@@ -1,0 +1,11 @@
+\usepackage{afterpage}
+
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage}
+
+\usepackage[utf8]{inputenc}
+\usepackage{imakeidx}
+\makeindex[columns=3, title=Alphabetical Index, intoc]
