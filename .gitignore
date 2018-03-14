@@ -4,3 +4,7 @@
 *.aux
 *.log
 *.synctex.gz
+*.idx
+*.ilg
+*.ind
+*.toc
