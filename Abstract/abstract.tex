@@ -1,0 +1,24 @@
+% ************************** Thesis Abstract *****************************
+% *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes, or Math in Paper Title or Abstract.
+%
+% Use buzzwords
+% Don't use jargon
+% Generic to specific
+% Pose questions
+%
+% In de samenvatting komt te staan:
+% - Onderwerp-informatie;
+% - probleemomschrijving/-analyse;
+% - probleemvraag; - onderzoeksmethode;
+% - de belangrijkste resultaten kort samengevat;
+% - de (belangrijkste) conclusies.
+%
+\begin{abstract}
+
+A purely geometrical interpretation of user-defined locations would allow taxi-companies around the world to set up rules so that trip prices could be calculated without depending on distinct postal code systems. Geolocation datatypes provide part of the solution, but the benifits of geometrical definitions are lost when areas intersect. A presidence hierarchy of rules that are tied to reusable locations would eliminate these competing rule matches.
+
+A solution is proposed to implement a microservice with a single responsibility of calculating trip prices that is accessible to existing systems and portals in which users can define the pricing rules. The company for which this system is realized requires customers to be able to migrate to the new system without downtime, while keeping the existing rules that determine the prices of taxi trips.
+
+The core system manages user and company data, this complicates identity management in the microservice. A JSON Web Token would allow user identity to be stored in the payload of the token, thereby delegating authentication to the core system, maintaining the single responsibility of the microservice.
+
+\end{abstract}
