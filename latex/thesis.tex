@@ -1,5 +1,6 @@
-\documentclass[11pt,conference]{IEEEtran}
-\IEEEoverridecommandlockouts
+% \documentclass[11pt,conference]{IEEEtran}
+\documentclass[12pt, letterpaper]{article}
+% \IEEEoverridecommandlockouts
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Titlepage & table of contents
@@ -14,11 +15,10 @@
 \input{src/customcommands}
 
 \begin{document}
-\input{src/intro/titlepage}
 
-\tableofcontents
-\printindex
-\newif\ifdraft\drafttrue
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Tips
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % T - topic
 % E - explain
@@ -32,83 +32,42 @@
 % Future - Jones will find out that …
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Preface
+% Cover
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\input{src/chapters/preface}
+\include{src/intro/cover}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Titlepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \include{src/intro/titlepage}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Abstract
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\input{src/chapters/abstract}
+\include{src/chapters/abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Keywords
+% Preface
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\input{src/chapters/keywords}
+\include{src/chapters/preface}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Table of Contents
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\printindex
+\newif\ifdraft\drafttrue
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Introduction
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \input{src/chapters/introduction}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Context
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - General
-% - Structure
-% - Clients
-%
-\section{Context}
-taxiID is an Amsterdam based company providing end-to-end cloud solutions for taxi companies. Founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, taxiID offers a wide range of IT solutions to serve the taxi market, including a passenger app, a driver app, administrative panels, and track and trace hardware.
-
-taxiID solutions have proven to be a reliable set of tools for all size businesses. For independent taxi companies with 2 cars or a companies with large fleets, affordable solutions are available. taxiID's goal is to deliver affordable, time-saving solutions for taxi companies to allow for convenient planning and dispatching without requiring local installation.
-
-Tough based in Amsterdam, the development team is located in Medemblik, consisting of two mobile developers, two backend developers, a designer and two project managers.
-
-taxiID's customers are located across the globe. This introduces challenges when developing applications that rely on clearly defined locations and infrastructure of all kinds.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Assignment
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Origin of the assignment
-% - Description
-% - Research question
-% - Sub questions
-%
-\section{Assignment}
-% Waar gaat dit hoofdstuk over?
-
-
-\subsection{Origin of the assignment}
-% Waarom deze opdracht?
-YourDriverApp (YDA) requires a pricing calculation functionality that is similar to the existing taxiID implementation. All functionalities within the current system align with the clients demands, but some features bring certain difficulties along, for example: region names are too vague for specific database queries. Some features could be abstracted so more possibilities can be implemented, some features are still unimplemented, and some features could be improved along the way.
-
-\subsection{Description}
-% Welke problemen moeten worden opgelost
-A system must be implemented in which group admins can define pricing rules based on user defined locations and time schedules, that can be used for calculating a passengers trip price, or show prices of different products based on the trip the passenger is about to make. For example: a passenger may book a taxi ride from Utrecht to Schiphol using the passenger app. Available products are presented with their respective prices based on the distance and duration of the trip using the pricing rules that were created by the group admin of a taxi company.
-
-The system must be usable in countries with a poor postal code system. There should be a way for a group admin to describe locations in a way that are precise and consistent with reality, meaning that a defined location should be usable from outside of the system, or at least be interpretable. An example of this requirement would be: a taxi company that operates in Afghanistan. A passenger wants to be picked up on some road near the mountains. How would a group admin describe that location in order to define a price beforehand?
-
-The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case, the new system should. It should have a single responsibility, and should be atonomous in that regard.
-
-\subsection{Research question}
-% Welke hoofdvraag moet worden beantwoord om de opdracht succesvol af te ronden?
-From the description of the problem, one main important question could be derived. How can a generic price calculation system be implemented that is usable across the globe?
-
-\subsection{Sub questions}
-% Hoe kunnen we de hoofdvraag opdelen?
-Which varieties of address formats exist around the world?
-
-Is it possible to redefine different address formats as a generic address?
-- Gps
-- Zip code
-
-To what extent do address formats have an impact on performance of a price calculation?
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Review
@@ -134,6 +93,14 @@ To what extent do address formats have an impact on performance of a price calcu
 %
 \section{Realization}
 % Waar gaat dit hoofdstuk over?
+This chapter describes the process and techniques used while implementing the solution.
+
+
+\subsection{Methods and Techniques}
+Before development could commence, requirements were described as user stories in Jira, a project management tool. The user stories were exported to a backlog, where the tasks were defined more precisely. The product owner prioritised tasks so that the most essential features were developed first.
+
+To produce software that meets the expectations of the product owners, a sprint was planned every two weeks, joined by one of the product owners, and members of the development team that were responsible for the systems architecture, where issues or tasks were well-defined and prioritised.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Conclusion
