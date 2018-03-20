@@ -12,7 +12,7 @@
 \fi
 
 % Waar gaat dit hoofdstuk over?
-Automatic fare estimations and calculations are one of many common features in taxi dispatch systems. A passenger books a ride, and a predicted price is displayed based on pickup and drop off locations. When the destination is reached, the system calculates the final price, with or without discounts, including taxes, and additional costs added by the driver. Taxi companies compete for customers, and prices are shifting regularly. This increases the demand for dispatch systems with easy and solid price managment features.
+Automatic fare estimations and calculations are one of many common features to go hand in hand with taxi dispatch systems. A potential passenger wants to books a ride using a mobile app. The passenger selects the pickup and drop off locations, upon which a list of available vehicles and corresponding prices is displayed. The passenger selects the desired vehicle from the list, and a taxi arrives to take the passenger to the selected destination. When the destination is reached, the system calculates the final price, with or without discounts, including taxes, and additional costs added by the driver. Based on whether the passenger ordered a ride from the center of Amsterdam, or a desolate hard to reach location, the directors of a taxi company want to make a profit. For this reason, companies must be able to define prices based on locations. The project for which this thesis is written aims to improve the process of defining prices based on various factors, one of which is geographical locations.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Context
@@ -22,7 +22,7 @@ Automatic fare estimations and calculations are one of many common features in t
 % - Clients
 %
 \section{Context}
-This thesis is written during an assignment at taxiID, an Amsterdam based company providing end-to-end cloud solutions for taxi companies. Founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, and offers a wide range of IT solutions to serve the taxi market, including a passenger app, a driver app, administrative panels, and track and trace hardware. taxiID solutions have proven to be a reliable set of tools for all size businesses. For independent taxi companies with 2 cars or a companies with large fleets, affordable solutions are available. taxiID's goal is to deliver affordable, time-saving solutions for taxi companies to allow for convenient planning and dispatching without requiring local installation. Tough based in Amsterdam, the development team is located in Medemblik, consisting of two mobile developers, two backend developers, a designer and two project managers. Clients are located across the globe, introducing challenges when developing applications that rely on clearly defined locations and infrastructures that vastly differ between countries.
+The company for which the project is realised is taxiID, an Amsterdam based company providing end-to-end cloud solutions for taxi companies. Founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, and offers a wide range of IT solutions to serve the taxi market, including a passenger app, a driver app, administrative panels, and track and trace hardware. taxiID solutions have proven to be a reliable set of tools for all size businesses. For independent taxi companies with 2 cars or a companies with large fleets, affordable solutions are available. taxiID's goal is to deliver affordable, time-saving solutions for taxi companies to allow for convenient planning and dispatching without requiring local installation. Tough based in Amsterdam, the development team is located in Medemblik, consisting of two mobile developers, two backend developers, a designer and two project managers. Clients are located across the globe, introducing challenges when developing applications that rely on clearly defined locations and infrastructures that vastly differ between countries. YourDriverApp (YDA) is a light version of the original solution that is offered by taxiID more focussed on smaller taxi companies. Currently this label depends on services within taxiID to operate, which has to change in the near future.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Assignment
@@ -36,36 +36,45 @@ This thesis is written during an assignment at taxiID, an Amsterdam based compan
 % Waar gaat dit hoofdstuk over?
 \section{Assignment}
 % Waarom deze opdracht? Welke problemen moeten worden opgelost
-YourDriverApp (YDA) requires a pricing calculation functionality that is similar to the existing taxiID implementation. All functionalities within the current system align with the clients demands, but some features introduce difficulties, for example: region names are too vague for specific database queries. Some features could be abstracted so more possibilities can be implemented, some features are still unimplemented, and some features could be improved along the way. A system must be implemented in which group admins can define pricing rules based on user defined locations and time schedules, that can be used for calculating a passengers trip price, or show prices of different products based on the trip the passenger is about to make. For example: a passenger may book a taxi ride from Utrecht to Schiphol using the passenger app. Available products are presented with their respective prices based on the distance and duration of the trip using the pricing rules that were created by the group admin of a taxi company. The system must be usable in countries with a poor postal code system. There should be a way for a group admin to describe locations in a way that are precise and consistent with reality, meaning that a defined location should be usable from outside of the system, or at least be interpretable. An example of this requirement would be: a taxi company that operates in Afghanistan. A passenger wants to be picked up on some road near the mountains. How would a group admin describe that location in order to define a price beforehand? The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case, the new system should. It should have a single responsibility, and should be atonomous in that regard.
+YDA requires its own pricing calculation functionality that is similar to the existing taxiID implementation. All functionalities within the current system align with the clients demands, but some features introduce difficulties, for example: region names are too vague for specific database queries. A system must be implemented in which group admins can define pricing rules based on user defined locations and time schedules, that can be used for calculating a passengers trip price, or show prices of different products based on the trip the passenger is about to make. In the current system, locations are uploaded by taxi company group admins as excel sheets with departure and destination zip codes in conjunction with prices. This process works in countries with an unambiguous, explicit, well-defined postal code infrastructure. Postal codes are matched in efficient database queries, leaving less room for improvement in terms of performance. Interpretability is an issue however. Sheets may contain thousands of rows, making it hard to interpret and maintain. On top of that, countries without such systems are not covered by the functionality. There are two more types of pricing rules that cover the rest of trip pricing cases. A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum will be used to manage work iterations (this fact will be covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be atonomous in that regard.
 
-\section{Research Objective}
+\section{Research}
 % Hoe wordt dit onderzoek aangepakt?
 % Designing research involves two separate sets of activities. The first involves determining everything you wish to achieve through the research project. This has to do with modelling the content of the research; we call this the con-ceptual design of a research project. The second set of activities concerns howto realise all this during the implementation stage of the project. This is called the technical research design.
-Three main challenges that construct the assignment can be identified. Research must be done to attain the best possible way of mapping locations to pricing rules. What this means is that locations must be storable, comparable, and interpretable. The database must be able to store locations in an efficient manner, to which queries can efficiently be made in order to find out whether a pricing rule applies to a given ride. For this to be the case, the stored locations must be comparable to the location of the passenger, or the destination. The user must be able to reason about his pricing rules, from which an understanding of his defined locations logically follows.
+Three main challenges that construct the assignment can be identified. Research must be done to attain the best possible way of mapping locations to pricing rules. What this means is that locations must be storable, comparable, and interpretable. The database must be able to store locations in an efficient manner, to which queries can be made as efficiently in order to find out whether a pricing rule applies to a given ride. For this to be the case, the stored locations must be comparable to the location of the passenger, or the destination. The user must be able to reason about his pricing rules, from which an understanding of his defined locations logically follows. But edge cases must be covered completely. For example, a rule in the current system dictates that a user traveling to Schiphol should receive a discount. But how would the system detect that this is the case? Or what if hotel guests receive discounts, but the neighbour shouldn't be allowed to use these discounts? Secondly, a system has to be developed that encapsulates the solution that is the result of the conducted research. It is helpful to extend the research of the problem to finding out how to incorporate the answers into a working system, where architecture has a major influence in the tools that are available. For example: if a solution to the main problem requires a database system capable of handling high quantities of geospatial queries, this requirement has to be satisfied in order to proceed in finding the final solution. Finally, a user interface has to be created that enables users to define the pricing rules. The complexity of the interface depends on how straight forward the price calculation system is put together. The user interface should also be available in multiple portals. The best way of making the systems capabilities available to the user through the UI in the portal, must be investigated.
 
-Secondly, a system has to be developed that encapsulates the solution that is the result of the conducted research. It is helpful to extend the research of the problem to finding out how to incorporate the answers into a working system, where architecture has a major influence in the tools that are available. For example: if a solution to the main problem requires a database system capable of handling high quantities of geospatial queries, this requirement has to be satisfied in order to proceed in finding the final solution.
+\subsection{Research Questions}
 
-Finally, a portal has to be created that enables users to define the pricing rules. The complexity of the portal depends on how straight forward the price calculation system is put together. The best way of making the systems capabilities available to the user through the UI in the portal, must be investigated.
+From the description of the problem, one main important research question can be derived: \textit{How can a generic location-based price calculation system be implemented that is usable around the globe?} \\
 
-\section{Questions}
-% Welke hoofdvraag moet worden beantwoord om de opdracht succesvol af te ronden?
+This question encapsulates the three important challenges that have to be dealt with before the project can successfully be implemented. In order to give a clear direction to the research, sub-questions are separated into three groups; location mapping, architecture and user interface.
 
-From the description of the problem, one main important research question can be derived: \\
+\begin{enumerate}
 
-\textit{How can a generic location-based price calculation system be implemented that is usable around the globe?} \\
+    \item In what way can locations be represented to be universally interpretable?
+    \begin{enumerate}
+        \item Which types of locations should be distinguished?
+        \item What are the main differences between postal systems used around the globe?
+        \item Can postal codes be abstracted to geospatial data while retaining the same usefulness in the system?
+        \item How can different types of locations be effectively stored in a database?
+    \end{enumerate}
 
-% Hoe kunnen we de hoofdvraag opdelen?
-Which varieties of address formats exist around the world?
+    \item Which architectural pattern is best suited for implementing the pricing system?
+    \begin{enumerate}
+        \item Which architectural patterns fit in with the exising architecture?
+        \item How will authentication be handled?
+        \item Which database will be suited for this project?
+    \end{enumerate}
 
-Is it possible to redefine different address formats as a generic address?
+    \item How can the task of defining rules be as insightful as possible to the user?
+    \begin{enumerate}
+        \item Which views should exist, does a logical hierarchy exist among views?
+        \item How should locations be defined and managed by the user?
+        \item How should timeframes be handled in the interface?
+    \end{enumerate}
 
-\begin{itemize}
-  \item Gps
-  \item Postal code
-  \item Intersecting areas
-  \item The hotel case
-  \item The airport case
-\end{itemize}
+\end{enumerate}
 
-To what extent do address formats have an impact on performance of a price calculation?
+\section{Process}
 
+The first group of questions will be answered in the chapter Theory. The second and third will be answered in the chapter Proposed Approach. At that point, enough knowledge is available to implement a solution. Scrum will be used to iteratively implement the solution. This project is taxiID's first project to make use of Scrum and Jira for project management.
