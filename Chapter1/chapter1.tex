@@ -6,9 +6,9 @@
 \chapter{Introduction}
 
 \ifpdf
-    \graphicspath{{Chapter1/Figs/Raster/}{Chapter1/Figs/PDF/}{Chapter1/Figs/}}
+  \graphicspath{{Chapter1/Figs/Raster/}{Chapter1/Figs/PDF/}{Chapter1/Figs/}}
 \else
-    \graphicspath{{Chapter1/Figs/Vector/}{Chapter1/Figs/}}
+  \graphicspath{{Chapter1/Figs/Vector/}{Chapter1/Figs/}}
 \fi
 
 % Waar gaat dit hoofdstuk over?
@@ -36,7 +36,7 @@ The company for which the project is realised is taxiID, an Amsterdam based comp
 % Waar gaat dit hoofdstuk over?
 \section{Assignment}
 % Waarom deze opdracht? Welke problemen moeten worden opgelost
-YDA requires its own pricing calculation functionality that is similar to the existing taxiID implementation. All functionalities within the current system align with the clients demands, but some features introduce difficulties, for example: region names are too vague for specific database queries. A system must be implemented in which group admins can define pricing rules based on user defined locations and time schedules, that can be used for calculating a passengers trip price, or show prices of different products based on the trip the passenger is about to make. In the current system, locations are uploaded by taxi company group admins as excel sheets with departure and destination zip codes in conjunction with prices. This process works in countries with an unambiguous, explicit, well-defined postal code infrastructure. Postal codes are matched in efficient database queries, leaving less room for improvement in terms of performance. Interpretability is an issue however. Sheets may contain thousands of rows, making it hard to interpret and maintain. On top of that, countries without such systems are not covered by the functionality. There are two more types of pricing rules that cover the rest of trip pricing cases. A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum will be used to manage work iterations (this fact will be covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be atonomous in that regard.
+YDA requires its own pricing calculation functionality that is similar to the existing taxiID implementation. All functionalities within the current system align with the clients demands, but some features introduce difficulties, for example: region names are too vague for specific database queries. A system must be implemented in which group admins can define pricing rules based on user defined locations and time schedules, that can be used for calculating a passengers trip price, or show prices of different products based on the trip the passenger is about to make. In the current system, locations are uploaded by taxi company group admins as excel sheets with departure and destination zip codes in conjunction with prices. This process works in countries with an unambiguous, explicit, well-defined postal code infrastructure. Postal codes are matched in efficient database queries, leaving less room for improvement in terms of performance. Interpretability is an issue however. Sheets may contain thousands of rows, making it hard to interpret and maintain. On top of that, countries without such systems are not covered by the functionality. There are two more types of pricing rules that cover the rest of trip pricing cases. A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be atonomous in that regard.
 
 \section{Research}
 % Hoe wordt dit onderzoek aangepakt?
@@ -51,30 +51,32 @@ This question encapsulates the three important challenges that have to be dealt 
 
 \begin{enumerate}
 
-    \item In what way can locations be represented to be universally interpretable?
-    \begin{enumerate}
-        \item Which types of locations should be distinguished?
-        \item What are the main differences between postal systems used around the globe?
-        \item Can postal codes be abstracted to geospatial data while retaining the same usefulness in the system?
-        \item How can different types of locations be effectively stored in a database?
-    \end{enumerate}
+  \item In what way can locations be represented to be universally interpretable?
+        \begin{enumerate}
+          \item Which types of locations should be distinguished?
+          \item What are the main differences between postal systems used around the globe?
+          \item Can postal codes be abstracted to geospatial data while retaining the same usefulness in the system?
+          \item How can different types of locations be effectively stored in a database?
+        \end{enumerate}
 
-    \item Which architectural pattern is best suited for implementing the pricing system?
-    \begin{enumerate}
-        \item Which architectural patterns fit in with the exising architecture?
-        \item How will authentication be handled?
-        \item Which database will be suited for this project?
-    \end{enumerate}
+  \item Which architectural pattern is best suited for implementing the pricing system?
+        \begin{enumerate}
+          \item Which architectural patterns fit in with the exising architecture?
+          \item How will authentication be handled?
+          \item Which database is suited for this project?
+        \end{enumerate}
 
-    \item How can the task of defining rules be as insightful as possible to the user?
-    \begin{enumerate}
-        \item Which views should exist, does a logical hierarchy exist among views?
-        \item How should locations be defined and managed by the user?
-        \item How should timeframes be handled in the interface?
-    \end{enumerate}
+  \item How can the task of defining rules be as insightful as possible to the user?
+        \begin{enumerate}
+          \item Which views should exist, does a logical hierarchy exist among views?
+          \item How should locations be defined and managed by the user?
+          \item How should timeframes be handled in the interface?
+        \end{enumerate}
 
 \end{enumerate}
 
+The first group of questions is answered in the chapter \mynote{Add chapter name}. The second and third is answered in the chapter Proposed Approach. At that point, enough knowledge is available to implement a solution.
+
 \section{Process}
 
-The first group of questions will be answered in the chapter Theory. The second and third will be answered in the chapter Proposed Approach. At that point, enough knowledge is available to implement a solution. Scrum will be used to iteratively implement the solution. This project is taxiID's first project to make use of Scrum and Jira for project management.
+Scrum is used to iteratively implement the solution. This is taxiID's first project to make use of Scrum and Jira for project management as a pilot. Therefore, some methods may differ from conventional prescribed methods. Before the start of the project, a pregame document was written to capture the project vision, the interpretation and proposed solution in that order and contains research information from this thesis. This, to make clear whether the requirements were correctly interpreted, and the proposed architectural vision aligns with, and correctly incorporates these requirements. The pregame document is added as an appendix \mynote{Add pregame to appendix}, and provides more insight in the requirement gathering before research was conducted. Chapter \mynote{Refer to chapter containing methods and techniques about scrum}.
