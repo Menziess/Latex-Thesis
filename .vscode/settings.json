@@ -1,0 +1,26 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/*.fls": true,
+    "**/*.aux": true,
+    "**/*.idx": true,
+    "**/*.ilg": true,
+    "**/*.ind": true,
+    "**/*.lof": true,
+    "**/*.log": true,
+    "**/*.synctex.gz": true,
+    "**/*.toc": true,
+    "**/*.ini": true,
+    "**/*.nlo": true,
+    "**/*.bbl": true,
+    "**/*.out": true,
+    "**/*.fdb_latexmk": true,
+    "**/*.lot": true,
+    "**/*.ps": true,
+    "**/*.blg": true,
+  }
+}
