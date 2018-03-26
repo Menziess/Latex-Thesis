@@ -13,7 +13,7 @@
 
 \section{Introduction}
 % Waar gaat dit hoofdstuk over?
-To answer in what way locations can be represented to be universally interpretable, the definition of a location must be well understood. Encoding of locations has historically been of great importance, and is always being modernized. This chapter aims to find the best method of representing locations that is universally interpretable and most importantly usable for the project. GPS and Postal Codes are globally adopted and have proven to be reliable methods of encoding locations. Locations, plurally, suggesting that more than one location should be encoded. This is where the challenge lies.
+To answer in what way locations can be represented to be universally interpretable, the definition of a location must be well understood. Encoding of locations has historically been of great importance, and is always being modernized. This chapter aims to find the best method of representing locations that is universally interpretable and most importantly usable in this project. GPS and Postal Codes are globally adopted and have proven to be reliable methods of encoding locations. Locations, plurally, suggesting that more than one location should be encoded. This is where the challenge lies.
 
 \section{A Brief History Of Geographic Locations}
 
@@ -29,11 +29,14 @@ A location is roughly described as a place or position. Throughout history, vari
 Modern navigation relies on sattelites that are capable of providing information to determine a location with an accuracy of 9 meters. The precision of hybrid methods using cell towers and Wi-Fi Location Services enables precise tracking of modern devices. Latitude and longitude are often referred to as GPS coordinates, as GPS is often used to calculate latitude and longitude by receiving position and time code sequences from at least four sattelites. Addresses are another representation of a location used in navigation. Addresses are easier to communicate than a pair of GPS coordinates, but can be ambiguous, imprecise, inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system.
 A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge of this project.
 
+\section{Useful Location Types}
+
+While setting up a backlog, a shared knowledge about the terminology used in the issues must be achieved. In the pregame document, the term "area" was defined as a collection of three or more coordinate pairs, or a collection of postal codes. A "point" was defined as one distinct coordinate pair or one distinct postal code. This way a location could either be an area or a point, with which all possibilities are covered. As stated in appendix \mynote{appendix pregame ref} definition of an area is precise, unambiguous and easy to use in compare in computer programs. A single point may match another single point if it’s the exact same point. A point may be sitting on top of a line or is contained within an area. The only other option is the negation of these statements. Because use cases for lines will be non-existent, points and areas are the proper candidates for spatial queries.
+
 \section{Requisites of Locations}
 
-A taxi company wants to be able to set a price from a certain location, to a certain location. Not the company itself, but the directors of the company, but for simplicity 'taxi company' is used. The taxi company would like to define prices based only on departure locations, or only on destination locations, or both. For example: 'to Schiphol, a trip should cost \euro 10,-', or 'from Falke hotels to Schiphol, the km price should be \euro 0,60'.
+A taxi company director wants to be able to set price or define discounts from or to a certain location. They would like to define prices based only on departure locations, or only on destination locations, or both. For example: 'to Schiphol, a trip should cost \euro 10,-', or 'from Falke hotels a trip should cost \euro 5,-', or 'from Falke hotels to Schiphol, the km price should be \euro 0,60'. In the current implementation, a record would be stored containing departure location, destination location and price for every combination, where locations were defined as zip codes. Instead, it would make sense to be able to reuse locations after they have been defined once.
 
-\section{Useful Location Types}
 \section{Literature Review}
 
 
