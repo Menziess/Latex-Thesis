@@ -14,11 +14,11 @@
 \section{Introduction}
 % Waar gaat dit hoofdstuk over?
 
-The price calculation system that is being made should integrate in the existing architecture seamlessly. This chapter aims to answer question number three, and its subquestions. First it is determined whether the frontend and backend that are to be developed should be integrated in existing projects, or should be made in separate projects altogether. If the backend is created as a separate project, authentication and authorization are directly affected by these decisions. Separation implies more complex identity management, or less separation of concern. Then, the database should be capable of storing geometry, and accept queries to determine which polygons contain a set of points, and which points are contained within a polygon.
+The price calculation system that is being made should integrate in the existing architecture seamlessly. This chapter aims to answer question number two, and its subquestions. First it is determined whether the frontend and backend that are to be developed should be integrated in existing projects, or should be made in separate projects altogether. If the backend is created as a separate project, authentication and authorization are directly affected by these decisions. Separation implies more complex identity management, or less separation of concern. Then, the database should be capable of storing geometry, and accept queries to determine which polygons contain a set of points, and which points are contained within a polygon.
 
 \section{Architectural Patterns}
 
-The current system architecture consists of three public API's and eight private API's that connect to four databases. \mynote{Refer to figure} The core API is the interface to which mobile applications make requests. It is possible to integrate the pricing system as a module in the existing project. This simplifies authentication and authorization, because it already exists is that project. Another option is to implement the system as a microservice, which is infamously known as a service-oriented architecture (SOA). Advantages of a microservice are the fact that a microservice is a self-contained and naturally modular structure, but authentication and authorization must be handled by the microservice itself, unless state is shared amongst services.
+The current system architecture consists of three public API's and eight private API's that connect to four databases. \mynote{Refer to figure} The core API is the interface to which mobile applications make requests. It is possible to integrate the pricing system as a module in the existing project. This simplifies authentication and authorization, because it already exists is that project. Another option is to implement the system as a microservice, which is infamously known as a service-oriented architecture (SOA). A microservice architecture is an architectural style that focuses on loosely-coupled services, improving scaling and continuous development of complex applications. Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and naturally modular structure, but authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice at all. In the present architecture, different services implement different authentication methods, store different information about different users. Authorization is managed by sending extra headers for each crucial piece of information. For example: company information, application information and user information are all sent in separate headers.
 
 \begin{figure}[ht!]
 	\centering
@@ -28,6 +28,7 @@ The current system architecture consists of three public API's and eight private
 \end{figure}
 \clearpage
 
+When the amount of services that are added to the architecture increases, the mount of information that is no longer centralized increases as well.
 
 \section{Authentication and Authorization}
 
@@ -40,11 +41,40 @@ Mobile applications should be able to make requests, just like the portals that 
 	\item Example 4: A separate service is used for authentication and authorization so that the core system is not involved at all.
 \end{itemize}
 
-In the first example, the microservice seems to be independent, because it has knowledge about the users identity without making requests to adjecent systems, or connecting to external databases. But this is not true. If data about the user is mutated in the core system, the microservice needs to be notified or synced. This greatly hinders scaling and makes it harder to keep data consistent. Example two solves the inconsistency part by connecting to the central database that holds user data, but contradicts the strive for encapsulation. Example three entirely removes the database connection to any user data. This is possible when a JSON Web Token (JWT) is used for example. The identity is stored in the token itself as an encrypted payload that can only be revealed by whoever holds the secret with which it was signed. Example four delegates managing user identity to a separate authentication service that, similar to the pricing microservice, has its own single task.
+In the first example, the microservice seems to work independently, because it has knowledge about the users identity without making requests to adjecent systems, or connecting to external databases. But this is not true. If data about the user is mutated in the core system, the microservice needs to be notified or synced. This greatly hinders scaling and makes it harder to keep data consistent. Example two solves the inconsistency part by connecting to the central database that holds user data, but contradicts the strive for encapsulation.
 
+\subsection{JSON Web Tokens}
+Example three entirely removes the database connection to any user data. This is possible when a JSON Web Token (JWT) is used. A JWT may be signed with a cryptographic algorithm or even a public/private key pair using RSA. After the user enters valid credentials, the core system validates the credentials by comparing them with user data in the database. The core system signs a token that with a secret that is known by the microservice. The token consists of three parts, separated by a fullstop. The first part (header) of the token contains information about the hashing algorithm that was used to encrypt the payload. This part is Base64Url encoded. The payload itself contains information stored in JSON format:
 
-Which architectural pattern is best suited for implementing the pricing system?
-\begin{enumerate}
-	\item Which architectural patterns fit in with the exising architecture?
-	\item How will authentication be handled?
-\end{enumerate}
+\begin{Verbatim}[fontsize=\scriptsize]
+{
+	"companyId": "59ea0846f1fea03858e16311",
+	"daAppInstallId": "599d39b67c4cae5f11475e93",
+	"iat": 1521729818,
+	"exp": 1521816218,
+	"aud": "tps.dispatchapi.io",
+	"iss": "api.dispatchapi.io",
+	"sub": "getPrices"
+}
+\end{Verbatim}
+
+The identity of the user is stored in the payload that can only be revealed by whoever holds the secret with which it was signed. Then the message can be verified using the third part of the token, which is the signature. This verification step prevents tampering with the payload.
+
+\subsection{oAuth 2.0}
+Example four delegates managing user identity to a separate authentication service that, similar to the pricing microservice, has its own single task of authenticating users. OAuth 2.0 is a protocol that has been designed to allow third-party apps to grant access to an HTTP service on behalf of the resource owner. This behaviour could be utilized to allow users to make use of services within the architecture, controlled by a single service, stored in a single token. A proposal was made in the Pregame document \mynote{Ref pregame doc} to combine oAuth with JWT and an API Gateway to introduce an automated authentication flow with a single token, instead of sending multiple headers.
+
+\begin{figure}[ht!]
+	\centering
+	\includegraphics[width=.7\textwidth]{OAuth}
+	\caption[Architecture]{oAuth, API Gateaway, using JWT}
+	\label{fig:oAuth}
+\end{figure}
+\clearpage
+
+\subsection{API Gateway}
+
+Another common structure that allows services to be used by external agents is the API Gateway. It allows for a central middleware in which authentication and authorization is handled, where the microservices are shielded from public access, and all communication is established through the API Gateway [4].
+
+Next to authentication, the gateway could optimize the endpoints so that no multiple requests are needed from external agents to gather different types of resources. These calls could be made internally to the microservices behind the gateway. This also opens the possibility the freely change the microservices without changing the public endpoints exposed by the gateway, and even offers slow or instant transitions to different versions of microservices.
+
+The different proposals explain the improvements they may bring over some system. But the advice given is not tied to this project, instead to the entire Dispatch API. It’s advised to have a constructive dialogue about the future of the company, and the way it’s planning to scale. One could put a API Gateway in front of a monolithic app to help with transitioning to a microservice-oriented app.

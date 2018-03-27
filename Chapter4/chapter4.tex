@@ -2,7 +2,7 @@
 %*******************************************************************************
 %****************************** Third Chapter **********************************
 %*******************************************************************************
-\chapter{Proposed Solution}
+\chapter{Proposed Portal Solution}
 
 % **************************** Define Graphics Path ****************************
 \ifpdf
@@ -14,13 +14,15 @@
 \section{Introduction}
 % Waar gaat dit hoofdstuk over?
 
-% The price calculation system that is being made should integrate in the existing architecture seamlessly. This chapter aims to answer question number three, and its subquestions. First it is determined whether the frontend and backend that are to be developed should be integrated in existing projects, or should be made in separate projects altogether. If the backend is created as a separate project, authentication and authorization are directly affected by these decisions. Separation implies more complex identity management, or less separation of concern. Then, the database should be capable of storing geometry, and accept queries to determine which polygons contain a set of points, and which points are contained within a polygon.
+This chapter covers the actual implementation plan of connecting the pricing system with the portal frontend. How the system should behave under different circumstances, how the user is able to interact with the system. The YTA-portal should integrate the frontend that allows taxi company users to modify their pricing rules. This chapter aims to answer question number three, which aims to 
 
-\section{Design}
+\section{Required Views}
+
+
+\mynote{This is not researched yet, as it's covered in later sprints}
 
 How can the task of defining rules be as insightful as possible to the user?
 \begin{enumerate}
-	\item Which database is suited for this project?
     \item Which views should exist, does a logical hierarchy exist among views?
     \item How should locations be defined and managed by the user?
     \item How should timeframes be handled in the interface?

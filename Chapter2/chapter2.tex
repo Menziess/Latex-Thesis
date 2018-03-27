@@ -39,6 +39,130 @@ A taxi company director wants to be able to set price or define discounts from o
 
 \section{Literature Review}
 
+\mynote{Potentially add literature review}
+
+\section{Database}
+
+The database must be capable of determining whether a virtual perimeter contains a set of coordinates, more specifically, it must adhere to The Open Geospatial Consortium (OGC) Simple Feature Access ISO 19125-1 \mynote{Add ref to ISO} and ISO 19125-2 \mynote{Add ref to ISO}, including spatial data types, analysis functions, measurements and predicates for this requirement, or have some comparable implementation. The scenario presented in image \mynote{Add ref to image} should be replicable.
+
+\subsection{OpenGIS Compatible databases}
+
+MYSQL’s innate integrity is a good reason to opt for a full MYSQL database setup. MariaDB is a fork of MYSQL that performs better according to benchmarks, however they don’t always translate to real life situations. It’s easy to migrate from MYSQL to MariaDB, so choosing MYSQL at first could be preferable as an instance of MYSQL is already used at TaxiID. PostgreSQL offers a spatial database extender for that is OpenGIS compliant called PostGIS that adds support for geographic objects and location queries.
+
+All spatial data types inherit properties such as type and spatial reference identifier (SRID). For rigorous documentation, both PostGIS documentation \mynote{Add reference to PostGIS docs} and MYSQL documentation \mynote{Add reference to MYSQL docs} could be consulted. When a generic geometry column, or point column is created, points can be inserted as shown in snippet \mynote{Add reference to snippet}
+
+\begin{Verbatim}[fontsize=\scriptsize]
+START TRANSACTION;
+SET @a = ST_GeomFromText('POINT(1 1)');
+INSERT INTO point (point) VALUES (@a);
+SET @b = ST_GeomFromText('POINT(2.5 2.5)');
+INSERT INTO point (point) VALUES (@b);
+SET @c = ST_GeomFromText('POINT(5 5)');
+INSERT INTO point (point) VALUES (@c);
+SET @d = ST_GeomFromText('POINT(-2.5 -2.5)');
+INSERT INTO point (point) VALUES (@d);
+COMMIT;
+
+START TRANSACTION;
+# First and last point must be the same
+	SET @a = PolygonFromText('POLYGON((2.5 5,5 7.5,7.5 5,5 2.5,2.5 5))');
+	INSERT INTO polygon (polygon) VALUES (@a);
+COMMIT;
+\end{Verbatim}
+
+It is evident that c is contained in p. To determine which points are contained in p, the function as seen in Snippet \mynote{Add ref to snippet} can be used, which returns the point with coordinates $[5, 5]$ as expected.
+
+\mynote{Make multicol}
+\begin{Verbatim}[fontsize=\scriptsize]
+// All points contained in polygon
+SELECT ST_ASTEXT(POINT)
+FROM POINT
+WHERE
+  ST_CONTAINS(
+    (
+SELECT POLYGON
+FROM POLYGON
+        WHERE id = 1
+    ),
+    POINT
+  );
+
+
+// All polygons containing point
+SELECT ST_ASTEXT(POLYGON)
+FROM POLYGON, POINT
+WHERE
+  POINT.id = 3 AND ST_CONTAINS(
+POLYGON.polygon,
+POINT.point
+  )
+\end{Verbatim}
+
+
+\subsection{OpenGIS Incompatible databases}
+
+MongoDB doesn’t offer OpenGIS implementations but has geospatial query operators that may provide enough functionalities for current requirements \mynote{Add ref to Geospatial Query Operators — MongoDB Manual 3.6}. The argument for choosing one over the other depends on the vast differences between SQL and NoSQL, next to performance and extensiveness of geospatial features. The setup displayed in image \mynote{Add ref to image} is recreated in MongoDB using queries shown in snippet \mynote{Add ref to snippet}.
+
+\begin{Verbatim}[fontsize=\scriptsize]
+db.point.insertMany([
+	{ shape: { type: "Point", coordinates: [1, 1] } },
+	{ shape: { type: "Point", coordinates: [2.5, 2.5] } },
+	{ shape: { type: "Point", coordinates: [5, 5] } },
+	{ shape: { type: "Point", coordinates: [-2.5, -2.5] } },
+])
+
+db.polygon.insert({
+  shape: {
+    type: "Polygon",
+    coordinates: [ [ [2.5, 5], [5, 7.5], [7.5, 5], [5, 2.5], [2.5, 5] ] ]
+  }
+})
+
+db.point.createIndex({ ‘shape’: '2dsphere' })
+db.polygon.createIndex({ ‘shape’: '2dsphere' })
+\end{Verbatim}
+
+\mynote{Make multicol}
+\begin{Verbatim}[fontsize=\scriptsize]
+// All points contained in polygon
+var p = db.polygon.find({})
+
+db.point.find({
+    shape: {
+        $geoWithin: {
+            $polygon: [
+                [2.5, 5],
+                [5, 7.5],
+                [7.5, 5],
+                [5, 2.5],
+                [2.5, 5]
+            ]
+        }
+    }
+})
+
+
+// All polygons containing point
+var p = db.point.findOne({ coordinates: [5, 5] })
+
+db.polygon.find({
+    shape: {
+        $geoIntersects: {
+            $geometry: {
+                type: "Point",
+                coordinates: [5, 5]
+            }
+        }
+    }
+})
+\end{Verbatim}
+
+Next to database solutions for this requirement, services exist that are capable of geofencing. Although these services may not be free, and the added dependencies restrict extensibility.
+
+\section{Performance and Clustering Trade-offs}
+
+Agarwal and Rajan state that NoSQL take advantage of cheap memory and processing power, thereby handling the four V’s of big data more effectively,
+but lack the robustness over SQL databases \mynote{Add reference to Agarwal and Rajan}. The report dives deeper into spatial queries and concludes that their tests suggest that MongoDB performs better by an average factor of 10, which increases exponentially as the data size increases, but lack many spatial functions that OpenGIS supports. Although improvements have been made \mynote{Add reference to Geospatial Performance Improvements in MongoDB 3.2,” MongoDB} after the cited paper Schmid et al. 2015 \mynote{Add ref to Stephan Schmid Eszter Galicz} was published. The team argues that clustering is much easier in MongoDB, which may be important in the future when the company grows. As the required functionalities exist in both SQL and NoSQL, it is beneficial to opt for MongoDB for its performance and alignment with the teams experience. Although if robustness is desired, or extra GIS functionalities required, SQL should be taken into consideration.
 
 
 In what way can locations be represented to be universally interpretable?
