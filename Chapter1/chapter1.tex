@@ -2,7 +2,7 @@
 %*******************************************************************************
 %*********************************** First Chapter *****************************
 %*******************************************************************************
-\graphicspath{Chapter1/Figs/}
+\graphicspath{{Chapter1/Figs/Vector/}{Chapter1/Figs/}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Introduction
@@ -14,31 +14,73 @@
 % - Roadmap
 %
 \chapter{Introduction}
-Hailing a taxi is not what it used to be. Once an ordinary startup, now the most famous taxi dispatch company of the world; Uber, 2008 - present \cite{Uber}. In the same year that Uber was founded, a similar startup in the Netherlands called taxiID was launched. Providing identical features to taxi companies, that help drivers and passengers alike. For example: a potential passenger needs a taxi. Using a mobile app, the passenger selects the pickup and drop off location, upon which a list of available vehicles and corresponding prices is displayed. After the passenger picks a product, the taxi driver is right on its way.
+What was once an ordinary startup known as Uber, is now the most famous taxi dispatch company in the world \cite{Uber}. In the same year that Uber was founded, a similar startup in the Netherlands called taxiID was launched; an Amsterdam based company providing end-to-end cloud solutions for taxi companies. Hailing a taxi has rarely been performed by sticking out ones hand, hoping to catch the attention of a bypassing cab, ever since. Recently, taxiID has started developing a new brand called YourDriverApp (YDA). Opposed to the original taxiID brand, YDA is a lighter and newer version of the original solution, being more focussed on smaller taxi companies. Currently the functionalities that YDA provides depend on the legacy system. This chapter expands on this challenge and how it was translated into an assignment.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Context
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - General
-% - Structure
 % - Clients
+% - Structure
+% - Cooperation
 %
 \section{Context}
-The company for which the project is realised is taxiID, an Amsterdam based company providing end-to-end cloud solutions for taxi companies. Founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, and offers a wide range of IT solutions to serve the taxi market, including a passenger app, a driver app, administrative panels, and track and trace hardware. taxiID solutions have proven to be a reliable set of tools for all size businesses. For independent taxi companies with 2 cars or a companies with large fleets, affordable solutions are available. taxiID's goal is to deliver affordable, time-saving solutions for taxi companies to allow for convenient planning and dispatching without requiring local installation. Tough based in Amsterdam, the development team is located in Medemblik, consisting of two mobile developers, two backend developers, a designer and two project managers. Clients are located across the globe, introducing challenges when developing applications that rely on clearly defined locations and infrastructures that vastly differ between countries. YourDriverApp (YDA) is a light version of the original solution that is offered by taxiID more focussed on smaller taxi companies. Currently this label depends on services within taxiID to operate, which has to change in the near future.
+% General
+taxiID was founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, and offers a wide range of IT solutions to serve the taxi market, including a passenger app, a driver app, and administrative panels. More specifically: an app for passengers to order a taxi, an app for drivers to receive their job assignments, and services  for all size businesses, offering convenient planning and dispatching without requiring local installations.
+% Clients
+Clients who make use of taxiID's services can be found anywhere in the world. This intoduces complicated challenges while developing applications that rely on clearly defined locations and infrastructures, often vastly differing between countries, if these countries have such a system to begin with.
+% Structure
+The taxiID development team is located in Medemblik, consisting of two mobile app developers (iOS and Android), two backend developers, a designer and two project managers.
+% Cooperation
+% Bridge
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Problem Definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% -
+%
+\section{Problem Definition}
+YDA requires its own pricing calculation functionality that is similar to the existing taxiID implementation. Similar in the sense that the system should return a formatted response that is identical to the existing system, where the content within the format may vary. But different in the way that it is architecturally set up, how the pricing rules are implemented, how ... \mynote{more reasons for problem definition}.
+
+\begin{figure}[htbp!]
+	\centering
+	\begin{tikzpicture}[scale=0.3]
+	\tikzstyle{every node}+=[inner sep=0pt]
+	\draw [black] (23.7,-41.6) circle (3);
+	\draw (23.7,-41.6) node {$YDA$};
+	\draw [black] (42,-41.6) circle (3);
+	\draw (42,-41.6) node {$legacy$};
+	\draw [black] (26.7,-41.6) -- (39,-41.6);
+	\fill [black] (39,-41.6) -- (38.2,-41.1) -- (38.2,-42.1);
+	\draw [black] (42.62,-38.677) arc (195.76239:-92.23761:2.25);
+	\fill [black] (44.7,-40.31) -- (45.6,-40.58) -- (45.33,-39.62);
+	\end{tikzpicture}
+	\label{fig:sub2}
+	\caption[Dependencies]{YDA depending on legacy}
+  \label{fig:dependencies}
+\end{figure}
+
+
+All functionalities within the current system align with the clients demands, but some features introduce difficulties, for example: region names are too vague for specific database queries. A system must be implemented in which group admins can define pricing rules based on user defined locations and time schedules, that can be used for calculating a passengers trip price, or show prices of different products based on the trip the passenger is about to make. In the current system, locations are uploaded by taxi company group admins as excel sheets with departure and destination zip codes in conjunction with prices. This process works in countries with an unambiguous, explicit, well-defined postal code infrastructure. Postal codes are matched in efficient database queries, leaving less room for improvement in terms of performance. Interpretability is an issue however. Sheets may contain thousands of rows, making it hard to interpret and maintain. On top of that, countries without such systems are not covered by the functionality. There are two more types of pricing rules that cover the rest of trip pricing cases.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Assignment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Origin of the assignment
 % - Description
-% - Research question
-% - Sub questions
 %
-% \section{Assignment}
-% Waar gaat dit hoofdstuk over?
 \section{Assignment}
-YDA requires its own pricing calculation functionality that is similar to the existing taxiID implementation. All functionalities within the current system align with the clients demands, but some features introduce difficulties, for example: region names are too vague for specific database queries. A system must be implemented in which group admins can define pricing rules based on user defined locations and time schedules, that can be used for calculating a passengers trip price, or show prices of different products based on the trip the passenger is about to make. In the current system, locations are uploaded by taxi company group admins as excel sheets with departure and destination zip codes in conjunction with prices. This process works in countries with an unambiguous, explicit, well-defined postal code infrastructure. Postal codes are matched in efficient database queries, leaving less room for improvement in terms of performance. Interpretability is an issue however. Sheets may contain thousands of rows, making it hard to interpret and maintain. On top of that, countries without such systems are not covered by the functionality. There are two more types of pricing rules that cover the rest of trip pricing cases. A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be autonomous in that regard.
+The title of this thesis, as agreed upon by the Examination Committee, reads: \\
+\textit{"A rule-based geospatial reasoning system for trip price calculations"}. \\
 
+A system must be implemented that is capable of
+
+A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be autonomous in that regard.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Research
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - How to get the required knowledge
+%
 \section{Research}
 % Hoe wordt dit onderzoek aangepakt?
 % Designing research involves two separate sets of activities. The first involves determining everything you wish to achieve through the research project. This has to do with modelling the content of the research; we call this the con-ceptual design of a research project. The second set of activities concerns howto realise all this during the implementation stage of the project. This is called the technical research design.
@@ -53,32 +95,37 @@ This question encapsulates the three important challenges that have to be dealt 
 \begin{enumerate}
 
 	\item In what way can locations be represented to be universally interpretable?
-	\begin{enumerate}[label*=\arabic*.]
-		\item Which types of locations should be distinguished?
-		\item What are the main differences between postal systems used around the globe?
-		\item Can postal codes be abstracted to geospatial data while retaining the same usefulness in the system?
-		\item How can different types of locations be effectively stored in a database?
-	\end{enumerate}
+	      \begin{enumerate}[label*=\arabic*.]
+		      \item Which types of locations should be distinguished?
+		      \item What are the main differences between postal systems used around the globe?
+		      \item Can postal codes be abstracted to geospatial data while retaining the same usefulness in the system?
+		      \item How can different types of locations be effectively stored in a database?
+	      \end{enumerate}
 
 	\item How could the price calculation system be integrated into the existing architecture?
-	\begin{enumerate}[label*=\arabic*.]
-		\item Which architectural patterns fit in with the exising architecture?
-		\item How will authentication be handled?
-		\item How is identity management handled?
-	\end{enumerate}
+	      \begin{enumerate}[label*=\arabic*.]
+		      \item Which architectural patterns fit in with the exising architecture?
+		      \item How will authentication be handled?
+		      \item How is identity management handled?
+	      \end{enumerate}
 
 	\item How can a working system be realized while defining rules is as insightful as possible to the user?
-	\begin{enumerate}[label*=\arabic*.]
-		\item Which Database Management System (DBMS) is suited for this project?
-		\item Which views should exist, does a logical hierarchy exist among views?
-		\item How should locations be defined and managed by the user?
-		\item How should timeframes be handled in the interface?
-	\end{enumerate}
+	      \begin{enumerate}[label*=\arabic*.]
+		      \item Which Database Management System (DBMS) is suited for this project?
+		      \item Which views should exist, does a logical hierarchy exist among views?
+		      \item How should locations be defined and managed by the user?
+		      \item How should timeframes be handled in the interface?
+	      \end{enumerate}
 
 \end{enumerate}
 
 The first group of questions is answered in the chapter \mynote{Add chapter name}. The second and third is answered in the chapter Proposed Approach. At that point, enough knowledge is available to implement a solution.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Process
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - How to complete the final product
+%
 \section{Process}
 
 A written working method is provided to the product owner, see Appendix \ref{appendix:pregame}, Pregame. The documents purpose is to clearly define the assignment and document the interpretation of the assignment definition so that miscommunications are found immediately. Requirements, scope and stakeholders of the project, as well as laying out the project timeline and estimated architecture based on use cases are clearly documented. Finally, a proposed solution is the result, which is agreed upon by the product owner before the backlog is created. Reading the document is recommended if more knowledge about the process and context of the assignment is desired.
