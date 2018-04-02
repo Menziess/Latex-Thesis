@@ -14,7 +14,7 @@
 % - Roadmap
 %
 \chapter{Introduction}
-What was once an ordinary startup known as Uber, is now the most famous taxi dispatch company in the world \cite{Uber}. In the same year that Uber was founded, a similar startup in the Netherlands called taxiID was launched; an Amsterdam based company providing end-to-end cloud solutions for taxi companies. Hailing a taxi has rarely been performed by sticking out ones hand, hoping to catch the attention of a bypassing cab, ever since. Recently, taxiID has started developing a new brand called YourDriverApp (YDA). Opposed to the original taxiID brand, YDA is a lighter and newer version of the original solution, being more focussed on smaller taxi companies. Currently the functionalities that YDA provides depend on the legacy system. This chapter expands on this challenge and how it was translated into an assignment.
+What was once an ordinary startup known as Uber, is now the most famous taxi dispatch company in the world \cite{Uber}. In the same year that Uber was founded, a similar startup in the Netherlands called taxiID was launched; an Amsterdam based company providing end-to-end cloud solutions for taxi companies. Hailing a taxi has rarely been performed by sticking out ones hand, hoping to catch the attention of a bypassing cab ever since. Recently, taxiID has started developing a new brand called YourDriverApp (YDA), a lighter and newer version of the original solution, being more focussed on smaller taxi companies. Despite the fact that YDA is new, it still depends on the price calculation functionality of the legacy system. This chapter expands on this matter and how it was translated into an assignment.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Context
@@ -28,40 +28,61 @@ What was once an ordinary startup known as Uber, is now the most famous taxi dis
 % General
 taxiID was founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, and offers a wide range of IT solutions to serve the taxi market, including a passenger app, a driver app, and administrative panels. More specifically: an app for passengers to order a taxi, an app for drivers to receive their job assignments, and services  for all size businesses, offering convenient planning and dispatching without requiring local installations.
 % Clients
-Clients who make use of taxiID's services can be found anywhere in the world. This intoduces complicated challenges while developing applications that rely on clearly defined locations and infrastructures, often vastly differing between countries, if these countries have such a system to begin with.
+Businesses that make use of taxiID's services can be found anywhere in the world. This intoduces complicated challenges while developing applications that rely on clearly defined locations and infrastructures, often vastly differing between countries, if these countries have such a system to begin with.
 % Structure
-The taxiID development team is located in Medemblik, consisting of two mobile app developers (iOS and Android), two backend developers, a designer and two project managers.
+The taxiID development team responsible for solving these problems is located in Medemblik, consisting of two mobile app developers (iOS and Android), two backend developers, a designer and two project managers.
 % Cooperation
 % Bridge
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Problem Definition
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% -
+% - How does it work now
+% - Why is that a problem
 %
 \section{Problem Definition}
-YDA requires its own pricing calculation functionality that is similar to the existing taxiID implementation. Similar in the sense that the system should return a formatted response that is identical to the existing system, where the content within the format may vary. But different in the way that it is architecturally set up, how the pricing rules are implemented, how ... \mynote{more reasons for problem definition}.
+YDA depends on the price calculation module that is part of the legacy system for which it was designed and implemented. When a passenger books a ride, the departure and destination locations that have been selected are sent to the legacy system. It then proceeds and constructs a list of prices for each vehicle type that is available, based on matching pricing rules that have been defined by the taxi company offering the rides. If directors of a taxi company using YDA want to modify their pricing rules, they will be obligated to use the taxiID portal, which has to store company information in a platform that is different from YDA. This makes little sense, as much as it is efficient from a technical point of view, and being easy to maintain and extend.
+%
+% \begin{figure}[htbp!]
+% 	\centering
+% 	\begin{tikzpicture}[scale=0.3]
+% 	\tikzstyle{every node}+=[inner sep=0pt]
+% 	\draw [black] (23.7,-41.6) circle (3);
+% 	\draw (23.7,-41.6) node {$YDA$};
+% 	\draw [black] (42,-41.6) circle (3);
+% 	\draw (42,-41.6) node {$legacy$};
+% 	\draw [black] (26.7,-41.6) -- (39,-41.6);
+% 	\fill [black] (39,-41.6) -- (38.2,-41.1) -- (38.2,-42.1);
+% 	\draw [black] (42.62,-38.677) arc (195.76239:-92.23761:2.25);
+% 	\fill [black] (44.7,-40.31) -- (45.6,-40.58) -- (45.33,-39.62);
+% 	\end{tikzpicture}
+% 	\caption[Dependencies]{YDA depending on legacy}
+%   \label{fig:dependencies}
+% \end{figure}
+%
+The current price calculation module knows three types of pricing rules: fixed prices based on postal codes, tier prices based on kilometer thresholds, and dynamic calculations based on distance and duration of a ride. A company may have as many rules as required, only one rule will be used to calculate the final price, and the rules are matched in the same order respectively. The fixed rules are defined by downloading, modifying, and uploading a .csv file as presented in table \ref{tab:fixedprices}, the other types of rules are simply managed through a web form.
 
 \begin{figure}[htbp!]
 	\centering
-	\begin{tikzpicture}[scale=0.3]
-	\tikzstyle{every node}+=[inner sep=0pt]
-	\draw [black] (23.7,-41.6) circle (3);
-	\draw (23.7,-41.6) node {$YDA$};
-	\draw [black] (42,-41.6) circle (3);
-	\draw (42,-41.6) node {$legacy$};
-	\draw [black] (26.7,-41.6) -- (39,-41.6);
-	\fill [black] (39,-41.6) -- (38.2,-41.1) -- (38.2,-42.1);
-	\draw [black] (42.62,-38.677) arc (195.76239:-92.23761:2.25);
-	\fill [black] (44.7,-40.31) -- (45.6,-40.58) -- (45.33,-39.62);
-	\end{tikzpicture}
-	\label{fig:sub2}
-	\caption[Dependencies]{YDA depending on legacy}
-  \label{fig:dependencies}
+	\begin{tabular}{c|c|c|c|c}
+		Departure & Destination & Nr Passengers & Price & Vehicle Type \\
+		\hline
+		1462 & 1313 & 4 & 125 & \\
+		1313 & 1462 & 4 & 125 & \\
+		1462 & 1313 & 8 & 150 & \\
+		1313 & 1462 & 8 & 150 & \\
+		1462 & 1012 & 4 & 65 & \\
+		1012 & 1462 & 4 & 65 & \\
+		0 & 1462 & 4 & 65 & \\
+		1462 & 0 & 4 & 65 & \\
+		1462 & AIR1 & 4 & 89 & \\
+		AIR1 & 1462 & 4 & 89 & \\
+	\end{tabular}
+	\caption[Fixed Prices]{Comma Separated File containing Fixed Prices in cents}
+  \label{tab:fixedprices}
 \end{figure}
 
-
-All functionalities within the current system align with the clients demands, but some features introduce difficulties, for example: region names are too vague for specific database queries. A system must be implemented in which group admins can define pricing rules based on user defined locations and time schedules, that can be used for calculating a passengers trip price, or show prices of different products based on the trip the passenger is about to make. In the current system, locations are uploaded by taxi company group admins as excel sheets with departure and destination zip codes in conjunction with prices. This process works in countries with an unambiguous, explicit, well-defined postal code infrastructure. Postal codes are matched in efficient database queries, leaving less room for improvement in terms of performance. Interpretability is an issue however. Sheets may contain thousands of rows, making it hard to interpret and maintain. On top of that, countries without such systems are not covered by the functionality. There are two more types of pricing rules that cover the rest of trip pricing cases.
+When a passenger books a ride, the price calculation module will first compare the postal codes, amount of passengers, and vehicle types in the fixed pricing rules with the information provided by the passenger's application. The fixed price is returned as soon as a match is found. If no match is found in any of the fixed pricing rules, the system proceeds to calculate a price using a kilometer threshold based rule, given that at least one exists. This type of calculation decreases or increases the price per kilometer for every successive amount of kilometers that have surpassed a predetermined threshold. This concept will be discussed in chapter \mynote{Refer to thresholds}. If this rule does not exist, a dynamic rule is used to calculate the price based on distance and duration of the ride. Finally, on top of the prices that have been calculated, a discount may be applied. As a fixed amount, as a percentage of the price, or as a so called alternative fixed pricing table. When this last option is selected, the price will be calculated all over, using a newly referenced fixed pricing rule. This process is not just hard to understand for a user, who has to reason about the companies prices. But it is also hard to understand for programmers, who have to maintain the code that supports this functionality. A small mistake in the csv file could lead to great issues if the mistake goes through processing undetected.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Assignment
@@ -72,9 +93,14 @@ All functionalities within the current system align with the clients demands, bu
 The title of this thesis, as agreed upon by the Examination Committee, reads: \\
 \textit{"A rule-based geospatial reasoning system for trip price calculations"}. \\
 
-A system must be implemented that is capable of
+YDA requires its own pricing calculation functionality that is similar to the existing taxiID implementation but is not incorporated into a non-related monolithical, highly coupled system. The calculation functionality must be similar in the sense that the system should return a formatted response that is identical to the existing system, where the content within the format may vary and different in the way that the system producing the output is architecturally set up.
 
-A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be autonomous in that regard.
+% A system must be implemented that is capable of
+
+% All functionalities within the current system align with the clients demands, but some features introduce difficulties, for example: region names are too vague for specific database queries. A system must be implemented in which group admins can define pricing rules based on user defined locations and time schedules, that can be used for calculating a passengers trip price, or show prices of different products based on the trip the passenger is about to make. In the current system, locations are uploaded by taxi company group admins as excel sheets with departure and destination zip codes in conjunction with prices. This process works in countries with an unambiguous, explicit, well-defined postal code infrastructure. Postal codes are matched in efficient database queries, leaving less room for improvement in terms of performance. Interpretability is an issue however. Sheets may contain thousands of rows, making it hard to interpret and maintain. On top of that, countries without such systems are not covered by the functionality. There are two more types of pricing rules that cover the rest of trip pricing cases.
+
+
+% A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be autonomous in that regard.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Research
