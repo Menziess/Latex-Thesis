@@ -68,9 +68,10 @@ The database must be capable of determining whether a virtual perimeter contains
 \subsection{OpenGIS Compatible databases}
 MYSQL’s innate integrity is a good reason to opt for a full MYSQL database setup. MariaDB is a fork of MYSQL that performs better according to benchmarks, however they don’t always translate to real life situations. It’s easy to migrate from MYSQL to MariaDB, so choosing MYSQL at first could be preferable as an instance of MYSQL is already used at TaxiID. PostgreSQL offers a spatial database extender for that is OpenGIS compliant called PostGIS that adds support for geographic objects and location queries.
 
-All spatial data types inherit properties such as type and spatial reference identifier (SRID). For rigorous documentation, both PostGIS documentation \mynote{Add reference to PostGIS docs} and MYSQL documentation \mynote{Add reference to MYSQL docs} could be consulted. When a generic geometry column, or point column is created, points can be inserted as shown in snippet \mynote{Add reference to snippet}
+All spatial data types inherit properties such as type and spatial reference identifier (SRID). For rigorous documentation, both PostGIS documentation \cite{PostGIS} and MYSQL documentation \cite{MySQL} could be consulted. When a generic geometry column, or point column is created, points can be inserted as shown in snippet \ref{lst:sql-insert-points} and \ref{lst:sql-insert-polygon} \\
 
-\begin{lstlisting}
+\begin{multicols*}{2}
+\begin{lstlisting}[caption={Insert four points}, label={lst:sql-insert-points}]
 	START TRANSACTION;
 	SET @a = ST_GeomFromText('POINT(1 1)');
 	INSERT INTO point (point) VALUES (@a);
@@ -81,13 +82,15 @@ All spatial data types inherit properties such as type and spatial reference ide
 	SET @d = ST_GeomFromText('POINT(-2.5 -2.5)');
 	INSERT INTO point (point) VALUES (@d);
 	COMMIT;
-
+\end{lstlisting}
+\begin{lstlisting}[caption={Insert polygon}, label={lst:sql-insert-polygon}]
 	START TRANSACTION;
 	# First and last point must be the same
 	SET @a = PolygonFromText('POLYGON((2.5 5,5 7.5,7.5 5,5 2.5,2.5 5))');
 	INSERT INTO polygon (polygon) VALUES (@a);
 	COMMIT;
 \end{lstlisting}
+\end{multicols*}
 
 
 It is evident that c is contained in p. To determine which points are contained in p, the function as seen in Snippet \mynote{Add ref to snippet} can be used, which returns the point with coordinates $[5, 5]$ as expected.
