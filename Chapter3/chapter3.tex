@@ -18,7 +18,7 @@ The price calculation system that is being made should integrate in the existing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Architectural Patterns}
-The current system architecture consists of three public API's and eight private API's that connect to four databases. \mynote{Refer to figure} The core API is the interface to which mobile applications make requests. It is possible to integrate the pricing system as a module in the existing project. This simplifies authentication and authorization, because it already exists is that project. Another option is to implement the system as a microservice, which is infamously known as a service-oriented architecture (SOA). A microservice architecture is an architectural style that focuses on loosely-coupled services, improving scaling and continuous development of complex applications. Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and naturally modular structure, but authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice at all. In the present architecture, different services implement different authentication methods, store different information about different users. Authorization is managed by sending extra headers for each crucial piece of information. For example: company information, application information and user information are all sent in separate headers.
+The current system architecture consists of three public API's and eight private API's that connect to four databases, as can be seen in \ref{fig:Architecture} The core API is the interface to which mobile applications make requests. It is possible to integrate the pricing system as a module in the existing project. This simplifies authentication and authorization, because it already exists is that project. Another option is to implement the system as a microservice, which is infamously known as a service-oriented architecture (SOA). A microservice architecture is an architectural style that focuses on loosely-coupled services, improving scaling and continuous development of complex applications. Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and naturally modular structure, but authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice at all. In the present architecture, different services implement different authentication methods, store different information about different users. Authorization is managed by sending extra headers for each crucial piece of information. For example: company information, application information and user information are all sent in separate headers.
 
 \begin{figure}[ht!]
 	\centering
@@ -52,21 +52,21 @@ Example three entirely removes the database connection to any user data. This is
 \mynote{Show diagram with hierarchy of companies and apps}
 
 \begin{center}
-\begin{tikzpicture}
-	\draw  (-2,5) rectangle (1,3);
-\end{tikzpicture}
+	\begin{tikzpicture}
+		\draw  (-2,5) rectangle (1,3);
+	\end{tikzpicture}
 \end{center}
 
 \begin{Verbatim}[fontsize=\scriptsize]
-{
-	"companyId": "59ea0846f1fea03858e16311",
-	"daAppInstallId": "599d39b67c4cae5f11475e93",
-	"iat": 1521729818,
-	"exp": 1521816218,
-	"aud": "tps.dispatchapi.io",
-	"iss": "api.dispatchapi.io",
-	"sub": "getPrices"
-}
+	{
+		"companyId": "59ea0846f1fea03858e16311",
+		"daAppInstallId": "599d39b67c4cae5f11475e93",
+		"iat": 1521729818,
+		"exp": 1521816218,
+		"aud": "tps.dispatchapi.io",
+		"iss": "api.dispatchapi.io",
+		"sub": "getPrices"
+	}
 \end{Verbatim}
 
 The identity of the user is stored in the payload that can only be revealed by whoever holds the secret with which it was signed. Then the message can be verified using the third part of the token, which is the signature. This verification step prevents tampering with the payload.
