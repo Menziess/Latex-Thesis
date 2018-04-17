@@ -10,12 +10,13 @@
 %
 \chapter{Encoding Locations}
 \section{Introduction}
-
 To answer in what way locations can be represented to be universally interpretable, the definition of a location must be well understood. Encoding of locations has historically been of great importance, and is always being modernized. This chapter aims to find the best method of representing locations that is universally interpretable and most importantly usable in this project. Locations, plurally, suggesting that more than one location should be encoded. This is where the challenge lies.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A Brief History Of Geographic Locations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - How did the history of navigation evolve?
+% - Who and what played a big role in navigation?
 %
 \section{A Brief History Of Geographic Locations}
 A location is roughly described as a place or position. Throughout history, various navigational techniques and tools like the sextant, nautical chart and marinner's compass were used, measuring the altitude of the North Star to determine the latitude $\phi$, in conjunction with a chronometer to determine the longitude $\lambda$ of a location on the Earth's surface. \mynote{galileo}
@@ -33,9 +34,13 @@ A location being roughly described as a place or position, can be decomposed as 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Useful Location Types
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - What do we need to describe our type of locations?
+% - What do we not need?
 %
 \section{Useful Location Types}
 While setting up a backlog, a shared knowledge about the terminology used in the issues must be achieved. In the pregame document, the term "area" was defined as a collection of three or more coordinate pairs, or a collection of postal codes. A "point" was defined as one distinct coordinate pair or one distinct postal code. This way a location could either be an area or a point, with which all possibilities are covered. As stated in Appendix \ref{appendix:pregame}, the definition of an area is precise, unambiguous and easy to use in compare in computer programs. A single point may match another single point if it’s the exact same point. A point may be sitting on top of a line or is contained within an area. The only other option is the negation of these statements. Because use cases for lines will be non-existent, points and areas are the proper candidates for spatial queries.
+
+\mynote{perhaps combine next chapter with this one}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Requisites of Location types
@@ -47,10 +52,13 @@ A taxi company director wants to be able to set price or define discounts from o
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Literature review
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - Storing location data
+% - Querying location data
+% - Intersecting
 %
 \section{Literature Review}
 
-
+\mynote{See if other people solved locations}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Database Prerequisites
@@ -58,6 +66,8 @@ A taxi company director wants to be able to set price or define discounts from o
 %
 \section{Database Prerequisites}
 The database must be capable of determining whether a virtual perimeter contains a set of coordinates, more specifically, it must adhere to The Open Geospatial Consortium (OGC) Simple Feature Access ISO 19125-1 \cite{SFA} and ISO 19125-2 \cite{SFS}, including spatial data types, analysis functions, measurements and predicates for this requirement, or have some comparable implementation. The scenario presented in image \ref{fig:square} should be replicable.
+
+\mynote{Speak of database specific example requirements}
 
 \begin{figure}[htbp!]
 	\centering

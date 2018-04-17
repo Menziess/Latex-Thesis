@@ -7,6 +7,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % System Architecture
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - What is most fitting solution to integrate TPS and UI into the
+%   existing architecture?
 %
 \chapter{System Architecture}
 \section{Introduction}
@@ -16,6 +18,7 @@ The price calculation system that is being made should integrate in the existing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Architectural Patterns
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - Which architectural patterns fit in with the exising architecture?
 %
 \section{Architectural Patterns}
 The current system architecture consists of three public API's and eight private API's that connect to four databases, as can be seen in \ref{fig:Architecture} The core API is the interface to which mobile applications make requests. It is possible to integrate the pricing system as a module in the existing project. This simplifies authentication and authorization, because it already exists is that project. Another option is to implement the system as a microservice, which is infamously known as a service-oriented architecture (SOA). A microservice architecture is an architectural style that focuses on loosely-coupled services, improving scaling and continuous development of complex applications. Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and naturally modular structure, but authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice at all. In the present architecture, different services implement different authentication methods, store different information about different users. Authorization is managed by sending extra headers for each crucial piece of information. For example: company information, application information and user information are all sent in separate headers.
@@ -30,9 +33,24 @@ The current system architecture consists of three public API's and eight private
 
 When the amount of services that are added to the architecture increases, the mount of information that is no longer centralized increases as well.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Accessing Necessary Data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - Which data is required to make TPS operational?
+%
+\section{Sharing Necessary Data}
+
+\begin{itemize}
+	\item User data
+	\item Vehicle data
+	\item etc..
+\end{itemize}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Authentication and Authorization
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - How can authentication between services be implemented or improved?
 %
 \section{Authentication and Authorization}
 Mobile applications should be able to make requests, just like the portals that are to be developed. But portal users make use of the microservice in a different way. Mobile apps merely request prices of products, based on the rules that group admins define through the portal. To make sure that only the portal users have the right to mutate their data, users have to be authenticated and authorized within the microservice. Identity management becomes a problem if data duplication is not desired. If a user makes a direct request to the microservice, the credentials have to be compared to user data in a database. To prevent duplication, the microservice could be connected to the database that is used by the core system. But this makes the microservice less decoupled, and directly contradicts the desire to separate concerns. Four examples demonstrate this problem:
@@ -56,6 +74,8 @@ Example three entirely removes the database connection to any user data. This is
 		\draw  (-2,5) rectangle (1,3);
 	\end{tikzpicture}
 \end{center}
+
+\mynote{Make }
 
 \begin{Verbatim}[fontsize=\scriptsize]
 	{
@@ -89,3 +109,17 @@ Another common structure that allows services to be used by external agents is t
 Next to authentication, the gateway could optimize the endpoints so that no multiple requests are needed from external agents to gather different types of resources. These calls could be made internally to the microservices behind the gateway. This also opens the possibility the freely change the microservices without changing the public endpoints exposed by the gateway, and even offers slow or instant transitions to different versions of microservices.
 
 The different proposals explain the improvements they may bring over some system. But the advice given is not tied to this project, instead to the entire Dispatch API. It’s advised to have a constructive dialogue about the future of the company, and the way it’s planning to scale. One could put a API Gateway in front of a monolithic app to help with transitioning to a microservice-oriented app.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Authentication and Authorization
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - Which methods and technologies can be used to ensure suitability and
+%   improve maintainability and testability?
+%
+\section{Suitability of Methods and Technologies}
+\mynote{Write chapter about methods and technologies}
+\begin{itemize}
+	\item Node JS, PHP, MongoDB, MySQL, Microservice, Loopback, Graph QL,
+	\item Slides and proposals
+	\item Mocha, Buddy-Works, Circle CI, Typescript, Chai, Functional Programming
+\end{itemize}
