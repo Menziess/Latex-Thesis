@@ -191,6 +191,7 @@
 \usepackage{listings}
 
 \usepackage{color}
+\usepackage{courier}
 
 \definecolor{blueish}{HTML}{4b83cd}
 \definecolor{brownish}{HTML}{aa3731}
@@ -198,13 +199,14 @@
 \definecolor{codepurple}{HTML}{7a3e9d}
 
 \lstdefinestyle{mystyle} {
+	inputencoding=utf8,
 	language=Octave,
 	backgroundcolor=\color{white},
 	commentstyle=\color{codegray},
 	keywordstyle=\color{brownish},
 	numberstyle=\tiny\color{codegray},
 	stringstyle=\color{blueish},
-	basicstyle=\scriptsize,
+	basicstyle=\scriptsize\ttfamily,
 	breakatwhitespace=false,
 	breaklines=true,
 	captionpos=b,
