@@ -5,24 +5,126 @@
 \graphicspath{{Chapter4/Figs/Vector/}{Chapter4/Figs/}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TPS
+% Trip Price Calculation System
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - Which logic and information is required to calculate a trip price?
 %
-\chapter{TPS}
+\chapter{Trip Price Calculation System}
 \section{Introduction}
 % Waar gaat dit hoofdstuk over?
-\mynote{Write entire TPS chapter}
-% EXAMPLE FROM PREV CHAPTER
-% The price calculation system that is being made should integrate in the existing architecture seamlessly. This chapter aims to answer question number two, and its subquestions. First it is determined whether the frontend and backend that are to be developed should be integrated in existing projects, or should be made in separate projects altogether. If the backend is created as a separate project, authentication and authorization are directly affected by these decisions. Separation implies more complex identity management, or less separation of concern. Then, the database should be capable of storing geometry, and accept queries to determine which polygons contain a set of points, and which points are contained within a polygon.
+This chapter clarifies which information should be present in the breakdown, what the logical flow that results into a price breakdown looks like, which problems have to be solved
 
 
-What does a price calculation look like? (How should they be calculated)
-\begin{enumerate}[label*=\arabic*.]
-	% VAT, rounding, discount, result breakdown, (all the parts explained)
-	\item Which parts of the system have an impact on the calculation result?
-	\item Query, Aggregate, ()
-	\item Proposals
-\end{enumerate}
+- What does a breakdown look like?
+- What information is required for a price calculation: vehicle types, passenger count, timeframes, locations
+- Which steps are taken before the calculation is finished: priority,
+- Which solutions are deemed realistic?
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Breakdown
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - What should be included in the price breakdown?
+% - VAT
+% - Cents
+%
+\section{Breakdown}
+To make sure that the transition from the previous price calculation system to the new one is perfectly seamless, the responses that the apps expect should have the exact same format. An array containing breakdowns for each product that is associated with the triggered pricing rule, as can be seen in \ref{lst:breakdown}.
+
+\begin{lstlisting}[caption={Array of products with pricing}, label={lst:breakdown}]
+[
+	{
+		"vehicleType": "estate",
+		"maxPassengers": 4,
+		"fixedPrice": true,
+		"price": {
+			"breakdown": {
+				"route": 8300,
+				"toll": 0,
+				"parking": 0,
+				"waiting": 0,
+				"discount": -1650
+			},
+			"currency": "EUR",
+			"total": 6650,
+			"tax": {
+				"amount": 400,
+				"percentage": 6
+			}
+		}
+	},
+	...
+]
+\end{lstlisting}
+
+It is important to mention that VAT is included, and does not add up to the total price. All amounts are displayed in cents.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Timeframes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - What was proposed as a solution to store a week schedule in a database?
+%
+\section{Timeframes}
+% Intro timeframes
+Next to the three dimensions of space, time will play a role in determining whether a rule has matched. The implementation of this concept should preferably offer enough freedom in the future, and should not be tailored toward one specific entity relation. Being able to reuse the timeframe entity improves maintainability of the system. The requirements state that the user must be able to define a start and end time, the days on which the times are active, and the start and end date of the timeframe. The timeframe is used to describe when rules or discounts are active. If, for example, a discount should be active during night of New Years Eve, between 23h and 5h, this description of a timeframe is already troublesome.
+
+\subsection{Conventional Approach}
+% Show db schema
+The current taxiID system solved this issue by storing multiple child entities with time information for each day, where the time inputs ranged from 00:00 up until
+has implemented this straight forward solution of storing the begin and end  of some event as timestamps as child entities to some parent timeframe. These child windows can be iterated or queried to see whether one contains the specified timestamp.
+
+- In what ways can timeframes be data modelled for a database?
+	- TIME
+	- Timestamp
+
+\subsection{Bitmap}
+% Show db schema
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Data Model
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Data Model}
 
 
-A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute is a very specific problem that must be split up into sizable categories to increase the chances of finding relevant solutions. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be autonomous in that regard.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Logical Flow
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - From A to Z, which steps are taken to calculate the final price for one
+%   product?
+% -
+%
+\section{Logical Flow}
+
+- authentication
+- extracting companyId and daAppInstallId
+- extracting departure and destination coordinates
+- using directions service to aqquire distance and duration
+	- converting to minutes and km
+- executing query
+	- find daAppInstall model with matching companyId and daAppInstallId
+	- find company country
+	- find matching discounts ordered by priority
+	  - enabled
+		- timeframes
+		- departure
+		- destination
+	- find matching rules ordered by priority
+	  - enabled
+		- timeframes
+		- departure
+		- destination
+	- get pricing information of all products for highest priority rule
+
+
+
+
+
+
+
+
+
+
+
+
+
+A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute is a very specific problem that must be split up into sizable categories. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be autonomous in that regard.

@@ -12,7 +12,7 @@
 %
 \chapter{Encoding Locations}
 \section{Introduction}
-Encoding of locations has historically been of great importance, and is always being modernized. This chapter aims to explain which types of locations are important for this project, and which method of representing locations, that is universally interpretable, should be used, and how the encoded locations are to be stored in a database.
+Encoding of locations has historically been of great importance, and is always being modernized. This chapter explains the general definition of locations, which types of locations are important for this project, how to make sure that the representation of these locations are universally interpretable, and how the encoded locations are to be stored in a database.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A Brief History Of Geographic Locations
@@ -21,7 +21,7 @@ Encoding of locations has historically been of great importance, and is always b
 % - Who and what played a big role in navigation?
 %
 \section{A Brief History Of Geographic Locations}
-A location is roughly described as a place or position. Throughout history, various navigational techniques and tools like the sextant, nautical chart and marinner's compass were used, measuring the altitude of the North Star to determine the latitude $\phi$, in conjunction with a chronometer to determine the longitude $\lambda$ of a location on the Earth's surface.
+A location is roughly described as a place or position. Throughout history, various navigational techniques and tools like the sextant, nautical chart and marinner's compass were used, measuring the altitude of the North Star to determine the latitude $\phi$, in conjunction with a chronometer to determine the longitude $\lambda$ of a location on the Earth's surface. The combination of coordinates is a distinct encoding of a location.
 
 \begin{figure}[htbp!]
 	\centering
@@ -30,13 +30,7 @@ A location is roughly described as a place or position. Throughout history, vari
 	\label{fig:latlngsphere}
 \end{figure}
 
-But the history of this encoding goes way back to its first to when it was first proposed in the 3rd century BC by Eratosthenes. He invented the discipline of geography, and was known for also being the first person to calculate the circumference of the Earth with remarkable accuracy. Today, navigation relies on sattelites that are capable of providing information to determine a location with an accuracy of 9 meters. The precision of hybrid methods using cell towers and Wi-Fi Location Services enables precise tracking of modern devices.
-
-\mynote{lat lng at gps needs to be rewritten}
-Latitude and longitude are often referred to as GPS coordinates, as GPS is often used to calculate latitude and longitude by receiving position and time code sequences from at least four sattelites.
-
-Addresses are another representation of a location used in navigation. Addresses are easier to communicate than a pair of GPS coordinates, but can be ambiguous, imprecise, inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system.
-A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge before mentioned of this project.
+The history of this encoding goes way back to when it was first proposed in the 3rd century BC by Eratosthenes. He invented the discipline of geography, and was known for also being the first person to calculate the circumference of the Earth with remarkable accuracy. Today, navigation relies on sattelites that are capable of providing information to determine a location with an accuracy of 9 meters. The precision of hybrid methods using cell towers and Wi-Fi Location Services enables precise tracking of modern devices, still using the same encoding. Addresses are another representation of a location used in navigation. Addresses are easier to communicate than a pair of GPS coordinates, but can be ambiguous, imprecise, inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system. In contrast to the geographic coordinate system, postal codes describe streets and areas of varying shapes and sizes. A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge of this project, how to communicate a collection of areas of differing shapes and sizes that may overlap?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Requisites of Location types
@@ -50,7 +44,50 @@ A location being roughly described as a place or position, can be decomposed as 
 %
 \section{Requisites of Location Types}
 % Area, Polygon, Zipcode, Gps pair, Place, Collections
-While setting up a backlog, a shared knowledge about the terminology used in the issues must be achieved. In the pregame document, the term "area" was defined as a collection of three or more coordinate pairs, or a collection of postal codes. A "point" was defined as one distinct coordinate pair or one distinct postal code. This way a location could either be an area or a point, with which all possibilities are covered. As stated in Appendix \ref{appendix:pregame}, the definition of an area is precise, unambiguous and easy to use in compare in computer programs. A single point may match another single point if it’s the exact same point. A point may be sitting on top of a line or is contained within an area. The only other option is the negation of these statements. Because use cases for lines will be non-existent, points and areas are the proper candidates for spatial queries.
+While setting up a backlog for a project, a shared knowledge about the terminology used in the issues must be achieved in order to collaborate effectively. Words or symbols do not have an absolute meaning, and ambiguity of abstract linguistic terms should be combatted by agreements. In Appendix \ref{appendix:pregame} an agreement was made on the terms "area" and "point".
+A point is a unique place expessed as a distinct coordinate pair. An area is a set of many points that is tightly packed together, forming a polygon. The point and shape can be translated to the addresses and postal codes in the current taxiID pricing system respectively. This approach has some problems:
+
+\begin{enumerate}
+	\item Addresses can be ambiguous.
+	\item Addresses and postal codes can be imprecise.
+	\item Postal code systems are not uniform.
+	\item Some countries don't have postal code systems.
+\end{enumerate}
+
+In contrast, geospatial datatypes The Open Geospatial Consortium (OGC) Simple Feature Access ISO 19125-1 \cite{SFA}, would provide unique and precise location definitions that are uniform and universal.
+
+
+The functional requirements state that, in the new system, users should be able to select predefined locations from external sources.
+
+Excel sheets of address and postal code combinations are hard to maintain.
+Collections of addresses and postal codes are hard to visualize and communicate
+
+
+much like a puddle is made up of many drops of water. What is needed for this project, is a method to determine whether a drop
+
+
+
+% a point is a distinct combination of latitude and longitude for which there is an address,
+\[p = {(x, y) | x tussen -90 en 90, y tussen -180 en 180 }\]
+
+% The set of all possible points
+$P$
+
+% The set of all possible lists of points, first and last point are equal
+% and an area is a list of points in which the first and the last element are equal, thus closing the shape, for which there may be an equal shape in the form of a postal code area.
+$A = \mathcal{P}(P)$
+
+Finally, collections of these possibilities are allowed to describe the problematic "all churches in the Netherlands" example:
+
+% A collection of points
+$C_p \subseteq P$
+
+and "all counties in which the majority voted Trump" example:
+
+% A collection of areas
+$C_a \subseteq A$.
+
+This way a location could either be an area or a point, with which all possibilities are covered, except sets of these elements. As stated in Appendix \ref{appendix:pregame}, the definition of an area is precise, unambiguous and easy to use in compare in computer programs. A single point may match another single point if it’s the exact same point. A point may be sitting on top of a line or is contained within an area. The only other option is the negation of these statements. Because use cases for lines will be non-existent, points and areas are the proper candidates for spatial queries.
 
 A taxi company director wants to be able to set price or define discounts from or to a certain location. They would like to define prices based only on departure locations, or only on destination locations, or both. For example: 'to Schiphol, a trip should cost \euro 10,-', or 'from van der Valk hotels, a trip should cost \euro 5,-', or 'from van der Valk hotels to Schiphol, the km price should be \euro 0,60'. In the current implementation, a record would be stored containing departure location, destination location and price for every combination, where locations were defined as zip codes. Instead, it would make sense to be able to reuse locations after they have been defined once.
 
