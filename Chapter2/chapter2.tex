@@ -12,7 +12,7 @@
 %
 \chapter{Encoding Locations}
 \section{Introduction}
-Encoding of locations has historically been of great importance, and is always being modernized. This chapter explains the general definition of locations, which types of locations are important for this project, how to make sure that the representation of these locations are universally interpretable, and how the encoded locations are to be stored in a database.
+Encoding of locations has historically been of great importance, and is always being modernized. This chapter explains the general definition of locations, which types of locations are important for this project, and how to represent these locations so that they are universally interpretable.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A Brief History Of Geographic Locations
@@ -30,7 +30,7 @@ A location is roughly described as a place or position. Throughout history, vari
 	\label{fig:latlngsphere}
 \end{figure}
 
-The history of this encoding goes way back to when it was first proposed in the 3rd century BC by Eratosthenes. He invented the discipline of geography, and was known for also being the first person to calculate the circumference of the Earth with remarkable accuracy. Today, navigation relies on sattelites that are capable of providing information to determine a location with an accuracy of 9 meters. The precision of hybrid methods using cell towers and Wi-Fi Location Services enables precise tracking of modern devices, still using the same encoding. Addresses are another representation of a location used in navigation. Addresses are easier to communicate than a pair of GPS coordinates, but can be ambiguous, imprecise, inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system. In contrast to the geographic coordinate system, postal codes describe streets and areas of varying shapes and sizes. A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge of this project, how to communicate a collection of areas of differing shapes and sizes that may overlap?
+The history of this encoding goes way back to when it was first proposed in the 3rd century BC by Eratosthenes. He invented the discipline of geography, and was known for also being the first person to calculate the circumference of the Earth with remarkable accuracy. Today, navigation relies on satellites that are capable of providing information to determine a location with an accuracy of 9 meters. The precision of hybrid methods using cell towers and Wi-Fi Location Services provide tracking using the same encoding. Addresses are another representation of a location used in navigation. Addresses are easier to communicate than a pair of GPS coordinates, but can be ambiguous, imprecise, inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system. In contrast to the geographic coordinate system, postal codes describe streets and areas of varying shapes and sizes. A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge of this project, how to communicate a collection of areas of differing shapes and sizes that may overlap?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Requisites of Location types
@@ -44,8 +44,8 @@ The history of this encoding goes way back to when it was first proposed in the 
 %
 \section{Requisites of Location Types}
 % Area, Polygon, Zipcode, Gps pair, Place, Collections
-While setting up a backlog for a project, a shared knowledge about the terminology used in the issues must be achieved in order to collaborate effectively. Words or symbols do not have an absolute meaning, and ambiguity of abstract linguistic terms should be combatted by agreements. In Appendix \ref{appendix:pregame} an agreement was made on the terms "area" and "point".
-A point is a unique place expessed as a distinct coordinate pair. An area is a set of many points that is tightly packed together, forming a polygon. The point and shape can be translated to the addresses and postal codes in the current taxiID pricing system respectively. This approach has some problems:
+While setting up a backlog for a project, a shared knowledge about the terminology used in the issues must be achieved in order to collaborate effectively. Words or symbols do not have an absolute meaning, and ambiguity of abstract linguistic terms should be elucidated. In Appendix \ref{appendix:pregame} an agreement was made on the terms "area" and "point".
+A point is a unique place expressed as a distinct coordinate pair. An area is a set of many points that is tightly packed together, forming a polygon. The point and shape can be translated to the addresses and postal codes in the legacy pricing system respectively. There are some downsides to using addresses and postal codes:
 
 \begin{enumerate}
 	\item Addresses can be ambiguous.
@@ -54,16 +54,11 @@ A point is a unique place expessed as a distinct coordinate pair. An area is a s
 	\item Some countries don't have postal code systems.
 \end{enumerate}
 
-In contrast, geospatial datatypes The Open Geospatial Consortium (OGC) Simple Feature Access ISO 19125-1 \cite{SFA}, would provide unique and precise location definitions that are uniform and universal.
+Not mentioning the usability aspect of having to handle error-prone excel sheets with hard to visualize zip code data in the legacy system. In contrast, spatial datatypes would provide unique and precise location definitions that are uniform and universal. Many spatial database systems support a basic Geometry hierarchy of Points, Polygons, MultiPoint and MultiPolygon Classes as described in the OGC~\cite{SFA} and ISO 19125~\cite{ISO-19125} standard.
 
 
 The functional requirements state that, in the new system, users should be able to select predefined locations from external sources.
 
-Excel sheets of address and postal code combinations are hard to maintain.
-Collections of addresses and postal codes are hard to visualize and communicate
-
-
-much like a puddle is made up of many drops of water. What is needed for this project, is a method to determine whether a drop
 
 
 
