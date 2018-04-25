@@ -13,6 +13,9 @@
 \chapter{System Architecture}
 \section{Introduction}
 % Waar gaat dit hoofdstuk over?
+
+% FRONTEND? BACKEND? PORTAL? TPS?
+\mynote{verbeter intro door backend frontend te definieren}
 The price calculation system that is being made should integrate in the existing architecture seamlessly. This chapter aims to answer question number two, and its subquestions. First it is determined whether the frontend and backend that are to be developed should be integrated in existing projects, or should be made in separate projects altogether. If the backend is created as a separate project, authentication and authorization are directly affected by these decisions. Separation implies more complex identity management, or less separation of concern. Then, the database should be capable of storing geometry, and accept queries to determine which polygons contain a set of points, and which points are contained within a polygon.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,15 +24,26 @@ The price calculation system that is being made should integrate in the existing
 % - Which architectural patterns fit in with the exising architecture?
 %
 \section{Architectural Patterns}
-The current system architecture consists of three public API's and eight private API's that connect to four databases, as can be seen in \ref{fig:Architecture} The core API is the interface to which mobile applications make requests. It is possible to integrate the pricing system as a module in the existing project. This simplifies authentication and authorization, because it already exists is that project. Another option is to implement the system as a microservice, which is infamously known as a service-oriented architecture (SOA). A microservice architecture is an architectural style that focuses on loosely-coupled services, improving scaling and continuous development of complex applications. Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and naturally modular structure, but authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice at all. In the present architecture, different services implement different authentication methods, store different information about different users. Authorization is managed by sending extra headers for each crucial piece of information. For example: company information, application information and user information are all sent in separate headers.
+The current system architecture consists of three public API's and eight private API's that connect to four databases, as can be seen in figure \ref{fig:Architecture}, and provide functionalities to portals and mobile apps.
+The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture \cite{IBM-3-tier}. Building the frontend and backend into one single project would be in conflict with this pattern, so the portal and TPS will be set up separately.
 
-\begin{figure}[ht!]
+\begin{figure}[htbp!]
 	\centering
 	\includegraphics[width=1\textwidth]{Architecture}
 	\caption[Architecture]{Current System Architecture}
 	\label{fig:Architecture}
 \end{figure}
-\clearpage
+
+% The option remains to integrate TPS and portal into the core API and YDA portal respectively.
+
+
+Another pattern that is used is the service-oriented architecture, where application components provide services over a network typically.
+
+It is possible to integrate the pricing system as a module in this existing project, simplifying authentication and authorization, because information is shared internally. Another option is to implement the system as a microservice, a service-oriented architecture (SOA), having the duty of offer a service to other components over the network.
+
+
+Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and naturally modular structure, but authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice at all. In the present architecture, different services implement different authentication methods, store different information about different users. Authorization is managed by sending extra headers for each crucial piece of information. For example: company information, application information and user information are all sent in separate headers.
+
 
 When the amount of services that are added to the architecture increases, the mount of information that is no longer centralized increases as well.
 
