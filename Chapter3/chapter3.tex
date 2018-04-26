@@ -13,10 +13,7 @@
 \chapter{System Architecture}
 \section{Introduction}
 % Waar gaat dit hoofdstuk over?
-
-% FRONTEND? BACKEND? PORTAL? TPS?
-\mynote{verbeter intro door backend frontend te definieren}
-The price calculation system that is being made should integrate in the existing architecture seamlessly. This chapter aims to answer question number two, and its subquestions. First it is determined whether the frontend and backend that are to be developed should be integrated in existing projects, or should be made in separate projects altogether. If the backend is created as a separate project, authentication and authorization are directly affected by these decisions. Separation implies more complex identity management, or less separation of concern. Then, the database should be capable of storing geometry, and accept queries to determine which polygons contain a set of points, and which points are contained within a polygon.
+In order to integrate TPS in the existing architecture, an analysis must be made so that the most suitable patterns are applied. The term TPS refers to the backend implementation that calculates the prices, and the frontend in which the rules can be defined. There exists an inverse relationship between integratability and the amount of adjecent systems from which information is required. When TPS requires user information from one system, vehicle infomation from another, and company information from another still, a gigantic monolithical system would simplify the task of sharing the data with the component that depends on it, and authentication wouldn't be required if no network is used to transfer the data. This approach has its disadvantages.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Architectural Patterns
@@ -25,7 +22,9 @@ The price calculation system that is being made should integrate in the existing
 %
 \section{Architectural Patterns}
 The current system architecture consists of three public API's and eight private API's that connect to four databases, as can be seen in figure \ref{fig:Architecture}, and provide functionalities to portals and mobile apps.
-The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture \cite{IBM-3-tier}. Building the frontend and backend into one single project would be in conflict with this pattern, so the portal and TPS will be set up separately.
+The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture \cite{IBM-3-tier}. Building the TPS frontend and backend into one single project would be in conflict with this pattern, so the portal and TPS should be set up separately.
+% The option remains to integrate TPS and portal into the core API and YDA portal respectively.
+The bigger shapes represent monolithical API's, and the smaller shapes represent services. The orange colored services are used internally, the green ones can be used by other companies. The pattern that is recognized here is called service-oriented architecture (SOA), where application components provide services over a network typically. As discussed in the introduction of this chapter, it would have been easier to integrate these services right into the monoliths that depend on them, eliminating the need for network requests and authentication. What logically follows is duplication, contradicting an important principle of software engineering; don't repeat yourself (DRY).
 
 \begin{figure}[htbp!]
 	\centering
@@ -34,19 +33,7 @@ The user interface, business logic, and data storage are separated, following th
 	\label{fig:Architecture}
 \end{figure}
 
-% The option remains to integrate TPS and portal into the core API and YDA portal respectively.
-
-
-Another pattern that is used is the service-oriented architecture, where application components provide services over a network typically.
-
-It is possible to integrate the pricing system as a module in this existing project, simplifying authentication and authorization, because information is shared internally. Another option is to implement the system as a microservice, a service-oriented architecture (SOA), having the duty of offer a service to other components over the network.
-
-
-Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and naturally modular structure, but authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice at all. In the present architecture, different services implement different authentication methods, store different information about different users. Authorization is managed by sending extra headers for each crucial piece of information. For example: company information, application information and user information are all sent in separate headers.
-
-
-When the amount of services that are added to the architecture increases, the mount of information that is no longer centralized increases as well.
-
+When should a system be integrated or separated? It is a balancing between satisfying dependencies, efficiency, separation of concern, and duplication. When a single responsibility is handled by one service, it may be classified as a microservice. Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and naturally modular structure, but authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice at all. In the present architecture, different services implement different authentication methods, store different information about different users. Authorization is managed by sending extra headers for each crucial piece of information. For example: company information, application information and user information are all sent in separate headers. When the amount of services that are added to the architecture increases, the mount of information that is no longer centralized increases as well.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Accessing Necessary Data
