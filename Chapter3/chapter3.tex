@@ -13,7 +13,7 @@
 \chapter{System Architecture}
 \section{Introduction}
 % Waar gaat dit hoofdstuk over?
-In order to integrate TPS in the existing architecture, an analysis must be made so that the most suitable patterns are applied. The term TPS refers to the backend implementation that calculates the prices, and the frontend in which the rules can be defined. There exists an inverse relationship between integratability and the amount of adjecent systems from which information is required. When TPS requires user information from one system, vehicle infomation from another, and company information from another still, a gigantic monolithical system would simplify the task of sharing the data with the component that depends on it, and authentication wouldn't be required if no network is used to transfer the data. This approach has its disadvantages.
+In order to integrate TPS in the existing architecture, an analysis must be made so that the most suitable patterns are applied. The term TPS refers to the backend implementation that calculates the prices, and the frontend in which the rules can be defined. There exists an inverse relationship between the amount of adjecent systems from which information is required and integrability. This required information impacts the way TPS is implemented. When TPS requires user information from one system, vehicle infomation from another, and company information from another still, a gigantic monolithical system would simplify the task of sharing the data with its components. Authentication wouldn't be required because no network connection is required to communicate the information. In contrast, separate services offer more independence and modularity.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Architectural Patterns
@@ -21,26 +21,29 @@ In order to integrate TPS in the existing architecture, an analysis must be made
 % - Which architectural patterns fit in with the exising architecture?
 %
 \section{Architectural Patterns}
-The current system architecture consists of three public API's and eight private API's that connect to four databases, as can be seen in figure \ref{fig:Architecture}, and provide functionalities to portals and mobile apps.
-The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture \cite{IBM-3-tier}. Building the TPS frontend and backend into one single project would be in conflict with this pattern, so the portal and TPS should be set up separately.
-% The option remains to integrate TPS and portal into the core API and YDA portal respectively.
-The bigger shapes represent monolithical API's, and the smaller shapes represent services. The orange colored services are used internally, the green ones can be used by other companies. The pattern that is recognized here is called service-oriented architecture (SOA), where application components provide services over a network typically. As discussed in the introduction of this chapter, it would have been easier to integrate these services right into the monoliths that depend on them, eliminating the need for network requests and authentication. What logically follows is duplication, contradicting an important principle of software engineering; don't repeat yourself (DRY).
+% Current architecture
+The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture \cite{IBM-3-tier}. The bigger and smaller shapes in the figure represent monolithical API's and services respectively. The orange colored services are used internally, the green ones can be used by other companies. The smaller services adhere to the pattern that is called service-oriented architecture (SOA), where application components provide services over a network typically. As discussed in the introduction of this chapter, it would have been easier to integrate these services right into the monoliths that depend on them, eliminating the need for network requests and authentication.
 
 \begin{figure}[htbp!]
 	\centering
 	\includegraphics[width=1\textwidth]{Architecture}
-	\caption[Architecture]{Current System Architecture}
+	\caption[Architecture]{Current System Architecture provided by taxiID}
 	\label{fig:Architecture}
 \end{figure}
 
-When should a system be integrated or separated? It is a balancing between satisfying dependencies, efficiency, separation of concern, and duplication. When a single responsibility is handled by one service, it may be classified as a microservice. Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and naturally modular structure, but authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice at all. In the present architecture, different services implement different authentication methods, store different information about different users. Authorization is managed by sending extra headers for each crucial piece of information. For example: company information, application information and user information are all sent in separate headers. When the amount of services that are added to the architecture increases, the mount of information that is no longer centralized increases as well.
+Integration of the backend would mean that the core system would contain the price calculation system as a component, separation of the backend would mean that the backend would be set up as a separate service. Integration of the frontend would mean that the DriverPortal would contain the views to manipulate information in the backend, separation of the frontend would mean that the views would be delivered from a separate service, or from within the backend service as a single project. Building the TPS frontend and backend into one single project would be in conflict with this three-tier pattern, which would not be desired.
+
+\subsection{Monoliths and Microservices}
+What logically follows from implementing functionalities as components in monoliths is either duplication or dependence between larger systems. This  contradicts an important principle of software engineering; don't repeat yourself (DRY), or limits scalability and indedpendence of deployment. The legacy system has implemented its price calculation system in this manner, now facing difficulties of expanding the functionality to new projects. If the previous price calculation system was implemented as a microservice, it could have been reused or deployed as a second separate price calculation system for YDA. Fiar points of criticism have been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, and message formats. As with most technological decisions, whether a microservice is desired depends on the problem that it meant to solve. When should a system be integrated or separated? It is a careful balancing between efficiency of satisfying dependencies keeping a separation of concern, and duplication of functionalities. When a single responsibility is handled by one service, it may be classified as a microservice. Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and has a naturally modular structure. But authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice in the first place. In the current system architecture, different services implement different authentication methods, store different pieces of information of different users. Authorization is managed by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. For example: company information, application information, and user information is all sent in separate headers. When the amount of services that are added to the architecture increases, the mount of information that is no longer centralized increases with it.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Accessing Necessary Data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - Which data is required to make TPS operational?
 %
-\section{Sharing Necessary Data}
+\section{Information Dependencies}
+% The option remains to integrate TPS and portal into the core API and YDA portal respectively.
+Mapping the information dependencies is important while making architectural decisions. Being able to satisfy information dependencies dictates whether a microservice can be used for example. Trip prices are calculated on company level. A company may have several applications that can make use of company pricing rules.
 
 \begin{itemize}
 	\item User data
@@ -76,8 +79,6 @@ Example three entirely removes the database connection to any user data. This is
 	\end{tikzpicture}
 \end{center}
 
-\mynote{Make }
-
 \begin{Verbatim}[fontsize=\scriptsize]
 	{
 		"companyId": "59ea0846f1fea03858e16311",
@@ -97,9 +98,23 @@ Example four delegates managing user identity to a separate authentication servi
 
 \begin{figure}[ht!]
 	\centering
-	\includegraphics[width=.7\textwidth]{OAuth}
-	\caption[Architecture]{oAuth, API Gateaway, using JWT}
-	\label{fig:oAuth}
+	\includegraphics[width=.7\textwidth]{Auth1}
+	\caption[Architecture]{OAuth requests where tokens are verified by Auth Server}
+	\label{fig:Auth1}
+\end{figure}
+\clearpage
+\begin{figure}[ht!]
+	\centering
+	\includegraphics[width=.7\textwidth]{Auth2}
+	\caption[Architecture]{OAuth with stateless JWT token requests}
+	\label{fig:Auth2}
+\end{figure}
+\clearpage
+\begin{figure}[ht!]
+	\centering
+	\includegraphics[width=.7\textwidth]{Auth3}
+	\caption[Architecture]{API Gateway}
+	\label{fig:Auth3}
 \end{figure}
 \clearpage
 
