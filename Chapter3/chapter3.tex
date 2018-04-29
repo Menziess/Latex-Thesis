@@ -12,8 +12,7 @@
 %
 \chapter{System Architecture}
 \section{Introduction}
-% Waar gaat dit hoofdstuk over?
-In order to integrate TPS in the existing architecture, an analysis must be made so that the most suitable patterns are applied. The term TPS refers to the backend implementation that calculates the prices, and the frontend in which the rules can be defined. There exists an inverse relationship between the amount of adjecent systems from which information is required and integrability. This required information impacts the way TPS is implemented. When TPS requires user information from one system, vehicle infomation from another, and company information from another still, a gigantic monolithical system would simplify the task of sharing the data with its components. Authentication wouldn't be required because no network connection is required to communicate the information. In contrast, separate services offer more independence and modularity.
+In order to integrate TPS in the existing architecture, an analysis must be made so that the most suitable patterns are applied. As stated, TPS consists of a frontend and a backend part. There are many ways in which these two parts could be realized, having major consequences for the future. The frontend could be provided as iframes, allowing them to be integrated in various portals. The backend could be implemented as a component in an existing API, easily accessing company data, delegating authentication and authorization to its host. Integrating the frontend in existing portals would ensure consistency, but would demand a custom implementation for each portal. Separating the backend would offer more independence and modularity, but would move the complexity of sharing data and authenticating users. Even an optimal solution will have its downsides and depends on various factors that are decomposed in this chapter.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Architectural Patterns
@@ -21,8 +20,7 @@ In order to integrate TPS in the existing architecture, an analysis must be made
 % - Which architectural patterns fit in with the exising architecture?
 %
 \section{Architectural Patterns}
-% Current architecture
-The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture \cite{IBM-3-tier}. The bigger and smaller shapes in the figure represent monolithical API's and services respectively. The orange colored services are used internally, the green ones can be used by other companies. The smaller services adhere to the pattern that is called service-oriented architecture (SOA), where application components provide services over a network typically. As discussed in the introduction of this chapter, it would have been easier to integrate these services right into the monoliths that depend on them, eliminating the need for network requests and authentication.
+The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture \cite{IBM-3-tier}. The bigger and smaller shapes in the figure represent monolithical API's and services respectively. The orange colored services are used internally, the green ones can be used by other companies. The smaller services adhere to the pattern that is called service-oriented architecture (SOA), where application components provide services over a network typically.
 
 \begin{figure}[htbp!]
 	\centering
@@ -31,7 +29,8 @@ The current system architecture consists of three API's and nine services that c
 	\label{fig:Architecture}
 \end{figure}
 
-Integration of the backend would mean that the core system would contain the price calculation system as a component, separation of the backend would mean that the backend would be set up as a separate service. Integration of the frontend would mean that the DriverPortal would contain the views to manipulate information in the backend, separation of the frontend would mean that the views would be delivered from a separate service, or from within the backend service as a single project. Building the TPS frontend and backend into one single project would be in conflict with this three-tier pattern, which would not be desired.
+
+% Integration of the backend would mean that the core system would contain the price calculation system as a component, separation of the backend would mean that the backend would be set up as a separate service. Integration of the frontend would mean that the DriverPortal would contain the views to manipulate information in the backend, separation of the frontend would mean that the views would be delivered from a separate service, or from within the backend service as a single project. Building the TPS frontend and backend into one single project would be in conflict with this three-tier pattern, which would not be desired.
 
 \subsection{Monoliths and Microservices}
 What logically follows from implementing functionalities as components in monoliths is either duplication or dependence between larger systems. This  contradicts an important principle of software engineering; don't repeat yourself (DRY), or limits scalability and indedpendence of deployment. The legacy system has implemented its price calculation system in this manner, now facing difficulties of expanding the functionality to new projects. If the previous price calculation system was implemented as a microservice, it could have been reused or deployed as a second separate price calculation system for YDA. Fiar points of criticism have been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, and message formats. As with most technological decisions, whether a microservice is desired depends on the problem that it meant to solve. When should a system be integrated or separated? It is a careful balancing between efficiency of satisfying dependencies keeping a separation of concern, and duplication of functionalities. When a single responsibility is handled by one service, it may be classified as a microservice. Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and has a naturally modular structure. But authentication and authorization must be handled by the microservice itself, unless state is shared amongst services, which would eliminate the reason to use a microservice in the first place. In the current system architecture, different services implement different authentication methods, store different pieces of information of different users. Authorization is managed by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. For example: company information, application information, and user information is all sent in separate headers. When the amount of services that are added to the architecture increases, the mount of information that is no longer centralized increases with it.
@@ -43,7 +42,12 @@ What logically follows from implementing functionalities as components in monoli
 %
 \section{Information Dependencies}
 % The option remains to integrate TPS and portal into the core API and YDA portal respectively.
-Mapping the information dependencies is important while making architectural decisions. Being able to satisfy information dependencies dictates whether a microservice can be used for example. Trip prices are calculated on company level. A company may have several applications that can make use of company pricing rules.
+
+
+
+
+
+Mapping the information dependencies is important while making architectural decisions. Being able to satisfy information dependencies dictates whether a microservice can be used. Trip prices are calculated on company level, and a company may have several applications that can make use of company pricing rules.
 
 \begin{itemize}
 	\item User data
