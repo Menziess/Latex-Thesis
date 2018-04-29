@@ -14,7 +14,7 @@
 % - Roadmap
 %
 \chapter{Introduction}
-What was once an ordinary startup known as Uber, is now the most famous taxi dispatch company in the world \cite{Uber}. In the same year that Uber was founded, a similar startup in the Netherlands called taxiID was launched; an Amsterdam based company providing end-to-end cloud solutions for taxi companies. Hailing a taxi has rarely been performed by sticking out ones hand, hoping to catch the attention of a bypassing cab ever since. Recently, taxiID has started developing a new brand called YourDriverApp (YDA), a lighter and newer version of the original solution, being more focussed on smaller taxi companies. Despite the fact that YDA is new, it still depends on the price calculation functionality of the legacy system. This chapter expands on this matter and how it was translated into an assignment.
+What was once an ordinary startup known as Uber, is now the most famous taxi dispatch company in the world \cite{Uber}. In the same year that Uber was founded, a similar startup in the Netherlands called taxiID was launched; an Amsterdam based company providing end-to-end cloud solutions and mobile applications for taxi companies. Hailing a taxi has rarely been performed by sticking out ones hand, hoping to catch the attention of a bypassing taxi driver ever since. The ability to order a cab lies at everyones fingertips, literally. Recently, taxiID has started developing a new brand called YourDriverApp (YDA), a lighter and newer version of the original solution, being more focussed on smaller taxi companies. Despite the fact that YDA is new, it still depends on the price calculation functionality of the legacy system. This chapter expands on how this matter is translated into the assignment.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Context
@@ -25,14 +25,7 @@ What was once an ordinary startup known as Uber, is now the most famous taxi dis
 % - Cooperation
 %
 \section{Context}
-% General
-taxiID was founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, and offers a wide range of IT solutions to serve the taxi market, including a passenger app, a driver app, and administrative panels. More specifically: an app for passengers to order a taxi, an app for drivers to receive their job assignments, and services  for all size businesses, offering convenient planning and dispatching without requiring local installations.
-% Clients
-Businesses that make use of taxiID's services can be found anywhere in the world. This intoduces complicated challenges while developing applications that rely on clearly defined locations and infrastructures, often vastly differing between countries, if these countries have such a system to begin with.
-% Structure
-The taxiID development team responsible for solving these problems is located in Medemblik, consisting of two mobile app developers (iOS and Android), two backend developers, a designer and two project managers.
-% Cooperation
-% Bridge
+taxiID was founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, offering a wide variety of IT solutions to serve the taxi market, including a passenger app, a driver app, and administrative panels. More specifically: an app for passengers to order a taxi, an app for drivers to receive their job assignments, and services for all size businesses, offering convenient planning and dispatching without requiring local installations. Businesses that make use of taxiID's services can be found anywhere in the world. This intoduces complicated challenges while developing applications that rely on clearly defined locations and infrastructures, often vastly differing between countries, if these countries have such a system to begin with. The taxiID development team responsible for solving these problems is located in Medemblik, consisting of two mobile app developers (iOS and Android), two backend developers, a designer and two project managers.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Problem Definition
@@ -41,7 +34,7 @@ The taxiID development team responsible for solving these problems is located in
 % - Why is that a problem
 %
 \section{Problem Definition}
-YDA depends on the price calculation module that is part of the legacy system for which it was designed and implemented. When a passenger books a ride, the departure and destination locations that have been selected are sent to the legacy system. It then proceeds and constructs a list of prices for each vehicle type that is available, based on matching pricing rules that have been defined by the taxi company offering the rides. If directors of a taxi company using YDA want to modify their pricing rules, they will be obligated to use the taxiID portal, which has to store company information in a platform that is different from YDA. This makes little sense, as much as it is efficient from a technical point of view, and being easy to maintain and extend.
+YDA depends on the price calculation module that is part of the legacy system for which it was designed and implemented. When a passenger books a ride, the departure and destination locations that have been selected are sent to the legacy system. It then proceeds and constructs a list of prices for each vehicle type that is available based on matching pricing rules that have been defined by the taxi company offering the rides. If directors of a taxi company using YDA want to modify their pricing rules, they will be obligated to use the taxiID portal, which has to store company information in a platform that is different from YDA. This makes little sense, as much as it is efficient from a technical point of view, and being easy to maintain and extend.
 %
 % \begin{figure}[htbp!]
 % 	\centering
@@ -62,27 +55,29 @@ YDA depends on the price calculation module that is part of the legacy system fo
 %
 The current price calculation module knows three types of pricing rules: fixed prices based on postal codes, tier prices based on kilometer thresholds, and dynamic calculations based on distance and duration of a ride. A company may have as many rules as required, only one rule will be used to calculate the final price, and the rules are matched in the same order respectively. The fixed rules are defined by downloading, modifying, and uploading a .csv file as presented in table \ref{tab:fixedprices}, the other types of rules are simply managed through a web form.
 
-\begin{figure}[htbp!]
+\begin{table}[htbp!]
 	\centering
 	\begin{tabular}{c|c|c|c|c}
+		\toprule
 		Departure & Destination & Nr Passengers & Price & Vehicle Type \\
-		\hline
-		1462 & 1313 & 4 & 125 & \\
-		1313 & 1462 & 4 & 125 & \\
-		1462 & 1313 & 8 & 150 & \\
-		1313 & 1462 & 8 & 150 & \\
-		1462 & 1012 & 4 & 65 & \\
-		1012 & 1462 & 4 & 65 & \\
-		0 & 1462 & 4 & 65 & \\
-		1462 & 0 & 4 & 65 & \\
-		1462 & AIR1 & 4 & 89 & \\
-		AIR1 & 1462 & 4 & 89 & \\
+		\midrule
+		1462      & 1313        & 4             & 125   & ...          \\
+		1313      & 1462        & 4             & 125   & ...          \\
+		1462      & 1313        & 8             & 150   & ...          \\
+		1313      & 1462        & 8             & 150   & ...          \\
+		1462      & 1012        & 4             & 65    & ...          \\
+		1012      & 1462        & 4             & 65    & ...          \\
+		0         & 1462        & 4             & 65    & ...          \\
+		1462      & 0           & 4             & 65    & ...          \\
+		1462      & AIR1        & 4             & 89    & ...          \\
+		AIR1      & 1462        & 4             & 89    & ...          \\
+		\bottomrule
 	\end{tabular}
 	\caption[Fixed Prices]{Comma Separated File containing Fixed Prices in cents}
-  \label{tab:fixedprices}
-\end{figure}
+	\label{tab:fixedprices}
+\end{table}
 
-When a passenger books a ride, the price calculation module will first compare the postal codes, amount of passengers, and vehicle types in the fixed pricing rules with the information provided by the passenger's application. The fixed price is returned as soon as a match is found. If no match is found in any of the fixed pricing rules, the system proceeds to calculate a price using a kilometer threshold based rule, given that at least one exists. This type of calculation decreases or increases the price per kilometer for every successive amount of kilometers that have surpassed a predetermined threshold. This concept will be discussed in chapter \mynote{Refer to thresholds}. If this rule does not exist, a dynamic rule is used to calculate the price based on distance and duration of the ride. Finally, on top of the prices that have been calculated, a discount may be applied. As a fixed amount, as a percentage of the price, or as a so called alternative fixed pricing table. When this last option is selected, the price will be calculated all over, using a newly referenced fixed pricing rule. This process is not just hard to understand for a user, who has to reason about the companies prices. But it is also hard to understand for programmers, who have to maintain the code that supports this functionality. A small mistake in the csv file could lead to great issues if the mistake goes through processing undetected.
+When a passenger books a ride, the price calculation module will first compare the postal codes, amount of passengers, and vehicle types in the fixed pricing rules with the information provided by the passenger's application. The fixed price is returned as soon as a match is found. If no match is found in any of the fixed pricing rules, the system proceeds to calculate a price using a kilometer threshold based rule, given that at least one exists. This type of calculation decreases or increases the price per kilometer for every successive amount of kilometers that have surpassed a predetermined threshold. This concept will be discussed in chapter 4. If this rule does not exist, a dynamic rule is used to calculate the price based on distance and duration of the ride. Finally, on top of the prices that have been calculated, a discount may be applied as a fixed amount, as a percentage of the price, or as a so called alternative fixed pricing table. When this last option is selected, the price will be calculated all over, using a newly referenced fixed pricing rule. This process is not just hard to understand for a user, who has to reason about the companies prices. But it is also hard to understand for programmers, who have to maintain the code that supports this functionality. A small mistake in the csv file could lead to great issues if the mistake goes through processing undetected.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Assignment
@@ -104,7 +99,7 @@ A Trip Pricing System (TPS) must be designed and implemented to calculate trip p
 \section{Research}
 % Hoe wordt dit onderzoek aangepakt?
 % Designing research involves two separate sets of activities. The first involves determining everything you wish to achieve through the research project. This has to do with modelling the content of the research; we call this the conceptual design of a research project. The second set of activities concerns howto realise all this during the implementation stage of the project. This is called the technical research design.
-Three main challenges that construct the assignment can be identified. Research must be conducted to attain the best possible way of mapping locations to pricing rules. What this means is that locations must be storable, comparable, and interpretable. The database must be able to store locations in an efficient manner, to which queries can be made as efficiently in order to find out whether a pricing rule applies to a given ride. For this to be the case, the stored locations must be comparable to the location of the passenger, or the destination. The user must be able to reason about his pricing rules, from which an understanding of his defined locations logically follows. But edge cases must be covered completely. For example, a rule in the current system dictates that a user traveling to Schiphol should receive a discount. But how would the system detect that this is the case? Or what if hotel guests receive discounts, but the neighbour shouldn't be allowed to use these discounts? Secondly, a system has to be developed that encapsulates the solution that is the result of the finished research. It is helpful to extend the research of the problem beyond finding out how to incorporate the answers into a working system, where architecture has a major influence in the tools that are available. For example: if a solution to the main problem requires a database system capable of handling high quantities of geospatial queries, this requirement has to be satisfied in order to proceed in finding the final solution. Finally, a user interface has to be created that enables users to define the pricing rules. The complexity of the interface depends on how straight forward the price calculation system is constructed. The user interface should also be available in multiple portals. The best way of making the systems capabilities available to the user through the UI in the portal, must be investigated. The UI must be built keeping the user in mind, simplifying complex rule management as much as possible.
+Three main challenges that construct the assignment can be identified. Research must be conducted to attain the best possible way of mapping locations to pricing rules. What this means is that locations must be storable, comparable, and interpretable. The database must be able to store locations in an efficient manner, to which queries can be made as efficiently in order to find out whether a pricing rule applies to a given ride. For this to be the case, the stored locations must be comparable to the departure and destination location of the passenger. The user must be able to reason about his pricing rules, from which an understanding of his defined locations logically follows. But edge cases must be covered completely. For example, a rule in the current system dictates that a user traveling to Schiphol should receive a discount. But how would the system detect that this is the case? Or what if hotel guests receive discounts, but the neighbour living next to the hotel shouldn't be allowed to benifit from these discounts unless he actually sleeps at the hotel? Secondly, a system has to be developed that encapsulates the solution that is the result of the finished research. It is helpful to extend the research of the problem beyond finding out how to incorporate the answers into a working system, where architecture has a major influence in the tools that are available. For example: if a solution to the main problem requires a database system capable of handling high quantities of geospatial queries, this requirement has to be satisfied in order to proceed in finding the final solution. Finally, a user interface has to be created that enables users to define the pricing rules. The complexity of the interface depends on how straight forward the price calculation system is constructed. The user interface should also be available in multiple portals. The best way of making the systems capabilities available to the user through the UI in the portal, must be investigated. The UI must be built keeping the user in mind, simplifying complex rule management as much as possible.
 
 \subsection{Questions}
 
@@ -118,49 +113,49 @@ This question encapsulates the four important challenges that have to be dealt w
 \begin{enumerate}
 
 	\item In what way can locations be represented to be universally interpretable and precise?
-		\begin{enumerate}[label*=\arabic*.]
-			% Area, Polygon, Zipcode, Gps pair, Place, Collections
-			\item Which location types matter for this project?
-			% Research different countries
-			\item What are the main differences between postal systems used around the globe?
-			% 3 words, gps, geospatial,
-			\item Can postal codes be abstracted to geospatial data while retaining the same usefulness in the system?
-			% Show queries with box and star
-			\item Which Database Management Systems (DBMS) cover the location storage use cases for this project?
-		\end{enumerate}
+	      \begin{enumerate}[label*=\arabic*.]
+		      % Area, Polygon, Zipcode, Gps pair, Place, Collections
+		      \item Which location types matter for this project?
+		            % Research different countries
+		      \item What are the main differences between postal systems used around the globe?
+		            % 3 words, gps, geospatial,
+		      \item Can postal codes be abstracted to geospatial data while retaining the same usefulness in the system?
+		            % Show queries with box and star
+		      \item Which Database Management Systems (DBMS)s cover the location storage use cases for this project?
+	      \end{enumerate}
 
 	\item What is most fitting solution to integrate the backend and frontend into the existing architecture?
-		\begin{enumerate}[label*=\arabic*.]
-			% Node JS, PHP, MongoDB, MySQL, Microservice, Loopback, Graph QL,
-			\item Which architectural patterns fit in with the exising architecture?
-			% Slides, proposals and illustrations / flowcharts
-			\item Which data of adjecent systems are required to make TPS operational?
-			% JWT, oAuth 2,
-			\item How can authentication between services be implemented or improved?
-			% Mocha, Buddy-Works, Circle CI, Typescript, Chai, Functional Programming
-			\item Which methods and technologies can be used to ensure suitability and improve maintainability and testability?
-		\end{enumerate}
+	      \begin{enumerate}[label*=\arabic*.]
+		      % Node JS, PHP, MongoDB, MySQL, Microservice, Loopback, Graph QL,
+		      \item Which architectural patterns fit in with the exising architecture?
+		            % Slides, proposals and illustrations / flowcharts
+		      \item Which data of adjecent systems are required to make TPS operational?
+		            % JWT, oAuth 2,
+		      \item How can authentication between services be implemented or improved?
+		            % Mocha, Buddy-Works, Circle CI, Typescript, Chai, Functional Programming
+		      \item Which methods and technologies can be used to ensure suitability and improve maintainability and testability?
+	      \end{enumerate}
 
 	\item Which logic and information is required to calculate a trip price breakdown?
-		\begin{enumerate}[label*=\arabic*.]
-			% Timeframes, Locations, Vehicle types, priority, (broad view)
-			\item How are rules matched?
-			% VAT, rounding, discount, result breakdown, (all the parts explained)
-			\item Which parts of the system have an impact on the calculation result?
-			% Timeframes proposal
-			\item How should the concept of time schedules be realised?
-		\end{enumerate}
+	      \begin{enumerate}[label*=\arabic*.]
+		      % Timeframes, Locations, Vehicle types, priority, (broad view)
+		      \item How are rules matched?
+		            % VAT, rounding, discount, result breakdown, (all the parts explained)
+		      \item Which parts of the system have an impact on the calculation result?
+		            % Timeframes proposal
+		      \item How should the concept of time schedules be realised?
+	      \end{enumerate}
 
 	\item How can complex pricing rules be communicated through the UI?
-		\begin{enumerate}[label*=\arabic*.]
-			\item Which views are essential?
-			\item How should locations be defined and managed by the user?
-			\item How should timeframes be represented in the interface?
-		\end{enumerate}
+	      \begin{enumerate}[label*=\arabic*.]
+		      \item Which views are essential?
+		      \item In what way can visual hierarchy guide the user through processes naturally?
+		      \item How should complex elements impacting price calculations be communicated to the user through UI components?
+	      \end{enumerate}
 
 \end{enumerate}
 
-The first group of questions is answered in the chapter Encoding Locations. The second and third are answered in the chapter Proposed Approach. At that point, enough knowledge is available to implement a solution.
+Answering these questions will lead to the implementation of a solid, straightforward, user-friendly system that utilizes the user interface to communicate the inner-workings of the rule-based price calculation system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Process
@@ -169,4 +164,42 @@ The first group of questions is answered in the chapter Encoding Locations. The 
 % - Steps taken before implementation phase
 %
 \section{Process}
-A written working method is provided to the product owner, see Appendix \ref{appendix:pregame}, Pregame. The purpose of the documents is to clearly define the assignment and reflect on the interpretation of the assignment definition, so that miscommunications are found immediately. Requirements, scope and stakeholders of the project, as well as laying out the project timeline and estimated architecture based on use cases are clearly documented. Finally, a proposed solution is the result, which is agreed upon by the product owner before the backlog is created, containing a preview of the ongoing research. Reading the document is recommended if more knowledge about the process and context of the assignment is desired.
+A desire from within taxiID to use the SCRUM methodology to potentially improve their development process is an important factor to set up this project in a way that would introduce the team to SCRUM without forcing developers and CEO's to adopt it right away. All team members are familiarized with tools, roles, workflows, and the project artifacts somewhat indirectly. Because of the novelty of SCRUM in regard to the product owner, a pregame phase is introduced for preparation purposes, see Table \ref{tab:planning}. A written working method is provided to the product owner, see Appendix \ref{appendix:pregame}, Phase I - Pregame. This document clearly documents the interpretation of the product owners product vision and reflects from a developer viewpoint, so that miscommunications and misinterpretations can be resolved before the project is started.
+
+\begin{table}[htbp!]
+	\centering
+	\begin{tabular}{ccc|c|c|c|c|c|c|c|c}
+		\toprule
+		\multicolumn{3}{c}{Phase I - Pregame}   &
+		\multicolumn{8}{c}{Phase II - Game}  		\\
+		\midrule
+		\rotate{week 1}                         &
+		\rotate{week 2}                         &
+		\rotate{week 3}                         &
+		\rotate{week 4}                         &
+		\rotate{week 5}                         &
+		\rotate{week 6}                         &
+		\rotate{week 7}                         &
+		\rotate{week 8}                         &
+		\rotate{week 9}                         &
+		\rotate{week 10}                        &
+		\rotate{week 11}                        \\
+		\midrule
+		\rotate{product definition}     				&
+		\rotate{architectural vision} 					&
+		\rotate{proposed solution}							&
+		\rotate{sprint 1}                       &
+		\rotate{sprint 2}                       &
+		\rotate{sprint 3}                       &
+		\rotate{sprint 4}                       &
+		\rotate{sprint 5}                       &
+		\rotate{sprint 6}                       &
+		\rotate{sprint 7}                       &
+		\rotate{sprint 8}                       \\
+		\bottomrule
+	\end{tabular}
+	\caption[Planning]{Project roadmap}
+	\label{tab:planning}
+\end{table}
+
+It contains an architectural vision and a proposed solution, which is agreed upon by the product owner before the backlog is created. Reading the document is recommended if more knowledge about the process and context of the assignment is desired.
