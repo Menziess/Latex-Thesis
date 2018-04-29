@@ -14,6 +14,24 @@
 			top: 0;
 			left: 0;
 		}
+		.pdf-link:link, .pdf-link:visited {
+			font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+			display: inline-block;
+			text-align: center;
+			text-decoration: none;
+			color: white;
+			background: #f44336;
+			border-radius: 10px;
+			position: absolute;
+			opacity: 0.9;
+			padding: 0.5em;
+			bottom: 0.5em;
+			left: 0.5em;
+		}
+		.pdf-link:hover, .pdf-link:active {
+			opacity: 1;
+			background: red;
+		}
 	</style>
 </head>
 <body>
@@ -28,6 +46,9 @@
 				<a href="thesis.pdf">click here to download the PDF file.</a>
 			</p>
 		</object>
+		<a class="pdf-link" href="thesis.pdf">
+			Download
+		</a>
 	</div>
 </body>
 </html>
