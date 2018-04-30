@@ -11,14 +11,7 @@
 %
 \chapter{Trip Price Calculation System}
 \section{Introduction}
-% Waar gaat dit hoofdstuk over?
-This chapter clarifies which information should be present in the breakdown, what the logical flow that results into a price breakdown looks like, which problems have to be solved
-
-
-- What does a breakdown look like?
-- What information is required for a price calculation: vehicle types, passenger count, timeframes, locations
-- Which steps are taken before the calculation is finished: priority,
-- Which solutions are deemed realistic?
+This chapter clarifies which information should comprise a price breakdown to reflect that of the legacy system, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed restrict the time and space dimensions of a price rule without blurring the straightforwardness of the system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Breakdown
@@ -28,9 +21,34 @@ This chapter clarifies which information should be present in the breakdown, wha
 % - Cents
 %
 \section{Breakdown}
-To make sure that the transition from the previous price calculation system to the new one is perfectly seamless, the responses that the apps expect should have the exact same format. An array containing breakdowns for each product that is associated with the triggered pricing rule, as can be seen in \ref{lst:breakdown}.
+To ensure a seamless transition from the legacy price calculation system to TPS, the response formats should be identical. Only when a clear improvement is worth a big refactor in all mobile apps, changes could be taken into consideration. A proposal was made to improve inclusion of VAT in the breakdown. The tax is part of the breakdown as shown in Listing \ref{lst:legacy-breakdown}.
 
-\begin{lstlisting}[caption={Array of products with pricing}, label={lst:breakdown}]
+\noindent\begin{minipage}{.45\textwidth}
+\begin{lstlisting}[caption={Legacy price breakdown}, label={lst:legacy-breakdown}]
+[
+	{
+		"vehicleType": "saloon",
+		"maxPassengers": "4",
+		"price": {
+			"currency": "EUR",
+			"total": 850,
+			"breakdown": {
+				"route": 802,
+				"tax": 48,
+				"toll": 0,
+				"parking": 0,
+				"waiting": 0,
+				"discount": 0
+			}
+		},
+		"fixedPrice": "true"
+	}
+]
+\end{lstlisting}
+\end{minipage}
+
+\noindent\begin{minipage}{.45\textwidth}
+\begin{lstlisting}[caption={Array of products with pricing}, label={lst:new-breakdown}]
 [
 	{
 		"vehicleType": "estate",
@@ -55,6 +73,17 @@ To make sure that the transition from the previous price calculation system to t
 	...
 ]
 \end{lstlisting}
+\end{minipage}
+
+A proposal was made to extract the tax element from the breakdown, so that the sum of the breakdown would add up to the total price, including VAT. As demonstrated in Appendix \ref{appendix:slides_2_breakdown}, a breakdown is easily constructed in four steps when VAT is included. The downsides of having to calculate the price of each component excluding VAT are the following:
+
+\begin{enumerate}
+	\item If an error is detected in the calculation, it is hard to trace back which components contributed to the total VAT. This would be even harder when each component uses its own VAT percentage.
+	\item It takes extra steps to calculate the price of each component excluding VAT.
+	\item Rounding the individual components could result in a sum that is not equal to the total displayed in the breakdown.
+\end{enumerate}
+
+The proposal would result in a breakdown as shown in Listing \ref{lst:new-breakdown}.
 
 It is important to mention that VAT is included, and does not add up to the total price. All amounts are displayed in cents.
 
@@ -93,7 +122,7 @@ has implemented this straight forward solution of storing the begin and end  of 
 %   product?
 % -
 %
-\section{Logical Flow}
+\section{Logical Flow of a Price Calculation}
 
 - authentication
 - extracting companyId and daAppInstallId

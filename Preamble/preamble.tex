@@ -14,8 +14,8 @@
 % Ragged bottom avoids extra whitespaces between paragraphs
 \raggedbottom
 % To remove the excess top spacing for enumeration, list and description
-%\usepackage{enumitem}
-%\setlist[enumerate,itemize,description]{topsep=0em}
+\usepackage{enumitem}
+\setlist[enumerate,itemize,description]{noitemsep}
 
 % *****************************************************************************
 % ******************* Fonts (like different typewriter fonts etc.)*************
@@ -220,7 +220,8 @@
 	showspaces=false,
 	showstringspaces=false,
 	showtabs=false,
-	tabsize=2
+	tabsize=2,
+	frame=tlrb
 }
 
 \lstset{style=mystyle}
