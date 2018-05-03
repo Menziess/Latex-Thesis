@@ -21,7 +21,7 @@ This chapter clarifies which information should comprise a price breakdown to re
 % - Cents
 %
 \section{Breakdown}
-To ensure a seamless transition from the legacy price calculation system to TPS, the response formats should be identical. Only when a clear improvement is worth a big refactor in all mobile apps, changes could be taken into consideration. A proposal was made to improve inclusion of VAT in the breakdown. The tax is part of the breakdown as shown in Listing \ref{lst:legacy-breakdown}.
+To ensure a seamless transition from the legacy price calculation system to TPS, the response formats should be identical. Still an improvement, if profitable enough, could be taken into consideration. One requirement of the price breakdown states that the tax should be included, but as shown in Listing \ref{lst:legacy-breakdown} the included tax is part of the breakdown. Is it by mistake or design?
 
 \noindent\begin{minipage}{.45\textwidth}
 \begin{lstlisting}[caption={Legacy price breakdown}, label={lst:legacy-breakdown}]
@@ -48,12 +48,12 @@ To ensure a seamless transition from the legacy price calculation system to TPS,
 \end{minipage}
 
 \noindent\begin{minipage}{.45\textwidth}
-\begin{lstlisting}[caption={Array of products with pricing}, label={lst:new-breakdown}]
+\begin{lstlisting}[caption={Improved price breakdown}, label={lst:new-breakdown}]
 [
 	{
 		"vehicleType": "estate",
 		"maxPassengers": 4,
-		"fixedPrice": true,
+		"isEstimated": false,
 		"price": {
 			"breakdown": {
 				"route": 8300,
@@ -75,7 +75,7 @@ To ensure a seamless transition from the legacy price calculation system to TPS,
 \end{lstlisting}
 \end{minipage}
 
-A proposal was made to extract the tax element from the breakdown, so that the sum of the breakdown would add up to the total price, including VAT. As demonstrated in Appendix \ref{appendix:slides_2_breakdown}, a breakdown is easily constructed in four steps when VAT is included. The downsides of having to calculate the price of each component excluding VAT are the following:
+Two possible solutions were proposed having VAT included in the price. The first solution extracts the tax element from the breakdown, so that the sum of the breakdown would add up to the total price where VAT is included in the price as shown in Listing \ref{lst:new-breakdown}. As demonstrated in Appendix \ref{appendix:slides_2_breakdown}, a breakdown is easily constructed in four steps when VAT is included. Keep in mind that unlike the listings the prices in the proposal are not displayed in cents. The second solution maintains the legacy format, but has to recalculate the prices without VAT. This could have downsides unlike the first approach:
 
 \begin{enumerate}
 	\item If an error is detected in the calculation, it is hard to trace back which components contributed to the total VAT. This would be even harder when each component uses its own VAT percentage.
@@ -83,9 +83,7 @@ A proposal was made to extract the tax element from the breakdown, so that the s
 	\item Rounding the individual components could result in a sum that is not equal to the total displayed in the breakdown.
 \end{enumerate}
 
-The proposal would result in a breakdown as shown in Listing \ref{lst:new-breakdown}.
-
-It is important to mention that VAT is included, and does not add up to the total price. All amounts are displayed in cents.
+The first proposal is chosen to be implemented, where the flag 'fixedPrice' is replaced by the 'isEstimated' flag to clearly reflect its purpose.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Timeframes
@@ -93,17 +91,13 @@ It is important to mention that VAT is included, and does not add up to the tota
 % - What was proposed as a solution to store a week schedule in a database?
 %
 \section{Timeframes}
-% Intro timeframes
-Next to the three dimensions of space, time will play a role in determining whether a rule has matched. The implementation of this concept should preferably offer enough freedom in the future, and should not be tailored toward one specific entity relation. Being able to reuse the timeframe entity improves maintainability of the system. The requirements state that the user must be able to define a start and end time, the days on which the times are active, and the start and end date of the timeframe. The timeframe is used to describe when rules or discounts are active. If, for example, a discount should be active during night of New Years Eve, between 23h and 5h, this description of a timeframe is already troublesome.
+Next to the three dimensions of space, time will play a role in determining whether a rule has matched. The implementation of this concept should preferably offer enough freedom in the future, and should not be tailored toward one specific entity relation. Being able to reuse the timeframe entity improves maintainability of the system. The requirements state that the user must be able to define a start and end time, the days on which the times are active, and the start and end date of the timeframe. The timeframe is used to describe when rules or discounts are active. If for example a discount should be active during night of New Years Eve, between 23h and 5h, this description of a timeframe is already lacking.
+
+\mynote{Why?}
 
 \subsection{Conventional Approach}
-% Show db schema
-The current taxiID system solved this issue by storing multiple child entities with time information for each day, where the time inputs ranged from 00:00 up until
-has implemented this straight forward solution of storing the begin and end  of some event as timestamps as child entities to some parent timeframe. These child windows can be iterated or queried to see whether one contains the specified timestamp.
+The legacy system takes a straight forward approach of storing time in a relational database. The begin and end of a window are stored in a record that is related to a parent timeframe entity. The timeframe has many windows that could contain a timestamp. It either finds one or many time windows that contain the timeframe. This approach covers all possibilities imaginable.
 
-- In what ways can timeframes be data modelled for a database?
-	- TIME
-	- Timestamp
 
 \subsection{Bitmap}
 % Show db schema
