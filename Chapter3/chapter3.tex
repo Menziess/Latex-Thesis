@@ -39,6 +39,7 @@ The current system architecture consists of three API's and nine services that c
 Monoliths are large single upright blocks of stone, especially shaped into or serving as a pillar or monument --- almost describing a single tiered software application. In the context of computer software, a monolithic system may have different definitions. Rod Stephens captures the meaning of a monolithic architecture quite broadly: "In a monolithic architecture, a single program does everything. It displays the user interface, accesses data, processes customer offers, prints invoices, launches missiles, and does whatever else the application needs to do" in \cite{rod-BSE}. In general, a monolith describes a software application which is designed without modularity. The bigger shapes in figure \ref{fig:Architecture} can be classified as monoliths. Even though the frontend is separated in some cases, it fits the description most accurately. Integration of TPS could be achieved by implementing TPS as a component of a monolith. What logically follows is either duplication, or dependencies between large systems. The first contradicts an important principle of software engineering; don't repeat yourself (DRY), the second limits scalability and independence of deployment. The legacy system has demonstrated this issue because it has its price calculation system in this manner, now facing difficulties of providing the price calculation functionality to new projects. If the previous price calculation system was implemented as a service, it could have been reused or redeployed as a second separate price calculation system for YDA.
 
 \subsection{Microservices}
+% https://resources.sei.cmu.edu/asset_files/Presentation/2016_017_001_454683.pdf
 A consensual definition of microservices does not exist, but can be described as a development technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}, mentioning; improvements in development speed through parallel development, isolated deployment and continuous delivery (CD), scalability and potential parallelism, and independence in case of failure. Fiar points of criticism have also been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, security, and message formats.
 
 \subsection{Frontend and Backend}
@@ -60,7 +61,7 @@ TPS will provide two types of services based around the same data. Portal users 
 	\item destination: \{ gps: \{ lat: string, lng: string \} \}
 \end{enumerate}
 
-In both the price calculation and the portal data mutation case, required data are stored in one or more databases. The proposed database schema for TPS in figure \ref{fig:Schema} shows the general structure of the data that must be stored for TPS to be operational.
+In both the price calculation and the portal data mutation case, required data are stored in one or more databases. The proposed database schema for TPS in figure \ref{fig:Schema} shows the general structure of the data that must be stored for TPS in order to be operational.
 
 \begin{figure}[ht!]
 	\centering
@@ -69,37 +70,41 @@ In both the price calculation and the portal data mutation case, required data a
 	\label{fig:Schema}
 \end{figure}
 
+The Company and DaAppInstall entities are fundamental concepts that are found throughout the systems architecture. A company may have multiple dispatch application installations, hence the DaAppInstall abbreviation. To make the schema ready to be implemented, some assumptions were made, for example: the DaAppInstall entity contains a authentication token. This would enable a basic form of authentication and authorization to be present.
+
 A large portion of that data are only relevant for price calculations, and should therefore not be stored in existing databases. Data that are relevant to all systems may include but not be limited to:
 
+\begin{multicols}{2}
 \begin{enumerate}
 	\item Company
-				\begin{enumerate}
-					\item id
+	      \begin{enumerate}
+		      \item id
 		      \item name
 		      \item taxing / VAT
 		      \item Country
-					\item Application
-					\item Debtors
-					\item Rules
-					\item Discounts
-					\item ...
+		      \item Application
+		      \item Debtors
+		      \item Rules
+		      \item Discounts
+		      \item ...
 	      \end{enumerate}
 	\item Country
 	      \begin{enumerate}
 		      \item name
-					\item language
-					\item code
-					\item default VAT
-					\item currency
+		      \item language
+		      \item code
+		      \item default VAT
+		      \item currency
 	      \end{enumerate}
 	\item Appliation
-				\begin{enumerate}
-					\item id
-					\item name
-					\item Rules
-					\item Discounts
+	      \begin{enumerate}
+		      \item id
+		      \item name
+		      \item Rules
+		      \item Discounts
 	      \end{enumerate}
 \end{enumerate}
+\end{multicols}
 
 A decision must be made whether company and product information is stored in a shared database that can be accessed by a subset of system architecture components, or whether data should be synchronized in some fashion, or whether there is a possibility that enables dependencies to be eliminated all together.
 

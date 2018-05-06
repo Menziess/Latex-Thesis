@@ -12,7 +12,7 @@
 %
 \chapter{Encoding Locations}
 \section{Introduction}
-Encoding of locations has historically been of great importance, and is always being modernized. This chapter explains the general definition of locations, which types of locations are important for this project, and how to represent these locations so that they are universally interpretable.
+Encoding of locations has historically been of great importance, and is always being modernized. This chapter explains the general definition of locations, which types of locations are important for this project, and how to represent these locations so that they are universally interpretable and do not rely on a postal code system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A Brief History Of Geographic Locations
@@ -21,7 +21,7 @@ Encoding of locations has historically been of great importance, and is always b
 % - Who and what played a big role in navigation?
 %
 \section{A Brief History Of Geographic Locations}
-A location is roughly described as a place or position. Throughout history, various navigational techniques and tools like the sextant, nautical chart and marinner's compass were used, measuring the altitude of the North Star to determine the latitude $\phi$, in conjunction with a chronometer to determine the longitude $\lambda$ of a location on the Earth's surface. The combination of coordinates is a distinct encoding of a location.
+A location is roughly described as a place or position. Throughout history, various navigational techniques and tools like the sextant, nautical chart and marinner's compass were used, measuring the altitude of the North Star to determine the latitude $\phi$, in conjunction with a chronometer to determine the longitude $\lambda$ of a location on the Earth's surface. The combination of coordinates is a distinct encoding of a location. This particular system is still commonly used today.
 
 \begin{figure}[htbp!]
 	\centering
@@ -30,9 +30,7 @@ A location is roughly described as a place or position. Throughout history, vari
 	\label{fig:latlngsphere}
 \end{figure}
 
-The history of this encoding goes way back to when it was first proposed in the 3rd century BC by Eratosthenes. He invented the discipline of geography, and was known for also being the first person to calculate the circumference of the Earth with remarkable accuracy. Today, navigation relies on satellites that are capable of providing information to determine a location with a precision of 9 meters. Hybrid methods using cell towers, Wi-Fi Location Services, or the new Galileo global navigation sattelite system, provide tracking with a precision down to the metre range. These locations are ordinarily communicated using the same established latitude and longitude encoding. For a human being, it is not practical to exchange day-to-day locations as geographical coordinates. For that, addresses much more suitable, but can be ambiguous, imprecise, inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system.
-\mynote{What are the main differences between postal systems used around the globe?}
-In contrast to the geographic coordinate system, postal codes describe streets and areas of varying shapes and sizes. A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge of this project, how to communicate the location of a collection with points or areas of differing shapes and sizes that may overlap?
+The history of this encoding goes way back to when it was first proposed in the 3rd century BC by Eratosthenes. He invented the discipline of geography, and was known for also being the first person to calculate the circumference of the Earth with remarkable accuracy. Today, navigation relies on satellites that are capable of providing information to determine a location with a precision of 9 meters. Hybrid methods using cell towers, Wi-Fi Location Services, and the new Galileo global navigation sattelite system, provide tracking with a precision down to the metre range. These locations are ordinarily communicated using the same established latitude and longitude encoding. For a human being, it is not practical to exchange day-to-day locations as geographical coordinates. For that, addresses much more suitable, but can be ambiguous, imprecise, and inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system. This renders the legacy systems fixed pricing functionality useless. In contrast to the geographic coordinate system, postal codes describe streets and areas of varying shapes and sizes. A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge of this project, how to communicate the location of a collection with points or areas of differing shapes and sizes that may overlap?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Requisites of Location types
@@ -45,8 +43,49 @@ In contrast to the geographic coordinate system, postal codes describe streets a
 %   usefulness in the system?
 %
 \section{Requisites of Location Types}
-% Area, Polygon, Zipcode, Gps pair, Place, Collections
-While setting up a backlog for a project, a shared knowledge about the terminology used in the issues must be achieved in order to collaborate effectively. Words or symbols do not have an absolute meaning, and ambiguity of abstract linguistic terms should be elucidated. In Appendix \ref{appendix:pregame} an agreement was made on what the terms "area" and "point" meant. A point is a unique place expressed as a distinct coordinate pair. An area is a set of many points that is tightly packed together. No degree of granularity is necessary, the coordinates are continuous. The point and shape can be translated to the addresses and postal codes in the legacy pricing system respectively if a radius was assigned to the centroid of the shape that is formed by the boundaries of the street, neighbourhood, province or country. There are some downsides to using addresses and postal codes:
+While setting up a backlog for a project, a shared knowledge about the terminology used in the issues must be achieved in order to collaborate effectively. Words or symbols do not have an absolute meaning, and ambiguity of abstract linguistic terms should be elucidated. In section 3.2.1 of Appendix \ref{appendix:pregame}, an agreement was made on what the terms "area" and "point" meant. During the process of implementing TPS, the definitions of a location have been refined.
+
+\subsection{The Point}
+A point is a unique place expressed as a distinct coordinate pair. An address in the legacy system could be translated to a point. For example, the address that is tied to Schiphol arrival is: Aankomstpassage, 1118 AX Schiphol Centrum.
+The point that encodes this location is (52.308891, 4.760900). This location is contained in the set of all possible points on Earth, which could be expressed using set builder notation:
+\[P = \{(\phi,\lambda) \in \mathbb{R}^2 | -90 < \phi < 90, -180 < \lambda < 180 \}\]
+\[(52.308891, 4.760900) \in P\]
+A point itself can not be used to match whether another point is contained within it, because the probability of a match is too small. Only when decimals were disregarded to decrease the precision of a point it would be possible, in which case it would still not be usefull in this application, because the imprecise point would be a square.
+
+\subsection{The Area}
+An area is a set of three or more points that is tightly packed together with an infinite granularity. This definition allows for an area to have holes inside them, consist of other locations and contain other locations. The most useful property of this area is to check whether a point is contained within the area, or which areas contain a given point. A line, which could be constructed with this definition, would essentially be useless for containment matching for the same reasons as a point would be useless. This definition however, will not be of much practical use. For example, $P$ is an infinitely long set of coordinates, an area that represents the earths surface. If $\phi$ ranged between 0 and 90, the set sould describe all points located in the northern hemisphere, but would still be infinitely long. So, an area can be described as a subset of all points:
+\[A \subseteq P \]
+Checking whether a given point is contained by checking an infinite amount of real number pairs will take an infinite amount of time in the worst case scenario. For this reason, it is more practical to only describe the edges of an area using a polygon shape. For example: all postal codes of the city of Amsterdam start with a ten, the entire area of Amsterdam can be drawn as a big polygon, containing all the postal codes that start with a ten, connecting the edges.
+
+\subsection{Qatar}
+In reverse, this procedure would not work. Postal codes are not flexible or precise enough to describe area's the way polygons would. A big taxi company that makes use of taxiID's legacy system is located in Qatar. When a trip is booked in Qatar, the only information provided as a destination or departure location are geospatial coordinates
+
+\begin{figure}[htbp!]
+	\centering
+	\includegraphics[width=1\textwidth]{PostalCodes}
+	\caption[PostalCodes]{aaaaaaaa}
+	\label{fig:postalcodes}
+\end{figure}
+
+A polygon could even describe the area of Belize City, which doesn't
+
+- freedom of cutting amsterdam in half any way possible
+- site of gps
+- bermuda triangle
+
+if a radius was assigned to the centroid of the shape that is formed by the boundaries of the street, neighbourhood, province or country. For example:
+
+\begin{enumerate}[label*=\arabic*.]
+	% Area, Polygon, Zipcode, Gps pair, Place, Collections
+	\item Which location types matter for this project?
+	% Polygons overlapping0
+	\item Can a system be created that does not solely rely on postal codes?
+				% 3 words, gps, geospatial,
+	\item How can postal codes be abstracted to geospatial data while retaining the same usefulness in the system?
+				% Show queries with box and star
+	\item Which Database Management Systems (DBMS)s cover the location storage use cases for this project?
+\end{enumerate}
+There are some downsides to using addresses and postal codes:
 
 \begin{enumerate}
 	\item Addresses can be ambiguous.
@@ -57,7 +96,6 @@ While setting up a backlog for a project, a shared knowledge about the terminolo
 
 In contrast, spatial datatypes would provide unique and precise location definition that is uniform and universal. Many spatial database systems support a basic Geometry hierarchy of Points, Polygons, MultiPoint and MultiPolygon Classes, as described in the OGC~\cite{SFA} and ISO 19125~\cite{ISO-19125} standard, which are capable of mapping areas and points that are currently described by addresses and postal codes, and more. This answers the question whether postal codes can be abstracted to geospatial data, but has it retained its usefulness in the system?
 
-\mynote{talk about use cases and usefulness of geospatial data}
 \subsection{Location Related Scenarios}
 The specific criteria to which the database geospatial functions must adhere are:
 
@@ -69,8 +107,8 @@ The specific criteria to which the database geospatial functions must adhere are
 	\item users should be able to select predefined locations from external sources.
 \end{enumerate}
 
-The set of all possible points on Earth:
-\[P = \{\langle x, y \rangle | -90 < x < 90, -180 < y < 180 \}\]
+
+
 
 
 % The set of all possible lists of points, first and last point are equal
@@ -107,6 +145,8 @@ What 3 words, a multi-award winning global addressing system, bases 3m x 3m squa
 Geospatial
 
 Postal code
+
+http://geoawesomeness.com/discrete-global-grid-system-dggs-new-reference-system/
 
 \mynote{See if other people solved locations}
 
