@@ -20,9 +20,7 @@ In order to succesfully integrate a new system component in an existing system a
 % - Which architectural patterns fit in with the exising architecture?
 %
 \section{Architectural Patterns}
-The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture \cite{IBM-3-tier}. The bigger and smaller shapes in the figure represent large API's and services respectively. The orange colored services are used internally, the green ones can be used by other companies. The smaller services adhere to the pattern that is called service-oriented architecture (SOA), where application components provide services over a network typically.
-
-Developers have carefully constructed the components that comprise the system architecture, designing their relations, taking evolution of the architecture into account. This design is to be respected and utilized in a way that does not hinder the planned evolution.
+The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture \cite{IBM-3-tier}. The bigger and smaller shapes in the figure represent large API's and smaller services respectively. The orange colored services are used internally, the green ones can be used by other companies. The smaller services adhere to the pattern that is called service-oriented architecture (SOA), where application components provide services over a network typically.
 
 % ! indicates that some restrictions should be ignored
 % h indicates that the float is allowed to be placed inline
@@ -37,23 +35,14 @@ Developers have carefully constructed the components that comprise the system ar
 	\label{fig:Architecture}
 \end{figure}
 
-\subsection{Monoliths and Microservices}
-Monoliths are large single upright blocks of stone, especially shaped into or serving as a pillar or monument. In the context of computer softare, a monolithic system may have different meanings. Rod Stephens captures the meaning of a monolithic architecture quite broadly: "In a monolithic architecture, a single program does everything. It displays the user interface, accesses data, processes customer offers, prints invoices, launches missiles, and does whatever else the application needs to do" in \cite{rod-BSE}.
+\subsection{Monoliths}
+Monoliths are large single upright blocks of stone, especially shaped into or serving as a pillar or monument. In the context of computer softare, a monolithic system may have different meanings. Rod Stephens captures the meaning of a monolithic architecture quite broadly: "In a monolithic architecture, a single program does everything. It displays the user interface, accesses data, processes customer offers, prints invoices, launches missiles, and does whatever else the application needs to do" in \cite{rod-BSE}. In general, a monolith describes a software application which is designed without modularity. The bigger shapes in figure \ref{fig:Architecture} can be classified as monoliths. Even though the frontend is separated in some cases, it fits the description most narrowly. Integration of TPS could be achieved by implementing TPS as a component of a monolith. What logically follows is either duplication or dependence between larger systems. This  contradicts an important principle of software engineering; don't repeat yourself (DRY), or limits scalability and indedpendence of deployment. The legacy system has implemented its price calculation system in this manner, now facing difficulties of expanding the functionality to new projects. If the previous price calculation system was implemented as a service, it could have been reusable or deployable as a second separate price calculation system for YDA.
 
-\subsection{Functional Decomposition}
+\subsection{Microservices}
+A consensual definition of microservices does not exist, but can be described as a develpment technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}. Fiar points of criticism have also been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, and message formats. As with most technological decisions, whether a microservice is desired depends on the problem that it meant to solve. When should a system be integrated or separated? It is a careful balancing between efficiency of satisfying dependencies keeping a separation of concern, and duplication of functionalities.
 
-What logically follows from implementing functionalities as components in monoliths is either duplication or dependence between larger systems. This  contradicts an important principle of software engineering; don't repeat yourself (DRY), or limits scalability and indedpendence of deployment.
-
-The legacy system has implemented its price calculation system in this manner, now facing difficulties of expanding the functionality to new projects. If the previous price calculation system was implemented as a microservice, it could have been reused or deployed as a second separate price calculation system for YDA. Fiar points of criticism have been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, and message formats. As with most technological decisions, whether a microservice is desired depends on the problem that it meant to solve. When should a system be integrated or separated? It is a careful balancing between efficiency of satisfying dependencies keeping a separation of concern, and duplication of functionalities.
-
-Integration of the backend would mean that the core system would contain the price calculation system as a component, separation of the backend would mean that the backend would be set up as a separate service. Integration of the frontend would mean that the DriverPortal would contain the views to manipulate information in the backend, separation of the frontend would mean that the views would be delivered from a separate service, or from within the backend service as a single project.
-
-Building the TPS frontend and backend into one single project would be in conflict with this three-tier pattern, which would not be desired unless the decision is made to provide the frontend as iframes.
-
-% \begin{itemize}
-% 	\item Integrating frontend into existing portal, creating new service for backend
-% 	\item Creating ser
-% \end{itemize}
+\subsection{Frontend and Backend}
+The requirements state that the frontend should be integrated in multiple portals. This would mean that separate views have to be developed for each portal, or the views should be provided to the portals via iframes, or some similar technique. In the last case, it may be benificial to combine the frontend and backend in the same project structure. This would be in conflict with this three-tier pattern, which is not desired in respect to the evolution of the system architecture. Integration of the backend would mean that the core system should contain the price calculation system as a component, and separation of the backend would mean that the backend would be set up as a separate service. Possibilities of separation and integration of the frontend and the backend are another aspect that has to be taken into account before implementation of TPS.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Accessing Necessary Data
@@ -71,30 +60,41 @@ TPS will provide two types of services based around the same data. Portal users 
 	\item destination: \{ gps: \{ lat: string, lng: string \} \}
 \end{enumerate}
 
-In both the price calculation and the portal data mutation case, required data are stored in one or more databases. The proposed database schema for TPS in Image 4.7.1. of Appendix \ref{appendix:pregame} shows the general structure of the data that must be stored for TPS to be operational. A large portion of that data are only relevant for price calculations, and should therefore not be stored in existing databases. Data that are relevant to all systems may include but not be limited to:
+In both the price calculation and the portal data mutation case, required data are stored in one or more databases.
+The proposed database schema for TPS in Image 4.7.1. of Appendix \ref{appendix:pregame} shows the general structure of the data that must be stored for TPS to be operational.
+A large portion of that data are only relevant for price calculations, and should therefore not be stored in existing databases. Data that are relevant to all systems may include but not be limited to:
 
 \begin{enumerate}
 	\item Company
-	      \begin{enumerate}
+				\begin{enumerate}
+					\item id
 		      \item name
-		      \item Country
 		      \item taxing / VAT
-		      \item Application
+		      \item Country
+					\item Application
+					\item Debtors
+					\item Rules
+					\item Discounts
+					\item ...
 	      \end{enumerate}
 	\item Country
 	      \begin{enumerate}
 		      \item name
-		      \item language
-		      \item default VAT
+					\item language
+					\item code
+					\item default VAT
+					\item currency
 	      \end{enumerate}
 	\item Appliation
-	      \begin{enumerate}
-		      \item name
+				\begin{enumerate}
+					\item id
+					\item name
+					\item Rules
+					\item Discounts
 	      \end{enumerate}
 \end{enumerate}
 
-A decision must be made whether company and product information is stored
-
+A decision must be made whether company and product information is stored in a shared database that can be accessed by a subset of system architecture components, or whether data should be synchronized in some fashion, or whether there is a possibility that enables dependencies to be eliminated all together.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Authentication and Authorization
@@ -102,10 +102,7 @@ A decision must be made whether company and product information is stored
 % - How can authentication between services be implemented or improved?
 %
 \section{Authentication and Authorization}
-% Current implementation
-
-
-Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and has a naturally modular structure. But authentication and authorization must be handled by the microservice itself, unless state is shared amongst services. In the current system architecture, different services implement different authentication methods, store different pieces of information of different users. Authorization is managed by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. For example: company information, application information, and user information is all sent in separate headers. When the amount of services that are added to the architecture increases, the mount of information that is no longer centralized increases with it. Mobile applications should be able to make requests, just like the portals that are to be developed. But portal users make use of the microservice in a different way. Mobile apps merely request prices of products, based on the rules that group admins define through the portal. To make sure that only the portal users have the right to mutate their data, users have to be authenticated and authorized within the microservice. Identity management becomes a problem if data duplication is not desired. If a user makes a direct request to the microservice, the credentials have to be compared to user data in a database. To prevent duplication, the microservice could be connected to the database that is used by the core system. But this makes the microservice less decoupled, and directly contradicts the desire to separate concerns. Four examples demonstrate this problem:
+Mobile applications should be able to make requests, just like the portals that are to be developed, but portal users and mobile app users consume microservices in different ways. Mobile apps merely request prices of products, based on the rules that group admins define through the portal. To make sure that only the portal users have the right to mutate their data, users have to be authenticated and authorized within the microservice. Identity management becomes a problem if data duplication is not desired. If a user makes a direct request to the microservice, the credentials have to be compared to user data in a database. To prevent duplication, the microservice could be connected to the database that is used by the core system. But this makes the microservice less decoupled, and directly contradicts the desire to separate data dependencies as described in the previous section. Four examples demonstrate this problem:
 
 \begin{itemize}
 	\item Example 1: The microservice authenticates and authorizes users all by itself, managing sessions and storing user data in its database.
@@ -115,6 +112,12 @@ Each microservice is responsible for managing and containing state to enable use
 \end{itemize}
 
 In the first example, the microservice seems to work independently, because it has knowledge about the users identity without making requests to adjacent systems, or connecting to external databases. But this is not true. If data about the user is mutated in the core system, the microservice needs to be notified or synced. This greatly hinders scaling and makes it harder to keep data consistent. Example two solves the inconsistency part by connecting to the central database that holds user data, but contradicts the strive for encapsulation.
+
+\subsection{The User}
+In the legacy system architecture, different services implement different authentication methods, store different pieces of information of different users. Authorization is managed by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. For example: company information, application information, and user information is all sent in separate headers. When the amount of services that are added to the architecture increases, the mount of information that is no longer centralized increases with it.
+
+\subsection{Statelesness}
+Each microservice is responsible for managing and containing state to enable users who would like to use the system to be authenticated and authorized. Advantages of a microservice are the fact that a microservice is a self-contained and has a naturally modular structure. But authentication and authorization must be handled by the microservice itself, unless state is shared amongst services.
 
 \subsection{JSON Web Tokens}
 Example three entirely removes the database connection to any user data. This is possible when a JSON Web Token (JWT) is used. A JWT may be signed with a cryptographic algorithm or even a public/private key pair using RSA. After the user enters valid credentials, the core system validates the credentials by comparing them with user data in the database. The core system signs a token that with a secret that is known by the microservice. The token consists of three parts, separated by a fullstop. The first part (header) of the token contains information about the hashing algorithm that was used to encrypt the payload. This part is Base64Url encoded. The payload itself contains information stored in JSON format:
