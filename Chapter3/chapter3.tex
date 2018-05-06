@@ -12,7 +12,7 @@
 %
 \chapter{System Architecture}
 \section{Introduction}
-In order to succesfully integrate a new system component in an existing system architecture, flows of information must be aligned with adjacent system components, so that data dependencies of the new component are satisfied, and expected functionalities can be provided in return. This chapter explains which important aspects dictate the systems architecture to implement TPS.
+In order to succesfully integrate a new system component in an existing system architecture, flows of information must be aligned with adjacent system components, so that data dependencies of the new component are satisfied, and expected functionalities can be provided in return. This chapter explains which important aspects dictate the systems architecture to implement TPS, taking quality metrics into account. ISO/IEC 25010 is the latest objective standard for systems and software engineering, providing a common understanding of software quality characteristics \cite{iso-25010}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Architectural Patterns
@@ -20,7 +20,7 @@ In order to succesfully integrate a new system component in an existing system a
 % - Which architectural patterns fit in with the exising architecture?
 %
 \section{Architectural Patterns}
-The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture \cite{IBM-3-tier}. The bigger and smaller shapes in the figure represent large API's and smaller services respectively. The orange colored services are used internally, the green ones can be used by other companies. The smaller services adhere to the pattern that is called service-oriented architecture (SOA), where application components provide services over a network typically.
+The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture as described in \cite{IBM-3-tier}. The bigger and smaller shapes in the figure represent large API's and smaller services respectively. The orange colored services are used internally, the green ones can be used by other companies. The smaller services adhere to the pattern that is called service-oriented architecture (SOA), where application components provide services over a network typically.
 
 % ! indicates that some restrictions should be ignored
 % h indicates that the float is allowed to be placed inline
@@ -36,10 +36,10 @@ The current system architecture consists of three API's and nine services that c
 \end{figure}
 
 \subsection{Monoliths}
-Monoliths are large single upright blocks of stone, especially shaped into or serving as a pillar or monument. In the context of computer softare, a monolithic system may have different meanings. Rod Stephens captures the meaning of a monolithic architecture quite broadly: "In a monolithic architecture, a single program does everything. It displays the user interface, accesses data, processes customer offers, prints invoices, launches missiles, and does whatever else the application needs to do" in \cite{rod-BSE}. In general, a monolith describes a software application which is designed without modularity. The bigger shapes in figure \ref{fig:Architecture} can be classified as monoliths. Even though the frontend is separated in some cases, it fits the description most narrowly. Integration of TPS could be achieved by implementing TPS as a component of a monolith. What logically follows is either duplication or dependence between larger systems. This  contradicts an important principle of software engineering; don't repeat yourself (DRY), or limits scalability and indedpendence of deployment. The legacy system has implemented its price calculation system in this manner, now facing difficulties of expanding the functionality to new projects. If the previous price calculation system was implemented as a service, it could have been reusable or deployable as a second separate price calculation system for YDA.
+Monoliths are large single upright blocks of stone, especially shaped into or serving as a pillar or monument --- almost describing a single tiered software application. In the context of computer software, a monolithic system may have different definitions. Rod Stephens captures the meaning of a monolithic architecture quite broadly: "In a monolithic architecture, a single program does everything. It displays the user interface, accesses data, processes customer offers, prints invoices, launches missiles, and does whatever else the application needs to do" in \cite{rod-BSE}. In general, a monolith describes a software application which is designed without modularity. The bigger shapes in figure \ref{fig:Architecture} can be classified as monoliths. Even though the frontend is separated in some cases, it fits the description most accurately. Integration of TPS could be achieved by implementing TPS as a component of a monolith. What logically follows is either duplication, which contradicts an important principle of software engineering; don't repeat yourself (DRY), or dependencies between larger systems, limiting scalability and independence of deployment. The legacy system has demonstrated this issue because it has its price calculation system in this manner, now facing difficulties of providing the price calculation functionality to new projects. If the previous price calculation system was implemented as a service, it could have been reused or redeployed as a second separate price calculation system for YDA.
 
 \subsection{Microservices}
-A consensual definition of microservices does not exist, but can be described as a develpment technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}. Fiar points of criticism have also been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, and message formats. As with most technological decisions, whether a microservice is desired depends on the problem that it meant to solve. When should a system be integrated or separated? It is a careful balancing between efficiency of satisfying dependencies keeping a separation of concern, and duplication of functionalities.
+A consensual definition of microservices does not exist, but can be described as a development technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}, mentioning; improvements in development speed through parallel development, isolated deployment and continuous delivery (CD), scalability and potential parallelism, and independence in case of failure. Fiar points of criticism have also been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, security, and message formats.
 
 \subsection{Frontend and Backend}
 The requirements state that the frontend should be integrated in multiple portals. This would mean that separate views have to be developed for each portal, or the views should be provided to the portals via iframes, or some similar technique. In the last case, it may be benificial to combine the frontend and backend in the same project structure. This would be in conflict with this three-tier pattern, which is not desired in respect to the evolution of the system architecture. Integration of the backend would mean that the core system should contain the price calculation system as a component, and separation of the backend would mean that the backend would be set up as a separate service. Possibilities of separation and integration of the frontend and the backend are another aspect that has to be taken into account before implementation of TPS.
@@ -60,8 +60,15 @@ TPS will provide two types of services based around the same data. Portal users 
 	\item destination: \{ gps: \{ lat: string, lng: string \} \}
 \end{enumerate}
 
-In both the price calculation and the portal data mutation case, required data are stored in one or more databases.
-The proposed database schema for TPS in Image 4.7.1. of Appendix \ref{appendix:pregame} shows the general structure of the data that must be stored for TPS to be operational.
+In both the price calculation and the portal data mutation case, required data are stored in one or more databases. The proposed database schema for TPS in figure \ref{fig:Schema} shows the general structure of the data that must be stored for TPS to be operational.
+
+\begin{figure}[ht!]
+	\centering
+	\includegraphics[width=1\textwidth]{Schema}
+	\caption[Schema]{Proposed Database Schema Design}
+	\label{fig:Schema}
+\end{figure}
+
 A large portion of that data are only relevant for price calculations, and should therefore not be stored in existing databases. Data that are relevant to all systems may include but not be limited to:
 
 \begin{enumerate}
@@ -178,15 +185,27 @@ Next to authentication, the gateway could optimize the endpoints so that no mult
 The different proposals explain the improvements they may bring over some system. But the advice given is not tied to this project, instead to the entire Dispatch API. It’s advised to have a constructive dialogue about the future of the company, and the way it’s planning to scale. One could put a API Gateway in front of a monolithic app to help with transitioning to a microservice-oriented app.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Authentication and Authorization
+% Suitability of Methods and Techniques
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - Which methods and technologies can be used to ensure suitability and
 %   improve maintainability and testability?
 %
-\section{Suitability of Methods and Technologies}
+\section{Suitability of Methods and Techniques}
 \mynote{Write chapter about methods and technologies}
 \begin{itemize}
 	\item Node JS, PHP, MongoDB, MySQL, Microservice, Loopback, Graph QL,
-	\item Slides and proposals
 	\item Mocha, Buddy-Works, Circle CI, Typescript, Chai, Functional Programming
 \end{itemize}
+
+
+As with most technological decisions, whether a microservice is desired depends on the problem that it meant to solve. When should a system be integrated or separated? It is a careful balancing between efficiency of satisfying dependencies keeping a separation of concern, and duplication of functionalities.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Conclusion
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - Which decisions could be made following the research in this chapter?
+%
+\section{Conclusion}
+Taking all the different aspects in this chapter into account, the advised architectural design of TPS comprises of integrated frontend views in each required portal using the associated available technologies, a separate NodeJS microservice with its own MongoDB database, Loopback as a framework to quickly implement functionalities using Typescript and a combination of OOP and FP, authentication via JWT, automated tests using mocha and chai, and continuous delivery and automated testing using Buddy-Works.
