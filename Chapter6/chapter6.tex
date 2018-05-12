@@ -45,29 +45,21 @@ At this point the system is fully operational, but company and daAppInstall info
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 4 - Expanding the Portal}
-Feedback was given by the product owner after each sprint, resulting into new requirements and modifications to requirements. A functionality was required that enabled the user to sort pricing rules and special rates (discounts), by dragging the rows in a table to the correct positions. Another requirement would enable products to be returned in the breakdown as 'on-meter' results. This meant that, whenever a destination or departure location was undefined, the system would return products without a price, so that the apps could assign a price later, but would still be aware of the available products.
-A view was added that displayed all apps of a company, and a detail page was added in which rules and discounts could be associated with those apps. This detail page was made in three iterations. The text of all pages were replaced by references to the localization api as seen in figure \ref{fig:fig:Architecture}.
+Feedback was given by the product owner after each sprint, resulting into new requirements and modifications to requirements. A functionality was required that enabled the user to sort pricing rules and special rates (discounts), by dragging the rows in a table to the correct positions. Whenever a priority changed, all subsequent rows needed to be updated to maintain a consistent prioritized list without duplicates. Another requirement would enable products to be returned in the breakdown as 'on-meter' results. This meant that, whenever a destination or departure location was undefined, the system would return products without a price, so that the apps could assign a price later, but would still be aware of the available products. A view was added that displayed all apps of a company, and a detail page was added in which rules and discounts could be associated with those apps. This detail page was created in three iterations. The titles and labels of all pages were replaced by references to the localization api for internationalization as seen in figure \ref{fig:Architecture}. Timeframe components were added to multiple views, in which hours per week could be specified between two dates.
 
-Thresholds
-
-Pricing rule priorities had to be draggable by the user, enabling ordering in a visual way.
-- thresholds continued
-- processing feedback
-- pricing rules overview, rules must be draggable to prioritize
-- priority must be maintained distinctly
-- app installations must be displayed
-- pricing rules and special rates must be enabled for specific app installs
-- allow on meter calculations
-- internationalization
-- timeframes
--
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Sprint 5 - Expanding the Portal
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Sprint 5 - Expanding the Portal}
+Thresholds, just like prioritized rules and discounts, had to be ordered, as they were independently embedded in multiple price entities that had to be synchronized consistently. A rule has pricing information for every product, and every product has many thresholds. Whenever a threshold property is mutated, every other threshold must be updated as well. Also no duplicates were allowed, and no empty price values were allowed inside the thresholds. Thresholds could independently be removed and added, where in the last case values would be copied from the last to the newly added threshold so that the user would not need to manually insert all values. The timeframes were expanded so that either hours per week were used to determine whether a rule should be triggered, or a time could be set to further restrict the begin and end date of the timeframes. Price estimations were added as a setting on all relations between all entities and rules, or discounts. Portal authentication was implemented so that a JWT was requested at the core system, the token stored in localstorage and used to communicate with TPS. The automatic call to generate synchronized company data was enabled for the core system, such that every time a company was created in the core system, it was also created in TPS. A locations overview was added that displayed a list of areas and points. The detail page for each location shows a map with the shape or point displayed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 5 - Locations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Sprint 5 - Expanding the Portal}
-Threshold prices
+\section{Sprint 6 - Locations}
+TBA
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Result
