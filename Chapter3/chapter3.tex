@@ -31,7 +31,7 @@ The current system architecture consists of three API's and nine services that c
 \begin{figure}[!htb]
 	\centering
 	\includegraphics[width=1\textwidth]{Architecture}
-	\caption[Architecture]{Current System Architecture provided by taxiID}
+	\caption[Current System Architecture]{Current System Architecture provided by taxiID}
 	\label{fig:Architecture}
 \end{figure}
 
@@ -66,7 +66,7 @@ In both the price calculation and the portal data mutation case, required data a
 \begin{figure}[ht!]
 	\centering
 	\includegraphics[width=1\textwidth]{Schema}
-	\caption[Schema]{Proposed Database Schema Design}
+	\caption[Database Schema]{Proposed Database Schema Design}
 	\label{fig:Schema}
 \end{figure}
 
@@ -162,27 +162,26 @@ Example four delegates managing user identity to a separate authentication servi
 \begin{figure}[ht!]
 	\centering
 	\includegraphics[width=.7\textwidth]{Auth1}
-	\caption[Architecture]{OAuth requests where tokens are verified by Auth Server}
+	\caption[oAuth 2.0]{OAuth requests where tokens are verified by Auth Server}
 	\label{fig:Auth1}
 \end{figure}
 \clearpage
 \begin{figure}[ht!]
 	\centering
 	\includegraphics[width=.7\textwidth]{Auth2}
-	\caption[Architecture]{OAuth with stateless JWT token requests}
+	\caption[Stateless JWT]{OAuth with stateless JWT token requests}
 	\label{fig:Auth2}
 \end{figure}
 \clearpage
 \begin{figure}[ht!]
 	\centering
 	\includegraphics[width=.7\textwidth]{Auth3}
-	\caption[Architecture]{API Gateway}
+	\caption[API Gateway]{API Gateway}
 	\label{fig:Auth3}
 \end{figure}
 \clearpage
 
 \subsection{API Gateway}
-
 Another common structure that allows services to be used by external agents is the API Gateway. It allows for a central middleware in which authentication and authorization is handled, where the microservices are shielded from public access, and all communication is established through the API Gateway [4].
 
 Next to authentication, the gateway could optimize the endpoints so that no multiple requests are needed from external agents to gather different types of resources. These calls could be made internally to the microservices behind the gateway. This also opens the possibility the freely change the microservices without changing the public endpoints exposed by the gateway, and even offers slow or instant transitions to different versions of microservices.
@@ -196,11 +195,11 @@ The different proposals explain the improvements they may bring over some system
 %   improve maintainability and testability?
 %
 \section{Suitability of Methods and Techniques}
-\mynote{Write chapter about methods and technologies}
-\begin{itemize}
-	\item Node JS, PHP, MongoDB, MySQL, Microservice, Loopback, Graph QL,
-	\item Mocha, Buddy-Works, Circle CI, Typescript, Chai, Functional Programming
-\end{itemize}
+Software Reliability is defined as the probability of an item to perform a required function under stated conditions for a specified period of time. New features often introduce bugs by adding functionalities that are broken, although the reliability of the existing functionalities may also be impacted because of changes in the existing code. To prevent units of code from malfunctioning, regression tests may be implemented to validate whether a unit still functions according to a set of conditions. Static and dynamic tests may be performed using the framework Mocha \cite{mocha} and the assertion library Chai \cite{chai}. On top of that, Microsoft’s new language Typescript could be used to replace Ecmascript, enabling type checking during development, boosting development velocity in the long run by preventing type related bugs from being introduced.
+
+
+% Node JS, PHP, MongoDB, MySQL, Microservice, Loopback, Graph QL,
+% Mocha, Buddy-Works, Circle CI, Typescript, Chai, Functional Programming
 
 
 As with most technological decisions, whether a microservice is desired depends on the problem that it meant to solve. When should a system be integrated or separated? It is a careful balancing between efficiency of satisfying dependencies keeping a separation of concern, and duplication of functionalities.
