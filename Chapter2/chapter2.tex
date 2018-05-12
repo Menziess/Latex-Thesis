@@ -30,7 +30,7 @@ A location is roughly described as a place or position. Throughout history, vari
 	\label{fig:latlngsphere}
 \end{figure}
 
-The history of this encoding goes way back to when it was first proposed in the 3rd century BC by Eratosthenes. He invented the discipline of geography, and was known for also being the first person to calculate the circumference of the Earth with remarkable accuracy. Today, navigation relies on satellites that are capable of providing information to determine a location with a precision of 9 meters. Hybrid methods using cell towers, Wi-Fi Location Services, and the new Galileo global navigation sattelite system, provide tracking with a precision down to the metre range. These locations are ordinarily communicated using the same established latitude and longitude encoding. For a human being, it is not practical to exchange day-to-day locations as geographical coordinates. For that, addresses much more suitable, but can be ambiguous, imprecise, and inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system. This forces the legacy system to support addresses for the fixed pricing functionality as well. In contrast to the geographic coordinate system, postal codes describe streets and areas of varying shapes and sizes. A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge of this project, how to communicate the location of a collection with points or areas of differing shapes and sizes that may overlap?
+The history of this encoding goes way back to when it was first proposed in the 3rd century BC by Eratosthenes. He invented the discipline of geography, and was known for also being the first person to calculate the circumference of the Earth with remarkable accuracy. Today, navigation relies on satellites that are capable of providing information to determine a location with a precision of 9 meters. Hybrid methods using cell towers, Wi-Fi Location Services, and the new Galileo global navigation sattelite system, provide tracking with a precision down to the meter range. These locations are ordinarily communicated using the same established latitude and longitude encoding. For a human being, it is not practical to exchange day-to-day locations as geographical coordinates. For that, addresses much more suitable, but can be ambiguous, imprecise, and inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system. This forces the legacy system to support addresses for the fixed pricing functionality as well. In contrast to the geographic coordinate system, postal codes describe streets and areas of varying shapes and sizes. A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge of this project, how to communicate the location of a collection with points or areas of differing shapes and sizes that may overlap?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Requisites of Location types
@@ -43,7 +43,7 @@ The history of this encoding goes way back to when it was first proposed in the 
 %   usefulness in the system?
 %
 \section{Requisite Location Types}
-While setting up a backlog for a project, a shared knowledge about the terminology used in the issues must be achieved in order to collaborate effectively. Words or symbols do not have an absolute meaning, and ambiguity of abstract linguistic terms should be elucidated. In section 3.2.1 of Appendix \ref{appendix:pregame}, an agreement was made on what the terms "area" and "point" meant. During the process of implementing TPS, the definitions of a location have been refined.
+While setting up a backlog for a project, a shared knowledge about the terminology used in the issues must be achieved in order to collaborate effectively. Words or symbols do not have an absolute meaning, and ambiguity of abstract linguistic terms should be elucidated. In section 3.2.1 of Appendix \ref{appendix:pregame}, an agreement was made on what the terms "area" and "point" meant. The MySQL documentation notes that "The term most commonly used is geometry, defined as a point or an aggregate of points representing anything in the world that has a location." in \cite{MySQL-Spat}. During the process of implementing TPS, the definitions of a location have been refined to represent a common and useful understanding.
 
 \subsection{The Point}
 A point is a unique place expressed as a distinct coordinate pair. An address in the legacy system could be translated to a point. For example, the address that is tied to Schiphol arrival is: Aankomstpassage, 1118 AX Schiphol Centrum.
@@ -74,16 +74,33 @@ All postal codes that start with a ten describe the city of Amsterdam, the entir
 
 When a trip is booked in the United Arab Emirates, the only information provided as a destination or departure location are geospatial coordinates and addresses. These addresses are compared with long lists of matching addresses in the legacy database, as previously described with postal codes. Addresses and postal code systems do not provide universally interpretable and precise encodings of locations, especially for the locations that matter for this project: points and areas. Addresses can be ambiguous, addresses and postal codes can be imprecise, postal codes are not uniform, and some countries do not have a postal code system. In contrast, polygons would provide unique and precise location definition that is uniform and universal. But postal codes and addresses have been useful in the legacy system. When moving to other encoding techniques, this usefulness must be preserved.
 
-\subsection{Location Matching}
-If the following statements are true for a given location encoding, the location encoding is useful and able to operate independently from the postal code and address systems.
+\subsection{Requirements for Location Matching}
+If the following statements are true for a given location encoding using the definitions of the Point and Area, the location encoding is useful and able to operate independently from the postal code and address systems.
 
-\begin{enumerate}
-	\item Every location is stored in a database as a single entity
-	\item Locations can consist of multiple locations (see figure \ref{fig:Amsterdam})
-	\item A deterministic predicate of whether a location is fully contained within a location is achievable
-	\item A deterministic method of finding all locations containing a single location can be used
-	\item A method of determining precedence of location in case of overlap must always yield one result, and discard all others
-\end{enumerate}
+\begin{table}[htbp!]
+	\centering
+	\begin{tabular}{l|l}
+		\toprule
+		Nr & Description \\
+		\midrule
+		1. & Every location is stored in a database as a single entity \\
+		\hline
+		2. & \makecell[l]{Locations can consist of multiple locations \\
+			(see figure \ref{fig:Amsterdam})} \\
+		\hline
+		3. & \makecell[l]{A deterministic predicate of whether a location is \\
+			fully contained within a location is achievable} \\
+		\hline
+		4. & \makecell[l]{A deterministic method of finding all locations \\
+			containing a single location can be used} \\
+		\hline
+		5. & \makecell[l]{A method of determining precedence of location in case \\
+			of overlap must always yield one result, and discard all others} \\
+		\bottomrule
+	\end{tabular}
+	\caption[Location Matching Requirements]{Location Matching Requirements}
+	\label{tab:location-matching-requirements}
+\end{table}
 
 \begin{figure}[htbp!]
 	\centering
@@ -91,7 +108,6 @@ If the following statements are true for a given location encoding, the location
 	\caption[Amsterdam]{Amsterdam - A single location contrived of multiple locations.}
 	\label{fig:Amsterdam}
 \end{figure}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Literature review
@@ -103,21 +119,11 @@ If the following statements are true for a given location encoding, the location
 % - 3 words, gps, geospatial
 %
 \section{Literature Review}
-Many spatial database systems support a basic Geometry hierarchy of Points, Polygons, MultiPoint and MultiPolygon Classes, as described in the OGC~\cite{SFA} and ISO 19125~\cite{ISO-19125} standard.
+Many spatial database systems support a basic Geometry hierarchy of Points, Polygons, MultiPoint and MultiPolygon Classes, as described in the OGC~\cite{SFA} and ISO 19125~\cite{ISO-19125} standard. These spatial datatypes would could be stored as single entities. The MultiPolygon class is able to support multiple polygons to be stored as a single entity. The standard provides containment predicate, and methods to distinguish larger locations from smaller ones, which could be used in precedence checks. Databases like MySQL and PostgreSQL provide similar functionalities that adhere to the OGC standard, while MongoDB has its own implementation. These functionalities can be seen as a straight forward approach in solving geometry based queries.
+What 3 words, a multi-award winning global addressing system, bases 3m x 3m squares, covering the planet, on a combination of three words. In their whitepaper: "Efficient and future-proof", CEO Chris Cheldrick explains how locations can be communicated more effectively by describing a three by three meter areas using three words \cite{w3w}. The what3words API offers functionalities that can find what3word geocodings near a specified latitude and longitude location. It is also able to find results within a clamped area, as documented in \cite{w3w-api}. This system could be used to retrieve area's as three words in a database with given clamp parameters, which could then be stored in the database as single entities. This system would solve the problem of having ambiguity in address or postal code systems, and it is also very accurate. But in order to provide complex polygon matching, a spatial database system is still required. If a radius was assigned to the centroid of the shape that is formed by the boundaries of the street, neighbourhood, province or country, the encoding could technically be defined as a what3words query. A combination of clustering of points around what3word encodings could provide a system that is far less accurate, but is usable.
 
-Clustering
-
-What 3 words, a multi-award winning global addressing system, bases 3m x 3m squares, covering the planet, on a combination of three words.
-
-If a radius was assigned to the centroid of the shape that is formed by the boundaries of the street, neighbourhood, province or country.
-
-Geospatial
-
-Postal code
-
+\mynote{Try to find if other people found solutions for determining precedence of polygon matches}
 http://geoawesomeness.com/discrete-global-grid-system-dggs-new-reference-system/
-
-\mynote{See if other people solved locations}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Database Prerequisites
