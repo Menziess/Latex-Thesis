@@ -63,7 +63,7 @@ At the equator, 1 degree is 111320m, so 0.000001 degrees is
 around 11cm. Six decimal places will be sufficient for location matching for this application. But even when reducing coordinates to having six decimal places, it would be impractical. For this reason, it is more realistic to only describe the rough edges of an area using a polygon shape. Instead of checking for a single point in a non-terminating iteration over all points in an area, a mathematical calculations could be used to check whether a unique point is contained within the polygon.
 
 \subsection{Postal Codes, Addresses, and Polygons}
-All postal codes that start with a ten describe the city of Amsterdam, the entire area of Amsterdam can be drawn as a big polygon containing all the postal codes that start with a ten. In reverse, this procedure would not work. If a polygon was drawn cutting Amsterdam in half diagonally, a single postal code pattern would never be flexible or precise enough to be able to describe the boundaries of the polygon. One big taxi company making use of taxiID's legacy system is located in the United Arab Emirates. This company would not be able to convert anything at all, because the United Arab Emirates does not have a postal code system to begin with.
+All postal codes that start with a ten describe the city of Amsterdam, the entire area of Amsterdam can be drawn as a big polygon containing all the postal codes that start with a ten. In reverse, this procedure would not work. If a polygon was drawn cutting Amsterdam in half diagonally, a single postal code pattern would never be flexible or precise enough to be able to describe the boundaries of the polygon. One big taxi company making use of taxiID's legacy system is located in the United Arab Emirates. This company would not be able to convert anything at all, because the United Arab Emirates does not have a postal code system to begin with. When a trip is booked in the United Arab Emirates, the only information provided as a destination or departure location are geospatial coordinates and addresses. These addresses are compared with long lists of matching addresses in the legacy database, as previously described with postal codes. Addresses and postal code systems do not provide universally interpretable and precise encodings of locations, especially for the locations that matter for this project: points and areas. Addresses can be ambiguous, addresses and postal codes can be imprecise, postal codes are not uniform, and some countries do not have a postal code system. In contrast, polygons would provide unique and precise location definition that is uniform and universal. But postal codes and addresses have been useful in the legacy system. When moving to other encoding techniques, this usefulness must be preserved.
 
 \begin{figure}[htbp!]
 	\centering
@@ -71,8 +71,6 @@ All postal codes that start with a ten describe the city of Amsterdam, the entir
 	\caption[PostalCodes]{Postal codes by country with amount of digits ranging from three digits (lightblue) to eight digits (darkgreen) and no postal code system (gray).}
 	\label{fig:postalcodes}
 \end{figure}
-
-When a trip is booked in the United Arab Emirates, the only information provided as a destination or departure location are geospatial coordinates and addresses. These addresses are compared with long lists of matching addresses in the legacy database, as previously described with postal codes. Addresses and postal code systems do not provide universally interpretable and precise encodings of locations, especially for the locations that matter for this project: points and areas. Addresses can be ambiguous, addresses and postal codes can be imprecise, postal codes are not uniform, and some countries do not have a postal code system. In contrast, polygons would provide unique and precise location definition that is uniform and universal. But postal codes and addresses have been useful in the legacy system. When moving to other encoding techniques, this usefulness must be preserved.
 
 \subsection{Requirements for Location Matching}
 If the following statements are true for a given location encoding using the definitions of the Point and Area, the location encoding is useful and able to operate independently from the postal code and address systems.
@@ -96,6 +94,8 @@ If the following statements are true for a given location encoding using the def
 		\hline
 		5. & \makecell[l]{A method of determining precedence of location in case \\
 			of overlap must always yield one result, and discard all others} \\
+		\hline
+		6. & \makecell[l]{Locations must be importable from external sources} \\
 		\bottomrule
 	\end{tabular}
 	\caption[Location Matching Requirements]{Location Matching Requirements}
@@ -132,7 +132,7 @@ http://geoawesomeness.com/discrete-global-grid-system-dggs-new-reference-system/
 %   cases for this project?
 %
 \section{Database Prerequisites}
-The database must be capable of determining whether a virtual perimeter contains a set of coordinates, more specifically, it must adhere to The Open Geospatial Consortium (OGC) Simple Feature Access ISO 19125-1 \cite{SFA} and ISO 19125-2 \cite{SFS}, including spatial data types, analysis functions, measurements and predicates for this requirement. The scenario presented in image \ref{fig:square} should be replicable.
+The database that is used must be able to determine whether a polygon contains a given point, and must be able to aggregate all points that are contained within a given polygon. The scenario presented in image \ref{fig:square} should be replicable.
 
 \begin{figure}[htbp!]
 	\centering
