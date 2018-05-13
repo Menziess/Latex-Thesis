@@ -68,7 +68,7 @@ All postal codes that start with a ten describe the city of Amsterdam, the entir
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=.8\textwidth]{Amsterdam}
-	\caption[Amsterdam]{Amsterdam - A single location contrived of multiple locations.}
+	\caption[Amsterdam]{Amsterdam - A single location comprised of multiple locations.}
 	\label{fig:Amsterdam}
 \end{figure}
 
@@ -145,12 +145,10 @@ The database that is used must be able to determine whether a polygon contains a
 	\label{fig:square}
 \end{figure}
 
-As contained in Appendix \ref{appendix:pregame}, this example provides a proof that a minimal requirement is satisfied, so that a list of candidate Database Management Systems could be constructed.
+As contained in Appendix \ref{appendix:pregame}, this example provides a proof that a minimal requirement is satisfied, so that a list of candidate Database Management Systems could be constructed. In all cases, a polygon is a list of coordinates that define a closed path, meaning that the first and last index contain identical points.
 
 \subsection{OpenGIS Compatible databases}
-MYSQL’s innate integrity is a good reason to opt for a full MYSQL database setup. MariaDB is a fork of MYSQL that performs better according to benchmarks, however they don’t always translate to real life situations. It’s easy to migrate from MYSQL to MariaDB, so choosing MYSQL at first could be preferable as an instance of MYSQL is already used at TaxiID. PostgreSQL offers a spatial database extender for that is OpenGIS compliant called PostGIS that adds support for geographic objects and location queries.
-
-All spatial data types inherit properties such as type and spatial reference identifier (SRID). For rigorous documentation, both PostGIS documentation \cite{PostGIS} and MYSQL documentation \cite{MySQL} could be consulted. When a generic geometry column, or point column is created, points can be inserted as shown in snippet \ref{lst:sql-insert-points}.
+MYSQL’s innate integrity is a good reason to opt for a full MYSQL database setup. MariaDB is a fork of MYSQL that performs better according to benchmarks, however they don’t always translate to real life situations. It’s easy to migrate from MYSQL to MariaDB, so choosing MYSQL at first could be preferable as an instance of MYSQL is already used at TaxiID. PostgreSQL offers a spatial database extender for that is OpenGIS compliant called PostGIS that adds support for geographic objects and location queries. All spatial data types inherit properties such as type and spatial reference identifier (SRID). For rigorous documentation, both PostGIS documentation \cite{PostGIS} and MYSQL documentation \cite{MySQL} could be consulted. When a generic geometry column, or point column is created, points can be inserted as shown in snippet \ref{lst:sql-insert-points}.
 
 \begin{lstlisting}[caption={Insert four points and one polygon in MySQL.}, label={lst:sql-insert-points}]
 	START TRANSACTION;
@@ -173,7 +171,6 @@ All spatial data types inherit properties such as type and spatial reference ide
 \end{lstlisting}
 
 It is evident that c is contained in p. To determine which points are contained in p, the function as seen in Snippet \ref{lst:sql-pts-in-poly} can be used, which returns the point with coordinates $[5, 5]$ as expected.
-
 
 \begin{lstlisting}[caption={Select points contained in polygon, and all polygons containing a point in MySQL.}, label={lst:sql-pts-in-poly}]
 	// All points contained in polygon
@@ -199,8 +196,18 @@ It is evident that c is contained in p. To determine which points are contained 
 		)
 \end{lstlisting}
 
+A multipolygon can be inserted using triple braces, indicating a collection of polygons to be inserted as seen in Figure \ref{lst:sql-multipolygon}.
+
+\begin{lstlisting}[caption={Insert one multipolygon in MySQL.}, label={lst:sql-multipolygon}]
+	START TRANSACTION;
+	# First and last point should be the same
+	SET @a = GeomFromText('MULTIPOLYGON(((1 1,2 2,3 3,1 1)),((5 5,6 6,8 8,5 5)))');
+	INSERT INTO multipolygon (multipolygon) VALUES (@a);
+	COMMIT;
+\end{lstlisting}
+
 \subsection{OpenGIS Incompatible databases}
-MongoDB doesn’t offer OpenGIS implementations but has geospatial query operators that may provide enough functionalities for current requirements \cite{MongoDB}. The argument for choosing one over the other depends on the vast differences between SQL and NoSQL, next to performance and extensiveness of geospatial features. The setup displayed in image \ref{fig:square} is recreated in MongoDB using queries shown in snippets \ref{lst:nosql-insert-points} and \ref{lst:nosql-pts-in-poly}.
+MongoDB doesn’t offer OpenGIS implementations but has geospatial query operators that may provide enough functionalities for current requirements \cite{MongoDB}. The argument for choosing one over the other depends on the vast differences between SQL and NoSQL, next to performance and extensiveness of geospatial features. The setup displayed in image \ref{fig:square} is recreated in MongoDB using queries shown in snippets \ref{lst:nosql-insert-points} and \ref{lst:nosql-pts-in-poly}. Geometry datatypes can be inserted as objects having a type and coordinates property. A polygon can be inserted in the same manner, having multiple points as a list instead of a single point.
 
 \begin{lstlisting}[caption={Insert four points and one polygon in MongoDB.}, label={lst:nosql-insert-points}]
 	db.point.insertMany([
@@ -213,13 +220,15 @@ MongoDB doesn’t offer OpenGIS implementations but has geospatial query operato
 	db.polygon.insert({
 		shape: {
 			type: "Polygon",
-			coordinates: [ [ [2.5, 5], [5, 7.5], [7.5, 5], [5, 2.5], [2.5, 5] ] ]
+			coordinates: [ [2.5, 5], [5, 7.5], [7.5, 5], [5, 2.5], [2.5, 5] ]
 		}
 	})
 
 	db.point.createIndex({ 'shape': '2dsphere' })
 	db.polygon.createIndex({ 'shape': '2dsphere' })
 \end{lstlisting}
+
+A method named $\$geoWithin$ can be used to return points that are contained within the polygon. Conversely, all polygons that contain a certain point can be queried using the $\$geoIntersects$ method as seen in \ref{lst:nosql-pts-in-poly}.
 
 \begin{lstlisting}[caption={Select points contained in polygon, and all polygons containing a point in MongoDB.}, label={lst:nosql-pts-in-poly}]
 	// All points contained in polygon
@@ -254,7 +263,24 @@ MongoDB doesn’t offer OpenGIS implementations but has geospatial query operato
 	})
 \end{lstlisting}
 
-Next to database solutions for this requirement, services exist that are capable of geofencing. Although these services may not be free, and the added dependencies restrict extensibility.
+In MongoDB, a multipolygon can be inserted using an extra pair of braces, as shown in \ref{lst:nosql-multipolygon}, while retaining the 'polygon' shape type.
+
+\begin{lstlisting}[caption={Insert one multipolygon in MongoDB.}, label={lst:nosql-multipolygon}]
+	db.polygon.insert({
+		shape: {
+			type: "Polygon",
+			coordinates: [ [ [2.5, 5], [5, 7.5], [7.5, 5], [5, 2.5], [2.5, 5] ] ]
+		}
+	})
+\end{lstlisting}
+
+\section{Overlapping Locations}
+Priority
+precedence
+polygon size
+arrival vs departure
+clustering around hotspots
+\mynote{Currently implementing solution}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Performance and Clustering Trade-offs
@@ -263,3 +289,10 @@ Next to database solutions for this requirement, services exist that are capable
 \section{Performance and Clustering Trade-offs}
 Agarwal and Rajan state that NoSQL take advantage of cheap memory and processing power, thereby handling the four V’s of big data more effectively,
 but lack the robustness over SQL databases in \cite{AGS}. The report dives deeper into spatial queries and concludes that their tests suggest that MongoDB performs better by an average factor of 10, which increases exponentially as the data size increases, but lack many spatial functions that OpenGIS supports. Although improvements have been made, as per \cite{MongoDB-Performance}. After the paper Schmid et al. 2015 \cite{SCS} was published. The team argues that clustering is much easier in MongoDB, which may be important in the future when the company grows. As the required functionalities exist in both SQL and NoSQL, it is beneficial to opt for MongoDB for its performance and alignment with the teams experience. Although if robustness is desired, or extra GIS functionalities required, SQL should be taken into consideration.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Conclusion
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Conclusion}
+Every point and area on earth can be described by geometric datatypes such as Polygons or MultiPolygons, yielding a consistent and universal solution of storing spatial data. This means that a new system does not have to rely on address and postal code data required by the legacy system. Some alternative encodings like what3words may be used to encode distinct points, but area's become quite a challenge in such systems. All physical locations located on the earths surface that were described by addresses and postal codes can be encoded by spatial datatypes. The multipolygon may be used to represent more complex areas like the city Amsterdam as seen in \ref{fig:Amsterdam}. The OGC standard offers a mature and thorough set of geospatial features that MongoDB does not support. If performance and expandability are important, a MongoDB NoSQL database will result in the better choice. Otherwise, MySQL, MariaDB, PostgreSQL and many other database systems offer GIS features that adhere to this projects requirements. Overlapping areas in conflicting rules can be resolved by assigning priorities to rules. This enables users to reason about their pricing rules more easily, and makes the intent of these pricing rules more interpretable for other people.

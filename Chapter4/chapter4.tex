@@ -11,7 +11,39 @@
 %
 \chapter{Trip Price Calculation System}
 \section{Introduction}
-This chapter clarifies which information should comprise a price breakdown to reflect that of the legacy system, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed restrict the time and space dimensions of a price rule without blurring the straightforwardness of the system.
+In the previous chapter, options regarding information dependencies were discussed. This chapter clarifies which information should comprise a price breakdown to reflect that of the legacy system, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed should restrict the time and space dimensions of a price rule without blurring the straightforwardness of the system.
+
+OOP en FP mixen
+OOP voor grote structuur
+FP voor solide operaties
+SOLID
+Gang of Four
+Loose coupling high cohesion
+Async
+Strategy pattern
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Data Model
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{The System}
+The database schema desgin as shown in the previous chapter gives an inpression on the different pieces of information required to calculate a price. Such a schema provides a good insight in the relationships that different entities have, but may distract from the actual story that is happening within each calculation. In Figure \ref{fig:DataModel} a conceptual model can be seen having association and composition relations in UML notation. This model will be used to refer to throughout this chapter.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{DataModel}
+	\caption[DataModel]{Conceptual data model showing database entity relations.}
+	\label{fig:DataModel}
+\end{figure}
+
+To understand more about the structure of the system, a class diagram visualizes the most important components in \ref{fig:ClassDiagram}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{ClassDiagram}
+	\caption[Class Diagram]{Class diagram.}
+	\label{fig:ClassDiagram}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Breakdown
@@ -23,7 +55,6 @@ This chapter clarifies which information should comprise a price breakdown to re
 \section{Breakdown}
 To ensure a seamless transition from the legacy price calculation system to TPS, the response formats should be identical. Still an improvement, if profitable enough, could be taken into consideration. One requirement of the price breakdown states that the tax should be included, but as shown in Listing \ref{lst:legacy-breakdown} the included tax is part of the breakdown. Is it by mistake or design?
 
-\noindent\begin{minipage}{.45\textwidth}
 \begin{lstlisting}[caption={Legacy price breakdown}, label={lst:legacy-breakdown}]
 [
 	{
@@ -45,9 +76,7 @@ To ensure a seamless transition from the legacy price calculation system to TPS,
 	}
 ]
 \end{lstlisting}
-\end{minipage}
 
-\noindent\begin{minipage}{.45\textwidth}
 \begin{lstlisting}[caption={Improved price breakdown}, label={lst:new-breakdown}]
 [
 	{
@@ -73,7 +102,6 @@ To ensure a seamless transition from the legacy price calculation system to TPS,
 	...
 ]
 \end{lstlisting}
-\end{minipage}
 
 Two possible solutions were proposed having VAT included in the price. The first solution extracts the tax element from the breakdown, so that the sum of the breakdown would add up to the total price where VAT is included in the price as shown in Listing \ref{lst:new-breakdown}. As demonstrated in Appendix \ref{appendix:slides_2_breakdown}, a breakdown is easily constructed in four steps when VAT is included. Keep in mind that unlike the listings the prices in the proposal are not displayed in cents. The second solution maintains the legacy format, but has to recalculate the prices without VAT. This could have downsides unlike the first approach:
 
@@ -97,34 +125,94 @@ Next to the three dimensions of space, time will play a role in determining whet
 The legacy system takes a straight forward approach of storing time in a relational database. The begin and end of a window are stored in a record that is related to a parent timeframe entity. The timeframe has many windows that could contain a timestamp. It either finds one or many time windows that contain the timeframe. This approach covers all possibilities imaginable.
 
 \subsection{Bitmap}
-For this reason, a proposal was made to implement timeframes in a way that let users choose to describe each hour of the week, being stored as a bit map. Three implementations have been tested, where the bitstring offered the best outcome, as seen in \ref{appendix:slides_4}.
+For this reason, a proposal was made to implement timeframes in a way that let users choose to describe each hour of the week, being stored as a bit map. The windows could be decreased to half an hour, resulting in twice as many bits. Three implementations have been tested, where the bitstring format offered the best outcome, as seen in \ref{appendix:slides_4}. A timeframe is stored having two ISODates (international standard: ISO 8601), and a bitstring representing the schedule for which the insert statement is shown in Listing \ref{lst:new-timeframe}.
 
-\noindent\begin{minipage}{.45\textwidth}
-	\begin{lstlisting}[caption={Improved timeframe.}, label={lst:new-timeframe}]
-		db.Timeframe.insert({
-			startDate: new Date(2018, 4, 7),
-			endDate: new Date(2019, 4, 7),
-			weekSchedule:
-			 "001101000110011011000011 //m
-			 011010110011000010111100  //t
-			 101010101110100011111000  //w
-			 111110011111011100100001  //t
-			 101000000010111011100100  //f
-			 110010000001000010101101  //s
-			 010111101000000101001110" //s
-		})
-	\end{lstlisting}
-\end{minipage}
+\begin{center}
+	\noindent\begin{minipage}{.45\textwidth}
+		\begin{lstlisting}[caption={Improved timeframe.}, label={lst:new-timeframe}]
+db.Timeframe.insert({
+	startDate: new Date(2018, 4, 7),
+	endDate: new Date(2019, 4, 7),
+	weekSchedule:
+		"001101000110011011000011
+		011010110011000010111100
+		101010101110100011111000
+		111110011111011100100001
+		101000000010111011100100
+		110010000001000010101101
+		010111101000000101001110"
+})
+\end{lstlisting}
+	\end{minipage}
+\end{center}
 
-As stated, a string is a flexible datatype. Using a regex to determine whether a bit is one, is a very safe operation.
-% A string is a very flexible datatype. 2. Using a regex in a query makes checking multiple bits in the string relatively easy, and enables different values next to 0 and 1. 3. It also makes querying the data really stable, as the query will silently fail if the content of the data is not of expected length or value. 4. Performance is not an issue if the regex column is indexed, and when prefix expressions (/^/) are used: docs.mongodb.com/manual/reference/operator/query/regex/#index-use 5. Another advantage is freedom and scalability. If multiple values, or ranges need to be matched, a simple regex modification is sufficient in solving that
+A string is a very flexible datatype. Using a regex in a query makes checking multiple bits in the string relatively easy, and enables different values next to 0 and 1. 3. A bitarray would only allow for 0 and 1 to be used. A bitstring also makes querying the data really stable, as the query will simply not match if the content of the data is not of expected length or value. Performance is not an issue if the regex column is indexed, and when prefix expressions $(/^/)$ are used, as per documentation in \cite{MongoDB-Regex}. As noted before, the system is easy to scale if existing data can be migrated to deal with a new amount of bits, or new character usage over bits.
+
+\begin{lstlisting}[caption={Opening timeframe.}, label={lst:open-timeframe}]
+/**
+ * Date object days start at sunday, in order let monday be
+ * index 0, decrease the index by one, but limit numbers
+ * in the range of [0, 7).
+ */
+const startMonday = (d: number) => (d - 1) % 7;
+
+/**
+ * Creates a regex that spreads bits across hours of each
+ * day of the week.
+ */
+export const regexFromDate = (date: Date) => {
+
+	const skip =
+		// Day of the week multiplied by hours a day
+		startMonday(date.getDay()) * 24
+		// Hour of the day
+		+ date.getUTCHours();
+
+	return { skip, timeRegex: new RegExp(`^.{${skip}}1`) };
+};
+\end{lstlisting}
+
+Skip is an integer representing the number of bits that should be skipped to get to the moment represented by the date. So in order to get 11 AM - 12 AM in the presented schedule, 3 * 24 skips + 11 skip = 83 skips are to be made to find the digit 1 on thursday.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Data Model
+% Google
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - What was proposed as a solution to store a week schedule in a database?
 %
-\section{Data Model}
+\section{Distance and Duration}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Google
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - What was proposed as a solution to store a week schedule in a database?
+%
+\section{Aggregate Query}
+\subsection{Identification}
+companyId daAppInstallId
+\subsection{Links}
+polymorphic hasthroughmany relation
+\subsection{Country}
+\subsection{Rules}
+\subsection{Discounts}
+\subsection{Products}
+\subsection{Prices}
+\subsection{Sorting and Formatting}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Google
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - What was proposed as a solution to store a week schedule in a database?
+%
+\section{Price Calculation Types}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Google
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - What was proposed as a solution to store a week schedule in a database?
+%
+\section{Threshold Calculations}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Logical Flow
@@ -139,32 +227,26 @@ As stated, a string is a flexible datatype. Using a regex to determine whether a
 - extracting companyId and daAppInstallId
 - extracting departure and destination coordinates
 - using directions service to aqquire distance and duration
-	- converting to minutes and km
+- converting to minutes and km
 - executing query
-	- find daAppInstall model with matching companyId and daAppInstallId
-	- find company country
-	- find matching discounts ordered by priority
-	  - enabled
-		- timeframes
-		- departure
-		- destination
-	- find matching rules ordered by priority
-	  - enabled
-		- timeframes
-		- departure
-		- destination
-	- get pricing information of all products for highest priority rule
-
-
-
-
-
-
-
-
-
-
-
-
+- find daAppInstall model with matching companyId and daAppInstallId
+- find company country
+- find matching discounts ordered by priority
+- enabled
+- timeframes
+- departure
+- destination
+- find matching rules ordered by priority
+- enabled
+- timeframes
+- departure
+- destination
+- get pricing information of all products for highest priority rule
 
 A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute is a very specific problem that must be split up into sizable categories. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be autonomous in that regard.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Conclusion
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Conclusion}
