@@ -27,8 +27,6 @@ The object-oriented programming (OOP) paradigm offers many ways to keep a system
 	\label{fig:ClassDiagram}
 \end{figure}
 
-The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. As discussed in the previous chapter, Typescript plays an important role in mixing OOP and FP together.
-
 \mynote{Expand on
 	interfaces,
 	static strong types,
@@ -43,7 +41,7 @@ The Price object is composed of a Directions and a Calculator Class, both of whi
 	Strategy pattern,
 }
 
-The database schema desgin as shown in the previous chapter gives an inpression on the different pieces of information required to calculate a price. Such a schema provides a good insight in the relationships that different entities have, but may distract from the actual story that is happening within each calculation. In Figure \ref{fig:DataModel} a conceptual model can be seen having association and composition relations in UML notation. This model will be used to refer to throughout this chapter.
+The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. The entire class diagram should adhere to Uncle Bob's SOLID principles. State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. As discussed in the previous chapter, Typescript plays an important role in mixing OOP and FP together. The database schema desgin as shown in the previous chapter gives an inpression on the different pieces of information required to calculate a price. Such a schema provides a good insight in the relationships that different entities have, but may distract from the actual story that is happening within each calculation. In Figure \ref{fig:DataModel} a conceptual model can be seen having association and composition relations in UML notation. This model will be used to refer to throughout this chapter.
 
 \begin{figure}[H]
 	\centering
@@ -51,76 +49,6 @@ The database schema desgin as shown in the previous chapter gives an inpression 
 	\caption[DataModel]{Conceptual data model showing database entity relations.}
 	\label{fig:DataModel}
 \end{figure}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Breakdown
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - What should be included in the price breakdown?
-% - VAT
-% - Cents
-%
-\section{Breakdown}
-The final result of the trip price calculation is a breakdown for every requested product. For example: if the mobile application requests prices for 'saloon' and 'limo' vehicle types, the response will at most contain an array with two breakdowns, for saloon and limo products. This chapter starts with the result to make obvious what every step in the process is working towards. To ensure a seamless transition from the legacy price calculation system to TPS, the response formats should be identical. Still an improvement, if profitable enough, could be taken into consideration. One requirement of the price breakdown states that the tax should be included, but as shown in Listing \ref{lst:legacy-breakdown} the included tax is part of the breakdown. Is it by mistake or design?
-
-\begin{lstlisting}[caption={Legacy price breakdown}, label={lst:legacy-breakdown}]
-[
-	{
-		"vehicleType": "saloon",
-		"maxPassengers": "4",
-		"price": {
-			"currency": "EUR",
-			"total": 850,
-			"breakdown": {
-				"route": 802,
-				"tax": 48,
-				"toll": 0,
-				"parking": 0,
-				"waiting": 0,
-				"discount": 0
-			}
-		},
-		"fixedPrice": "true"
-	}
-]
-\end{lstlisting}
-
-Two possible solutions were proposed having VAT included in the price. The first solution extracts the tax element from the breakdown, so that the sum of the breakdown would add up to the total price where VAT is included in the price as shown in Listing \ref{lst:new-breakdown}. As demonstrated in Appendix \ref{appendix:slides_2_breakdown}, a breakdown is easily constructed in four steps when VAT is included.
-
-\begin{lstlisting}[caption={Improved price breakdown}, label={lst:new-breakdown}]
-[
-	{
-		"vehicleType": "estate",
-		"maxPassengers": 4,
-		"isEstimated": false,
-		"price": {
-			"breakdown": {
-				"route": 8300,
-				"toll": 0,
-				"parking": 0,
-				"waiting": 0,
-				"discount": -1650
-			},
-			"currency": "EUR",
-			"total": 6650,
-			"tax": {
-				"amount": 400,
-				"percentage": 6
-			}
-		}
-	},
-	...
-]
-\end{lstlisting}
-
-Keep in mind that unlike the listings the prices in the proposal are not displayed in cents. The second solution maintains the legacy format, but has to recalculate the prices without VAT. This could have downsides unlike the first approach:
-
-\begin{enumerate}
-	\item If an error is detected in the calculation, it is hard to trace back which components contributed to the total VAT. This would be even harder when each component uses its own VAT percentage.
-	\item It takes extra steps to calculate the price of each component excluding VAT.
-	\item Rounding the individual components could result in a sum that is not equal to the total displayed in the breakdown.
-\end{enumerate}
-
-The first proposal is chosen to be implemented, where the flag 'fixedPrice' is replaced by the 'isEstimated' flag to clearly reflect its purpose.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Locations
@@ -205,34 +133,33 @@ The directions class will provide an interface to retrieve trip related data. Th
 	\label{fig:Calculation}
 \end{figure}
 
-When the user is authenticated, the system immediately requests the distance and duration of a ride by providing the departure and destination locations to the directions service. The class that is responsible for fetching these results is provided to the Price class. This class will perform the price calculation for each rule that is matched in the database. These asynchronous actions join at the start of the breakdown method of the Price class. If all steps were succesfull, pricing rules were fetched for each requested product, discounts were either available or not, and the directions service is ready to provide the distance and duration of a ride.
+When the user is authenticated, the system immediately requests the distance and duration of a ride by providing the departure and destination locations to the directions service. The directions service is provided to a Price class instantiation. The Price class waits for matched rules, upon which it will perform the price calculation. If all steps were succesfull, pricing rules were fetched for each requested product, discounts were either available or not, and the directions service is ready to provide the distance and duration of a ride.
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % Discounts
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %
-% \subsection{Discounts}
-% The price calculation matches rules and discounts separately. Discounts were associated with rules in the legacy system, eliminating the amount of combinations of prices with or without discounts. A discount was either always active, or it was not. Having separation between the two enables users to define other locations and timeframes to both of them separately.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Discounts %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\subsection{Discounts}
+The price calculation matches rules and discounts separately. Discounts were associated with rules in the legacy system, eliminating the amount of combinations of prices with or without discounts. A discount was either always active, or it was not. Having separation between the two enables users to define other locations and timeframes to both of them separately.
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % Rules
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %
-% \subsection{Rules}
-% Rules and discounts are queried for each requested product as shown in step three and five of Figure \ref{fig:Calculation}. MongoDB’s aggregation framework allows documents to be aggregated in a multi-staged pipeline.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Rules
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\subsection{Rules}
+\mynote{Changes a lot, needs final version}
+Rules and discounts are queried for each requested product as shown in step three and five of Figure \ref{fig:Calculation}. MongoDB’s aggregation framework allows documents to be aggregated in a multi-staged pipeline.
 
-% \subsubsection{Identification}
-% The first step in the pipeline matches all DaAppInstall entities with the identifiers sent along in the JWT payload: companyId and daAppInstallId.
-% \subsubsection{Links}
-% As shown in Figure \ref{fig:DataModel}, the DaAppInstall entities have multiple Links; ruleLinks and discountLinks. These links store data in a polymorphic hasManyThrough relation.
-% \subsubsection{Country}
-% Each company has a country, used to determine the default VAT and currency.
-% \subsubsection{Rules}
-% All documents are filtered based on geolocation and timeframes.
-% \subsubsection{Prices}
-% Prices are retrieved for each product that is associated with the matched rule. DynamicPrices and related thresholds, and FixedPrices and related thresholds.
-% \subsubsection{Sorting and Formatting}
-% The final step in the aggregate sorts and formats the results so that the Price class can calculate a price breakdown for each result.
+\subsubsection{Identification}
+The first step in the pipeline matches all DaAppInstall entities with the identifiers sent along in the JWT payload: companyId and daAppInstallId.
+\subsubsection{Links}
+As shown in Figure \ref{fig:DataModel}, the DaAppInstall entities have multiple Links; ruleLinks and discountLinks. These links store data in a polymorphic hasManyThrough relation.
+\subsubsection{Country}
+Each company has a country, used to determine the default VAT and currency.
+\subsubsection{Rules}
+All documents are filtered based on geolocation and timeframes.
+\subsubsection{Prices}
+Prices are retrieved for each product that is associated with the matched rule. DynamicPrices and related thresholds, and FixedPrices and related thresholds.
+\subsubsection{Sorting and Formatting}
+The final step in the aggregate sorts and formats the results so that the Price class can calculate a price breakdown for each result.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Price Calculation Types
@@ -314,35 +241,74 @@ public static recursiveThreshold(
 The Typescript type definitions reveal that calculation is of type Function, and thresholds is of type threshold[]. The base case returns the calculation with an undefined first argument. This forces the calculation method to use its default value, which is actually the normal kilometer or minute price. The base case will have the value of the first threshold that is met, assuring that the passenger pays the normal price up until that point. If the base case is not satisfied, the function checks whether the cascading boolean is true. This boolean determines whether each threshold should be evaluated, or only the last one. In case of the fixed price calculation, only the last threshold fixed price will be computed. But for the dynamic prices, each step has to be added to the total amount. Finally, the calculation is made using the next threshold,  and the recusive call is summed up with the calculated price. It is worth noting that even though this function is static and does not modify instance data, it is impure, leaving the passed thresholds array empty at the end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Logical Flow
+% Breakdown
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - From A to Z, which steps are taken to calculate the final price for one
-%   product?
-% -
+% - What should be included in the price breakdown?
+% - VAT
+% - Cents
 %
-% \section{Logical Flow of a Price Calculation}
+\section{Breakdown}
+The final result of the trip price calculation is a breakdown for every requested product. For example: if the mobile application requests prices for 'saloon' and 'limo' vehicle types, the response will at most contain an array with two breakdowns, for saloon and limo products. To ensure a seamless transition from the legacy price calculation system to TPS, the response formats should be identical. Still an improvement, if profitable enough, could be taken into consideration. One requirement of the price breakdown states that the tax should be included, but as shown in Listing \ref{lst:legacy-breakdown} the included tax is part of the breakdown. Is it by mistake or design?
 
-% - authentication
-% - extracting companyId and daAppInstallId
-% - extracting departure and destination coordinates
-% - using directions service to aqquire distance and duration
-% - converting to minutes and km
-% - executing query
-% - find daAppInstall model with matching companyId and daAppInstallId
-% - find company country
-% - find matching discounts ordered by priority
-% - enabled
-% - timeframes
-% - departure
-% - destination
-% - find matching rules ordered by priority
-% - enabled
-% - timeframes
-% - departure
-% - destination
-% - get pricing information of all products for highest priority rule
+\begin{lstlisting}[caption={Legacy price breakdown}, label={lst:legacy-breakdown}]
+[
+	{
+		"vehicleType": "saloon",
+		"maxPassengers": "4",
+		"price": {
+			"currency": "EUR",
+			"total": 850,
+			"breakdown": {
+				"route": 802,
+				"tax": 48,
+				"toll": 0,
+				"parking": 0,
+				"waiting": 0,
+				"discount": 0
+			}
+		},
+		"fixedPrice": "true"
+	}
+]
+\end{lstlisting}
 
-% A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute is a very specific problem that must be split up into sizable categories. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be autonomous in that regard.
+Two possible solutions were proposed having VAT included in the price. The first solution extracts the tax element from the breakdown, so that the sum of the breakdown would add up to the total price where VAT is included in the price as shown in Listing \ref{lst:new-breakdown}. As demonstrated in Appendix \ref{appendix:slides_2_breakdown}, a breakdown is easily constructed in four steps when VAT is included.
+
+\begin{lstlisting}[caption={Improved price breakdown}, label={lst:new-breakdown}]
+[
+	{
+		"vehicleType": "estate",
+		"maxPassengers": 4,
+		"isEstimated": false,
+		"price": {
+			"breakdown": {
+				"route": 8300,
+				"toll": 0,
+				"parking": 0,
+				"waiting": 0,
+				"discount": -1650
+			},
+			"currency": "EUR",
+			"total": 6650,
+			"tax": {
+				"amount": 400,
+				"percentage": 6
+			}
+		}
+	},
+	...
+]
+\end{lstlisting}
+
+Keep in mind that unlike the listings the prices in the proposal are not displayed in cents. The second solution maintains the legacy format, but has to recalculate the prices without VAT. This could have downsides unlike the first approach:
+
+\begin{enumerate}
+	\item If an error is detected in the calculation, it is hard to trace back which components contributed to the total VAT. This would be even harder when each component uses its own VAT percentage.
+	\item It takes extra steps to calculate the price of each component excluding VAT.
+	\item Rounding the individual components could result in a sum that is not equal to the total displayed in the breakdown.
+\end{enumerate}
+
+The first proposal is chosen to be implemented, where the flag 'fixedPrice' is replaced by the 'isEstimated' flag to clearly reflect its purpose.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Conclusion
