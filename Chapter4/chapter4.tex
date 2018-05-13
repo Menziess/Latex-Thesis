@@ -11,22 +11,40 @@
 %
 \chapter{Trip Price Calculation System}
 \section{Introduction}
-In the previous chapter, options regarding information dependencies were discussed. This chapter clarifies which information should comprise a price breakdown to reflect that of the legacy system, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed should restrict the time and space dimensions of a price rule without blurring the straightforwardness of the system.
-
-OOP en FP mixen
-OOP voor grote structuur
-FP voor solide operaties
-SOLID
-Gang of Four
-Loose coupling high cohesion
-Async
-Strategy pattern
+In the previous chapter, information dependencies were discussed. This chapter clarifies which information should comprise a price breakdown to reflect that of the legacy system, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed should restrict the time and space dimensions of a price rule without blurring the straightforwardness of the system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Data Model
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{The System}
+The object-oriented programming (OOP) paradigm offers many ways to keep a system structured. Words like 'organized', 'structured', and 'modular' boil down to the same idea: 'a cohesive whole built up of distinct parts'. Good software design has low coupling and high cohesion, meaning that software components should have a high degree of belongingness, and a low degree of dependence in respect of eachother. As stated in the previous chapter, another paradigm was used that compliments price calculation very well called: functional programming (FP). These two paradigms together are capable of providing a modular system that is highly cohesive, and very low coupled. To understand more about the structure of the system, a class diagram visualizes the most important components in \ref{fig:ClassDiagram}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{ClassDiagram}
+	\caption[Class Diagram]{Class diagram.}
+	\label{fig:ClassDiagram}
+\end{figure}
+
+The Price object is composed of
+The instance methods shown in the diagram are are used by the associated class that is composed of
+Within each component, state and mutations are fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. As discussed in the previous chapter, Typescript plays an important role in mixing OOP and FP together.
+
+\mynote{Expand on
+	interfaces,
+	static strong types,
+	type hinting,
+	OOP en FP mixen,
+	OOP voor grote structuur,
+	FP voor solide operaties,
+	SOLID,
+	Gang of Four,
+	Loose coupling high cohesion,
+	Async,
+	Strategy pattern,
+}
+
 The database schema desgin as shown in the previous chapter gives an inpression on the different pieces of information required to calculate a price. Such a schema provides a good insight in the relationships that different entities have, but may distract from the actual story that is happening within each calculation. In Figure \ref{fig:DataModel} a conceptual model can be seen having association and composition relations in UML notation. This model will be used to refer to throughout this chapter.
 
 \begin{figure}[H]
@@ -36,14 +54,7 @@ The database schema desgin as shown in the previous chapter gives an inpression 
 	\label{fig:DataModel}
 \end{figure}
 
-To understand more about the structure of the system, a class diagram visualizes the most important components in \ref{fig:ClassDiagram}.
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\textwidth]{ClassDiagram}
-	\caption[Class Diagram]{Class diagram.}
-	\label{fig:ClassDiagram}
-\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Breakdown
@@ -146,7 +157,7 @@ db.Timeframe.insert({
 	\end{minipage}
 \end{center}
 
-A string is a very flexible datatype. Using a regex in a query makes checking multiple bits in the string relatively easy, and enables different values next to 0 and 1. 3. A bitarray would only allow for 0 and 1 to be used. A bitstring also makes querying the data really stable, as the query will simply not match if the content of the data is not of expected length or value. Performance is not an issue if the regex column is indexed, and when prefix expressions $(/^/)$ are used, as per documentation in \cite{MongoDB-Regex}. As noted before, the system is easy to scale if existing data can be migrated to deal with a new amount of bits, or new character usage over bits.
+A string is a very flexible datatype. Using a regex in a query makes checking multiple bits in the string relatively easy, and enables different values next to 0 and 1. 3. A bitarray would only allow for 0 and 1 to be used. A bitstring also makes querying the data really stable, as the query will simply not match if the content of the data is not of expected length or value. Performance is not an issue if the regex column is indexed, and when prefix expressions $(/\string^/)$ are used, as per documentation in \cite{MongoDB-Regex}. As noted before, the system is easy to scale if existing data can be migrated to deal with a new amount of bits, or new character usage over bits.
 
 \begin{lstlisting}[caption={Opening timeframe.}, label={lst:open-timeframe}]
 /**
@@ -175,12 +186,18 @@ export const regexFromDate = (date: Date) => {
 Skip is an integer representing the number of bits that should be skipped to get to the moment represented by the date. So in order to get 11 AM - 12 AM in the presented schedule, 3 * 24 skips + 11 skip = 83 skips are to be made to find the digit 1 on thursday.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Google
+% Directions Service
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - What was proposed as a solution to store a week schedule in a database?
 %
 \section{Distance and Duration}
+The directions class provides an interface to retrieve trip related data. The BasicDirections class returns a base case result, while the GoogleDirections class retrieves the data from the Google Directions API. The trip price calculation flow changes drastically when no destination or departure locations are provided in the request body. During development, many requirements were added and removed, handling different cases, returning different results. For this reason, a base case and the google case are defined using a behavioral strategy pattern as described in \cite{gof}, only using an abstract class instead of an interface.
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{Calculation}
+	\caption[Calculation Flow]{The flow of a trip price calculation.}
+	\label{fig:Calculation}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Google
