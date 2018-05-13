@@ -63,14 +63,25 @@ At the equator, 1 degree is 111320m, so 0.000001 degrees is
 around 11cm. Six decimal places will be sufficient for location matching for this application. But even when reducing coordinates to having six decimal places, it would be impractical. For this reason, it is more realistic to only describe the rough edges of an area using a polygon shape. Instead of checking for a single point in a non-terminating iteration over all points in an area, a mathematical calculations could be used to check whether a unique point is contained within the polygon.
 
 \subsection{Postal Codes, Addresses, and Polygons}
-All postal codes that start with a ten describe the city of Amsterdam, the entire area of Amsterdam can be drawn as a big polygon containing all the postal codes that start with a ten. In reverse, this procedure would not work. If a polygon was drawn cutting Amsterdam in half diagonally, a single postal code pattern would never be flexible or precise enough to be able to describe the boundaries of the polygon. One big taxi company making use of taxiID's legacy system is located in the United Arab Emirates. This company would not be able to convert anything at all, because the United Arab Emirates does not have a postal code system to begin with. When a trip is booked in the United Arab Emirates, the only information provided as a destination or departure location are geospatial coordinates and addresses. These addresses are compared with long lists of matching addresses in the legacy database, as previously described with postal codes. Addresses and postal code systems do not provide universally interpretable and precise encodings of locations, especially for the locations that matter for this project: points and areas. Addresses can be ambiguous, addresses and postal codes can be imprecise, postal codes are not uniform, and some countries do not have a postal code system. In contrast, polygons would provide unique and precise location definition that is uniform and universal. But postal codes and addresses have been useful in the legacy system. When moving to other encoding techniques, this usefulness must be preserved.
+All postal codes that start with a ten describe the city of Amsterdam, the entire area of Amsterdam can be drawn as a big polygon containing all the postal codes that start with a ten.
 
-\begin{figure}[htbp!]
+\begin{figure}[H]
 	\centering
-	\includegraphics[width=1\textwidth]{PostalCodes}
+	\includegraphics[width=.8\textwidth]{Amsterdam}
+	\caption[Amsterdam]{Amsterdam - A single location contrived of multiple locations.}
+	\label{fig:Amsterdam}
+\end{figure}
+
+In reverse, this procedure would not work. If a polygon was drawn cutting Amsterdam in half diagonally, a single postal code pattern would never be flexible or precise enough to be able to describe the boundaries of the polygon. One big taxi company making use of taxiID's legacy system is located in the United Arab Emirates. This company would not be able to convert anything at all, because the United Arab Emirates does not have a postal code system to begin with.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.8\textwidth]{PostalCodes}
 	\caption[PostalCodes]{Postal codes by country with amount of digits ranging from three digits (lightblue) to eight digits (darkgreen) and no postal code system (gray).}
 	\label{fig:postalcodes}
 \end{figure}
+
+When a trip is booked in the United Arab Emirates, the only information provided as a destination or departure location are geospatial coordinates and addresses. These addresses are compared with long lists of matching addresses in the legacy database, as previously described with postal codes. Addresses and postal code systems do not provide universally interpretable and precise encodings of locations, especially for the locations that matter for this project: points and areas. Addresses can be ambiguous, addresses and postal codes can be imprecise, postal codes are not uniform, and some countries do not have a postal code system. In contrast, polygons would provide unique and precise location definition that is uniform and universal. But postal codes and addresses have been useful in the legacy system. When moving to other encoding techniques, this usefulness must be preserved.
 
 \subsection{Requirements for Location Matching}
 If the following statements are true for a given location encoding using the definitions of the Point and Area, the location encoding is useful and able to operate independently from the postal code and address systems.
@@ -102,13 +113,6 @@ If the following statements are true for a given location encoding using the def
 	\label{tab:location-matching-requirements}
 \end{table}
 
-\begin{figure}[htbp!]
-	\centering
-	\includegraphics[width=.8\textwidth]{Amsterdam}
-	\caption[Amsterdam]{Amsterdam - A single location contrived of multiple locations.}
-	\label{fig:Amsterdam}
-\end{figure}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Literature review
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -122,7 +126,7 @@ If the following statements are true for a given location encoding using the def
 Many spatial database systems support a basic Geometry hierarchy of Points, Polygons, MultiPoint and MultiPolygon Classes, as described in the OGC~\cite{SFA} and ISO 19125~\cite{ISO-19125} standard. These spatial datatypes would could be stored as single entities. The MultiPolygon class is able to support multiple polygons to be stored as a single entity. The standard provides containment predicate, and methods to distinguish larger locations from smaller ones, which could be used in precedence checks. Databases like MySQL and PostgreSQL provide similar functionalities that adhere to the OGC standard, while MongoDB has its own implementation. These functionalities can be seen as a straight forward approach in solving geometry based queries.
 What 3 words, a multi-award winning global addressing system, bases 3m x 3m squares, covering the planet, on a combination of three words. In their whitepaper: "Efficient and future-proof", CEO Chris Cheldrick explains how locations can be communicated more effectively by describing a three by three meter areas using three words \cite{w3w}. The what3words API offers functionalities that can find what3word geocodings near a specified latitude and longitude location. It is also able to find results within a clamped area, as documented in \cite{w3w-api}. This system could be used to retrieve area's as three words in a database with given clamp parameters, which could then be stored in the database as single entities. This system would solve the problem of having ambiguity in address or postal code systems, and it is also very accurate. But in order to provide complex polygon matching, a spatial database system is still required. If a radius was assigned to the centroid of the shape that is formed by the boundaries of the street, neighbourhood, province or country, the encoding could technically be defined as a what3words query. A combination of clustering of points around what3word encodings could provide a system that is far less accurate, but is usable.
 
-\mynote{Try to find if other people found solutions for determining precedence of polygon matches}
+\mynote{Keep trying to find if other people found solutions for determining precedence of polygon matches}
 http://geoawesomeness.com/discrete-global-grid-system-dggs-new-reference-system/
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -141,13 +145,14 @@ The database that is used must be able to determine whether a polygon contains a
 	\label{fig:square}
 \end{figure}
 
+As contained in Appendix \ref{appendix:pregame}, this example provides a proof that a minimal requirement is satisfied, so that a list of candidate Database Management Systems could be constructed.
+
 \subsection{OpenGIS Compatible databases}
 MYSQL’s innate integrity is a good reason to opt for a full MYSQL database setup. MariaDB is a fork of MYSQL that performs better according to benchmarks, however they don’t always translate to real life situations. It’s easy to migrate from MYSQL to MariaDB, so choosing MYSQL at first could be preferable as an instance of MYSQL is already used at TaxiID. PostgreSQL offers a spatial database extender for that is OpenGIS compliant called PostGIS that adds support for geographic objects and location queries.
 
-All spatial data types inherit properties such as type and spatial reference identifier (SRID). For rigorous documentation, both PostGIS documentation \cite{PostGIS} and MYSQL documentation \cite{MySQL} could be consulted. When a generic geometry column, or point column is created, points can be inserted as shown in snippet \ref{lst:sql-insert-points} and \ref{lst:sql-insert-polygon}
+All spatial data types inherit properties such as type and spatial reference identifier (SRID). For rigorous documentation, both PostGIS documentation \cite{PostGIS} and MYSQL documentation \cite{MySQL} could be consulted. When a generic geometry column, or point column is created, points can be inserted as shown in snippet \ref{lst:sql-insert-points}.
 
-\begin{multicols}{2}
-	\begin{lstlisting}[caption={Insert four points}, label={lst:sql-insert-points}, belowskip=100pt]
+\begin{lstlisting}[caption={Insert four points and one polygon in MySQL.}, label={lst:sql-insert-points}]
 	START TRANSACTION;
 	SET @a = ST_GeomFromText('POINT(1 1)');
 	INSERT INTO point (point) VALUES (@a);
@@ -159,20 +164,18 @@ All spatial data types inherit properties such as type and spatial reference ide
 	INSERT INTO point (point) VALUES (@a);
 	# also insert @b, @c, and @d
 	COMMIT;
-\end{lstlisting}
-	\begin{lstlisting}[caption={Insert polygon}, label={lst:sql-insert-polygon}, belowskip=0pt]
+
 	START TRANSACTION;
-	# First and last point must be the same
+	# First and last point should be the same
 	SET @a = PolygonFromText('POLYGON((2.5 5,5 7.5,7.5 5,5 2.5,2.5 5))');
 	INSERT INTO polygon (polygon) VALUES (@a);
 	COMMIT;
 \end{lstlisting}
-\end{multicols}
 
-It is evident that c is contained in p. To determine which points are contained in p, the function as seen in Snippet \mynote{Add ref to snippet} can be used, which returns the point with coordinates $[5, 5]$ as expected.
+It is evident that c is contained in p. To determine which points are contained in p, the function as seen in Snippet \ref{lst:sql-pts-in-poly} can be used, which returns the point with coordinates $[5, 5]$ as expected.
 
-\begin{multicols}{2}
-	\begin{lstlisting}[caption={Select points contained in polygon}, label={lst:sql-pts-in-poly}, belowskip=100pt]
+
+\begin{lstlisting}[caption={Select points contained in polygon, and all polygons containing a point in MySQL.}, label={lst:sql-pts-in-poly}]
 	// All points contained in polygon
 	SELECT ST_ASTEXT(POINT)
 	FROM POINT
@@ -185,8 +188,7 @@ It is evident that c is contained in p. To determine which points are contained 
 		),
 		POINT
 	)
-\end{lstlisting}
-	\begin{lstlisting}[caption={Select polygons containing point}, label={lst:sql-poly-has-pt}, belowskip=0pt]
+
 	// All polygons containing point
 	SELECT ST_ASTEXT(POLYGON)
 	FROM POLYGON, POINT
@@ -196,63 +198,61 @@ It is evident that c is contained in p. To determine which points are contained 
 			POINT.point
 		)
 \end{lstlisting}
-\end{multicols}
 
 \subsection{OpenGIS Incompatible databases}
-MongoDB doesn’t offer OpenGIS implementations but has geospatial query operators that may provide enough functionalities for current requirements \mynote{Add ref to Geospatial Query Operators — MongoDB Manual 3.6}. The argument for choosing one over the other depends on the vast differences between SQL and NoSQL, next to performance and extensiveness of geospatial features. The setup displayed in image \mynote{Add ref to image} is recreated in MongoDB using queries shown in snippet \mynote{Add ref to snippet}.
+MongoDB doesn’t offer OpenGIS implementations but has geospatial query operators that may provide enough functionalities for current requirements \cite{MongoDB}. The argument for choosing one over the other depends on the vast differences between SQL and NoSQL, next to performance and extensiveness of geospatial features. The setup displayed in image \ref{fig:square} is recreated in MongoDB using queries shown in snippets \ref{lst:nosql-insert-points} and \ref{lst:nosql-pts-in-poly}.
 
-\begin{multicols}{2}
-	\begin{lstlisting}[caption={Select points contained in polygon}, label={lst:sql-pts-in-poly}, belowskip=100pt]
+\begin{lstlisting}[caption={Insert four points and one polygon in MongoDB.}, label={lst:nosql-insert-points}]
 	db.point.insertMany([
-	{ shape: { type: "Point", coordinates: [1, 1] } },
-	{ shape: { type: "Point", coordinates: [2.5, 2.5] } },
-	{ shape: { type: "Point", coordinates: [5, 5] } },
-	{ shape: { type: "Point", coordinates: [-2.5, -2.5] } },
+		{ shape: { type: "Point", coordinates: [1, 1] } },
+		{ shape: { type: "Point", coordinates: [2.5, 2.5] } },
+		{ shape: { type: "Point", coordinates: [5, 5] } },
+		{ shape: { type: "Point", coordinates: [-2.5, -2.5] } },
 	])
 
 	db.polygon.insert({
-	shape: {
-	type: "Polygon",
-	coordinates: [ [ [2.5, 5], [5, 7.5], [7.5, 5], [5, 2.5], [2.5, 5] ] ]
-	}
+		shape: {
+			type: "Polygon",
+			coordinates: [ [ [2.5, 5], [5, 7.5], [7.5, 5], [5, 2.5], [2.5, 5] ] ]
+		}
 	})
 
 	db.point.createIndex({ 'shape': '2dsphere' })
 	db.polygon.createIndex({ 'shape': '2dsphere' })
 \end{lstlisting}
-	\begin{lstlisting}[caption={Select points contained in polygon}, label={lst:sql-pts-in-poly}, belowskip=0pt]
+
+\begin{lstlisting}[caption={Select points contained in polygon, and all polygons containing a point in MongoDB.}, label={lst:nosql-pts-in-poly}]
 	// All points contained in polygon
 	var p = db.polygon.find({})
 
 	db.point.find({
-	shape: {
-	$geoWithin: {
-	$polygon: [
-	[2.5, 5],
-	[5, 7.5],
-	[7.5, 5],
-	[5, 2.5],
-	[2.5, 5]
-	]
-	}
-	}
+		shape: {
+			$geoWithin: {
+				$polygon: [
+					[2.5, 5],
+					[5, 7.5],
+					[7.5, 5],
+					[5, 2.5],
+					[2.5, 5]
+				]
+			}
+		}
 	})
 
 	// All polygons containing point
 	var p = db.point.findOne({ coordinates: [5, 5] })
 
 	db.polygon.find({
-	shape: {
-	$geoIntersects: {
-	$geometry: {
-	type: "Point",
-	coordinates: [5, 5]
-	}
-	}
-	}
+		shape: {
+			$geoIntersects: {
+				$geometry: {
+					type: "Point",
+					coordinates: [5, 5]
+				}
+			}
+		}
 	})
 \end{lstlisting}
-\end{multicols}
 
 Next to database solutions for this requirement, services exist that are capable of geofencing. Although these services may not be free, and the added dependencies restrict extensibility.
 
@@ -262,4 +262,4 @@ Next to database solutions for this requirement, services exist that are capable
 %
 \section{Performance and Clustering Trade-offs}
 Agarwal and Rajan state that NoSQL take advantage of cheap memory and processing power, thereby handling the four V’s of big data more effectively,
-but lack the robustness over SQL databases \mynote{Add reference to Agarwal and Rajan}. The report dives deeper into spatial queries and concludes that their tests suggest that MongoDB performs better by an average factor of 10, which increases exponentially as the data size increases, but lack many spatial functions that OpenGIS supports. Although improvements have been made \mynote{Add reference to Geospatial Performance Improvements in MongoDB 3.2,” MongoDB} after the cited paper Schmid et al. 2015 \mynote{Add ref to Stephan Schmid Eszter Galicz} was published. The team argues that clustering is much easier in MongoDB, which may be important in the future when the company grows. As the required functionalities exist in both SQL and NoSQL, it is beneficial to opt for MongoDB for its performance and alignment with the teams experience. Although if robustness is desired, or extra GIS functionalities required, SQL should be taken into consideration.
+but lack the robustness over SQL databases in \cite{AGS}. The report dives deeper into spatial queries and concludes that their tests suggest that MongoDB performs better by an average factor of 10, which increases exponentially as the data size increases, but lack many spatial functions that OpenGIS supports. Although improvements have been made, as per \cite{MongoDB-Performance}. After the paper Schmid et al. 2015 \cite{SCS} was published. The team argues that clustering is much easier in MongoDB, which may be important in the future when the company grows. As the required functionalities exist in both SQL and NoSQL, it is beneficial to opt for MongoDB for its performance and alignment with the teams experience. Although if robustness is desired, or extra GIS functionalities required, SQL should be taken into consideration.
