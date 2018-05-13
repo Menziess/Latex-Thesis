@@ -54,8 +54,6 @@ The database schema desgin as shown in the previous chapter gives an inpression 
 	\label{fig:DataModel}
 \end{figure}
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Breakdown
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,7 +62,7 @@ The database schema desgin as shown in the previous chapter gives an inpression 
 % - Cents
 %
 \section{Breakdown}
-To ensure a seamless transition from the legacy price calculation system to TPS, the response formats should be identical. Still an improvement, if profitable enough, could be taken into consideration. One requirement of the price breakdown states that the tax should be included, but as shown in Listing \ref{lst:legacy-breakdown} the included tax is part of the breakdown. Is it by mistake or design?
+The final result of the trip price calculation is a breakdown for every requested product. This chapter starts with the result to make obvious what every step in the process is working towards. To ensure a seamless transition from the legacy price calculation system to TPS, the response formats should be identical. Still an improvement, if profitable enough, could be taken into consideration. One requirement of the price breakdown states that the tax should be included, but as shown in Listing \ref{lst:legacy-breakdown} the included tax is part of the breakdown. Is it by mistake or design?
 
 \begin{lstlisting}[caption={Legacy price breakdown}, label={lst:legacy-breakdown}]
 [
@@ -125,12 +123,20 @@ Two possible solutions were proposed having VAT included in the price. The first
 The first proposal is chosen to be implemented, where the flag 'fixedPrice' is replaced by the 'isEstimated' flag to clearly reflect its purpose.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Locations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Locations}
+Locations and timeframes are the big filters that reduce the amount of potential matching rules and discounts based on space and time. The implementation for location queries ...
+\mynote{Currently implementing this part}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Timeframes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - What was proposed as a solution to store a week schedule in a database?
 %
 \section{Timeframes}
-Next to the three dimensions of space, time will play a role in determining whether a rule has matched. The implementation of this concept should preferably offer enough freedom in the future, and should not be tailored toward one specific entity relation. Being able to reuse the timeframe entity improves maintainability of the system. The requirements state that the user must be able to define a start and end time, the days on which the times are active, and the start and end date of the timeframe. This either means that the timeframe one window of time, or that each given day has a single window of time. But if a discount should be active during night of New Years Eve, between 23h and 5h, this description would not be sufficient to cover this use case under any interpretation.
+Time plays a role in determining whether a rule has matched. The implementation of this concept should preferably offer enough freedom in the future, and should not be tailored toward one specific entity relation. Being able to reuse the timeframe entity improves maintainability of the system. The requirements state that the user must be able to define a start and end time, the days on which the times are active, and the start and end date of the timeframe. This either means that the timeframe one window of time, or that each given day has a single window of time. But if a discount should be active during night of New Years Eve, between 23h and 5h, this description would not be sufficient to cover this use case under any interpretation.
 
 \subsection{Conventional Approach}
 The legacy system takes a straight forward approach of storing time in a relational database. The begin and end of a window are stored in a record that is related to a parent timeframe entity. The timeframe has many windows that could contain a timestamp. It either finds one or many time windows that contain the timeframe. This approach covers all possibilities imaginable.
@@ -189,8 +195,8 @@ Skip is an integer representing the number of bits that should be skipped to get
 % Directions Service
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Distance and Duration}
-The directions class provides an interface to retrieve trip related data. The BasicDirections class returns a base case result, while the GoogleDirections class retrieves the data from the Google Directions API. The trip price calculation flow changes drastically when no destination or departure locations are provided in the request body. During development, many requirements were added and removed, handling different cases, returning different results. For this reason, a base case and the google case are defined using a behavioral strategy pattern as described in \cite{gof}, only using an abstract class instead of an interface.
+\section{The Trip Price Calculation}
+The directions class provides an interface to retrieve trip related data. The BasicDirections class returns a base case result, while the GoogleDirections class retrieves the data from the Google Directions API. The trip price calculation flow changes drastically when no destination or departure locations are provided in the request body. During development, many requirements were added and removed, handling different cases, returning different results. For this reason, a base case and the google case are defined using a behavioral strategy pattern as described in \cite{gof}, only using an abstract class instead of an interface. This improves the systems resistence to change. The flowchart in Figure \ref{fig:Calculation} shows the on-meter (3) and dynamic and fixed (5) rule queries. Just like the directions, the calculator has its strategies to adapt to other circumstances.
 
 \begin{figure}[H]
 	\centering
@@ -200,32 +206,44 @@ The directions class provides an interface to retrieve trip related data. The Ba
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Google
+% Discounts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - What was proposed as a solution to store a week schedule in a database?
 %
-\section{Aggregate Query}
-\subsection{Identification}
-companyId daAppInstallId
-\subsection{Links}
-polymorphic hasthroughmany relation
-\subsection{Country}
-\subsection{Rules}
-\subsection{Discounts}
-\subsection{Products}
-\subsection{Prices}
-\subsection{Sorting and Formatting}
-
+\section{Discounts}
+The price calculation matches rules and discounts separately. Discounts were associated with rules in the legacy system, eliminating the amount of combinations of prices with or without discounts. A discount was either always active, or it was not. Having separation between the two enables users to define other locations and timeframes to both of them.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Google
+% Rules
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Rules}
+Rules and discounts are queried for each requested product. MongoDB’s aggregation framework allows documents to be aggregated in a multi-staged pipeline.
+
+\subsection{Identification}
+The first step in the pipeline matches all DaAppInstall entities with the identifiers sent along in the JWT payload: companyId and daAppInstallId.
+\subsection{Links}
+As shown in Figure \ref{fig:DataModel}, the DaAppInstall entities have multiple Links; ruleLinks and discountLinks. These links store data in a polymorphic hasManyThrough relation.
+\subsection{Country}
+Each company has a country, used to determine the default VAT and currency.
+\subsection{Rules}
+All documents are filtered based on geolocation and timeframes.
+\subsection{Prices}
+Prices are retrieved for each product that is associated with the matched rule. DynamicPrices and related thresholds, and FixedPrices and related thresholds.
+\subsection{Sorting and Formatting}
+The final step in the aggregate sorts and formats the results so that the Price class can calculate a price breakdown for each result.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Price Calculation Types
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - What was proposed as a solution to store a week schedule in a database?
 %
 \section{Price Calculation Types}
+\subsection{Dynamic}
+\subsection{Fixed}
+\subsection{Meter}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Google
+% Threshold Calculations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - What was proposed as a solution to store a week schedule in a database?
 %
@@ -238,29 +256,29 @@ polymorphic hasthroughmany relation
 %   product?
 % -
 %
-\section{Logical Flow of a Price Calculation}
+% \section{Logical Flow of a Price Calculation}
 
-- authentication
-- extracting companyId and daAppInstallId
-- extracting departure and destination coordinates
-- using directions service to aqquire distance and duration
-- converting to minutes and km
-- executing query
-- find daAppInstall model with matching companyId and daAppInstallId
-- find company country
-- find matching discounts ordered by priority
-- enabled
-- timeframes
-- departure
-- destination
-- find matching rules ordered by priority
-- enabled
-- timeframes
-- departure
-- destination
-- get pricing information of all products for highest priority rule
+% - authentication
+% - extracting companyId and daAppInstallId
+% - extracting departure and destination coordinates
+% - using directions service to aqquire distance and duration
+% - converting to minutes and km
+% - executing query
+% - find daAppInstall model with matching companyId and daAppInstallId
+% - find company country
+% - find matching discounts ordered by priority
+% - enabled
+% - timeframes
+% - departure
+% - destination
+% - find matching rules ordered by priority
+% - enabled
+% - timeframes
+% - departure
+% - destination
+% - get pricing information of all products for highest priority rule
 
-A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute is a very specific problem that must be split up into sizable categories. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be autonomous in that regard.
+% A tier price system, that calculates fixed prices based cascading thresholds, and a dynamic pricing system that calculates prices per distance unit and minute is a very specific problem that must be split up into sizable categories. The term 'distance unit' is used on purpose, as distances are measured using different metrics in various countries. Pricing rules should be constrained by time frames, making rules available only for some hours a day, or only on christmas for example. Rules should be specifyable per product as different vehicle types have different prices, but are included in the same pricing rules. Discounts may be calculated with the trip price, and VAT should be displayed in the price breakdown. Some additional requirements to the system may be added in later phases, as Scrum is used to manage work iterations (this fact is covered later in this chapter). The system should be accessible to other systems, meaning that applications that currently rely on the old system should be able to migrate to the new system. As the old system shouldn't be used for new applications, as it was not designed for this use case. The system should have a single responsibility, and should be autonomous in that regard.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Conclusion
