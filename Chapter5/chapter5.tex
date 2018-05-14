@@ -9,39 +9,64 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \chapter{Proposed Portal Solution}
-\mynote{Skip Portal Solution Chapter?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Introduction
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Introduction}
-This chapter covers the actual implementation plan of connecting the pricing system with the portal frontend. How the system should behave under different circumstances, how the user is able to interact with the system. The YTA-portal should integrate the frontend that allows taxi company users to modify their pricing rules. This chapter aims to answer question number three, which aims to
+% This chapter covers the actual implementation plan of connecting the pricing system with the portal frontend. How the system should behave under different sets of criteria, and how the user should be able to interact with the system. The YTA-portal should integrate the frontend that allows taxi company users to modify their pricing rules without having prior knowledge about the system.
+Ultimately, the main goal of this project is to achieve a system that works as the user wants it to. Freedom and broad ranges of possibilities have a cost however. Complexity confuses the user, discouraging exploration. A hand guide would ease the cognitive strain surely? Or a developer is often kind enough to take the responsibility and do the tough job for the user instead. A software system as complex as it may be, must be reasonable in the eyes of the user.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Required Views
+% Outline
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Required Views}
+% - How can complex pricing rules be communicated through the UI?
+% - Which views are essential?
+% - In what way can visual hierarchy guide the user through processes naturally?
+% - How should complex elements impacting price calculations be communicated to
+%   the user through UI components?
+%
+\section{Outline}
+A famous phrase often used in data visualizations called Shneiderman's mantra \cite{mantra}, lays the foundation of principles that enable a user to maintain an understanding of the context in which data is visualized. The three sentences in the mantra dictate that there are three stages in data exploration.
 
-\subsection{Entities}
-- products
-- rules
-- discounts
-- locations
-- apps
+\begin{enumerate}
+	\item Overview First
+	\item Zoom and Filter
+	\item Details on Demand
+\end{enumerate}
 
-- timeframes
-- location picker
+Pricing rules cannot be plotted in a graph, yet this mantra could be put to good use when dealing with the many components that make up a rule.
 
-\subsection{Hierarchy}
-- overview pages
-- detail pages
-- composite pages
 
-% How can complex pricing rules be communicated through the UI?
+What are we showing, when are we showing it
 
-% Which views are essential?
-% In what way can visual hierarchy guide the user through processes naturally?
-% How should complex elements impacting price calculations be communicated to the user through UI components?
+The central thing of the price calculation vs hierarchy
 
+Internationalization
+
+% \subsection{Entities}
+% - products
+% - rules
+% - discounts
+% - locations
+% - apps
+% - timeframes
+% - location picker
+% \subsection{Hierarchy}
+% - overview pages
+% - detail pages
+% - composite pages
+
+
+
+challenges
+
+drawing polygons
+
+entering hours in a week schedule
+
+fitting rule information, prices per products per rule and even thresholds on one page
+
+sorting rules and disctouts
