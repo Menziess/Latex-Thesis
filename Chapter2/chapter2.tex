@@ -30,7 +30,7 @@ A location is roughly described as a place or position. Throughout history, vari
 	\label{fig:latlngsphere}
 \end{figure}
 
-The history of this encoding goes way back to when it was first proposed in the 3rd century BC by Eratosthenes. He invented the discipline of geography, and was known for also being the first person to calculate the circumference of the Earth with remarkable accuracy. Today, navigation relies on satellites that are capable of providing information to determine a location with a precision of 9 meters. Hybrid methods using cell towers, Wi-Fi Location Services, and the new Galileo global navigation sattelite system, provide tracking with a precision down to the meter range. These locations are ordinarily communicated using the same established latitude and longitude encoding. For a human being, it is not practical to exchange day-to-day locations as geographical coordinates. For that, addresses much more suitable, but can be ambiguous, imprecise, and inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system. This forces the legacy system to support addresses for the fixed pricing functionality as well. In contrast to the geographic coordinate system, postal codes describe streets and areas of varying shapes and sizes. A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge of this project, how to communicate the location of a collection with points or areas of differing shapes and sizes that may overlap?
+Today, navigation relies on satellites that are capable of providing information to determine a location with a precision of 9 meters. Hybrid methods using cell towers, Wi-Fi Location Services, and the new Galileo global navigation sattelite system, provide tracking with a precision down to the meter range. These locations are ordinarily communicated using the same established latitude and longitude encoding. For a human being, it is not practical to exchange day-to-day locations as geographical coordinates. For that, addresses much more suitable, but can be ambiguous, imprecise, and inconsistent in format. Addresses commonly make use of Postal Code systems, which have reliably been assigned to geographical areas with the purpose of sorting mail. Although even today, there are countries that do not have a Postal Code system. This forces the legacy system to support addresses for the fixed pricing functionality as well. In contrast to the geographic coordinate system, postal codes describe streets and areas of varying shapes and sizes. A location being roughly described as a place or position, can be decomposed as an abstract term to describe physical or imaginary areas with varying radiusses and shapes. You could prepend 'the location of' to the following terms as an example: America, the birthplace of Sokrates, Wall Street, the center of the universe, the Laryngeal Nerve of the Giraffe, churches in the Netherlands. The final example presents the main challenge of this project, how to communicate the location of a collection with points or areas of differing shapes and sizes that may overlap?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Requisites of Location types
@@ -123,7 +123,7 @@ If the following statements are true for a given location encoding using the def
 % - 3 words, gps, geospatial
 %
 \section{Literature Review}
-In \cite{w3w}, CEO Chris Cheldrick explains how locations can be communicated more effectively by describing a three by three meter areas using deterministicly assigned triple of words. The system aims to solve the problem of ambiguity in address or postal code systems. The what3words API offers functionalities that can find what3word geocodings near a specified latitude and longitude location. The system is able to find results within a clamped area, as documented in \cite{w3w-api}, effectively acting like a spherical circle with a given radius in which points can be contained. In the paper \cite{spatial-data-types} Markus elaborates on the distinction between structure-based spatial data and point sets, stating that: "Structure-based spatial data types have prevailed and form the basis of a large number of data models and query languages for spatial data". He elaborates on distinctions of operations and predicates between different spatial data models in \cite{geometry}. Operations such as point-in-polygon test and intersection are categorized as spatial modeling. Regular spatial database systems support a basic Geometry hierarchy of Points, Polygons, MultiPoint and MultiPolygon Classes, as described in the OGC~\cite{SFA} and ISO 19125~\cite{ISO-19125} standard. MySQL, PostgreSQL, MariaDB and other systems having distinct implementations adhere to the OGC standard. Some other databases like MongoDB adopt the GeoJSON standard \cite{MongoDB-GeoJSON}, providing similar operations and data types. Xiang et al proposed conventional flattened R-Tree indexing for the less mature MongoDB spatial system \cite{MongoDB-implementation}. The built in Geohashing method is typically used to index points and centroids, having the possibility to inaccuracies and missing data. Locations should be importable in geography formats. Holmberg extracts data from OpenStreetMap as shape files, see \cite[Chapter~6]{openstreetmap}. He uses two sources: 'https://www.openstreetmap.org' and 'http://download.geofabrik.de' see \cite[Chapter~7.3]{openstreetmap}. The latter is used to obtain data for whole countries. OpenStreetMap offers a downloadable dataset at 'https://planet.openstreetmap.org/' from which geographic data can be exported.
+In \cite{w3w}, CEO Chris Cheldrick explains how locations can be communicated more effectively by describing a three by three meter areas using deterministicly assigned triple of words. The system aims to solve the problem of ambiguity in address or postal code systems. The what3words API offers functionalities that can find what3word geocodings near a specified latitude and longitude location. The system is able to find results within a clamped area, as documented in \cite{w3w-api}, effectively acting like a spherical circle with a given radius in which points can be contained. In the paper \cite{spatial-data-types} Markus elaborates on the distinction between structure-based spatial data and point sets, stating that: "Structure-based spatial data types have prevailed and form the basis of a large number of data models and query languages for spatial data". He elaborates on distinctions of operations and predicates between different spatial data models in \cite{geometry}. Operations such as point-in-polygon test and intersection are categorized as spatial modeling. Regular spatial database systems support a basic Geometry hierarchy of Points, Polygons, MultiPoint and MultiPolygon Classes, as described in the OGC~\cite{SFA} and ISO 19125~\cite{ISO-19125} standard. MySQL, PostgreSQL, MariaDB and other systems having distinct implementations adhere to the OGC standard. Some other databases like MongoDB adopt the GeoJSON standard \cite{MongoDB-GeoJSON}, providing similar operations and data types. Xiang et al proposed conventional flattened R-Tree indexing for the less mature MongoDB spatial system \cite{MongoDB-implementation}. The built in Geohashing method is typically used to index points and centroids, having the possibility to inaccuracies and missing data. Locations should be importable in geography formats. Holmberg extracts data from OpenStreetMap as shape files, see \cite[Chapter~6]{openstreetmap}. He uses two sources: \url{https://www.openstreetmap.org} and \url{http://download.geofabrik.de} see \cite[Chapter~7.3]{openstreetmap}. The latter is used to obtain data for whole countries. OpenStreetMap offers a downloadable dataset at \url{https://planet.openstreetmap.org} from which geographic data can be exported.
 The OSM Nominatim Usage policy states that no heavy usage is allowed, that bulk geocoding is restricted, that auto-complete is not supported, and that attribution must be displayed \cite{OSM-policy}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -193,7 +193,7 @@ It is evident that c is contained in p. To determine which points are contained 
 		)
 \end{lstlisting}
 
-A multipolygon can be inserted using triple braces, indicating a collection of polygons to be inserted as seen in Figure \ref{lst:sql-multipolygon}.
+A multipolygon can be inserted using triple braces, indicating a collection of polygons to be inserted as seen in Figure \ref{lst:sql-multipolygon}. The MultiPolygon class is able to support multiple polygons to be stored as a single entity. The standard provides containment predicate, and methods to distinguish larger locations from smaller ones, which could be used in precedence checks.
 
 \begin{lstlisting}[caption={Insert one multipolygon in MySQL.}, label={lst:sql-multipolygon}]
 	START TRANSACTION;
@@ -260,27 +260,7 @@ A method named $\$geoWithin$ can be used to return points that are contained wit
 	})
 \end{lstlisting}
 
-In MongoDB, a multipolygon can be inserted using an extra pair of braces, as shown in \ref{lst:nosql-multipolygon}.
-% The MultiPolygon class is able to support multiple polygons to be stored as a single entity. The standard provides containment predicate, and methods to distinguish larger locations from smaller ones, which could be used in precedence checks. Databases like MySQL and PostgreSQL provide similar functionalities that adhere to the OGC standard, while MongoDB has its own implementation. These functionalities can be seen as a straight forward approach in solving geometry based queries.
-
-
-
-% But in order to provide complex polygon matching, a spatial database system is still required. If a radius was assigned to the centroid of the shape that is formed by the boundaries of the street, neighbourhood, province or country, the encoding could technically be defined as a what3words query. A combination of clustering of points around what3word encodings could provide a system that is far less accurate, but is usable.
-% Polygon must be single array
-% MultiPolygon must me multiple arrays, or query fails
-
-% Polygon: [[[2, 2]]]
-% Not MultiPolygon: [
-% 	[
-% 		[2,2]
-% 	],
-% 	[
-% 		[2,2]
-% 	]
-% ]
-% Valid MultiPolygon: [[[2,2]]],
-% 										[[[2,2]]]
-
+In MongoDB, a multipolygon can be inserted using extra pairs of braces, as shown in \ref{lst:nosql-multipolygon}. Any predicate will fail if the type is defined as 'Polygon', but a MultiPolygon is stored in the coordinates property or vice versa. Therefore, it is important to manage the type property as more polygons are to be stored at once.
 
 \begin{lstlisting}[caption={Insert one multipolygon in MongoDB.}, label={lst:nosql-multipolygon}]
 	db.polygon.insert({
@@ -295,12 +275,15 @@ In MongoDB, a multipolygon can be inserted using an extra pair of braces, as sho
 \end{lstlisting}
 
 \section{Overlapping Locations}
-Priority
-precedence
-polygon size
-arrival vs departure
-clustering around hotspots
-\mynote{Currently implementing solution}
+If the destination is contained in several polygons associated with multiple rules, which rule should then be used to calculate the final price? A database will just pick the first result when the results are limited to one. Several solutions have been proposed to solve this problem:
+
+\begin{enumerate}
+	\item Using the location with the shortest distance from its centroid to the destination.
+	\item Picking the location with the smallest area.
+	\item Picking the location that has the rule with the lowest price.
+	\item Picking the rule that as the highest precedence assigned by the user.
+	\item A combination of these proposals.
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Performance and Clustering Trade-offs
@@ -308,11 +291,12 @@ clustering around hotspots
 %
 \section{Performance and Clustering Trade-offs}
 Agarwal and Rajan state that NoSQL take advantage of cheap memory and processing power, thereby handling the four V’s of big data more effectively,
-but lack the robustness over SQL databases in \cite{AGS}. The report dives deeper into spatial queries and concludes that their tests suggest that MongoDB performs better by an average factor of 10, which increases exponentially as the data size increases, but lack many spatial functions that OpenGIS supports. Although improvements have been made, as per \cite{MongoDB-Performance}. After the paper Schmid et al. 2015 \cite{SCS} was published. The team argues that clustering is much easier in MongoDB, which may be important in the future when the company grows. As the required functionalities exist in both SQL and NoSQL, it is beneficial to opt for MongoDB for its performance and alignment with the teams experience. Although if robustness is desired, or extra GIS functionalities required, SQL should be taken into consideration.
+but lack the robustness over SQL databases in \cite{AGS}. The report dives deeper into spatial queries and concludes that their tests suggest that MongoDB performs better by an average factor of 10, which increases exponentially as the data size increases, but lack many spatial functions that OpenGIS supports. Although improvements have been made, as per \cite{MongoDB-Performance}. After the paper Schmid et al. 2015 \cite{SCS} was published. The team argues that clustering is much easier in MongoDB, which may be important in the future when the company grows.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Conclusion
+% Locations Conclusion
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Conclusion}
-Every point and area on earth can be described by geometric datatypes such as Polygons or MultiPolygons, yielding a consistent and universal solution of storing spatial data. This means that a new system does not have to rely on address and postal code data required by the legacy system. Some alternative encodings like what3words may be used to encode distinct points, but area's become quite a challenge in such systems. All physical locations located on the earths surface that were described by addresses and postal codes can be encoded by spatial datatypes. The multipolygon may be used to represent more complex areas like the city Amsterdam as seen in \ref{fig:Amsterdam}. The OGC standard offers a mature and thorough set of geospatial features that MongoDB does not support. If performance and expandability are important, a MongoDB NoSQL database will result in the better choice. Otherwise, MySQL, MariaDB, PostgreSQL and many other database systems offer GIS features that adhere to this projects requirements. Overlapping areas in conflicting rules can be resolved by assigning priorities to rules. This enables users to reason about their pricing rules more easily, and makes the intent of these pricing rules more interpretable for other people.
+\section{Locations Conclusion}
+Every point and area on earth can be described by geometric datatypes such as Polygons or MultiPolygons, yielding a consistent and universal solution of storing spatial data. This means that a new system does not have to rely on address and postal code data required by the legacy system. Some alternative encodings like what3words may be used to encode distinct points, but area's become quite a challenge in such systems. All physical locations located on the earths surface that were described by addresses and postal codes can be encoded by spatial datatypes. The multipolygon may be used to represent more complex areas like the city Amsterdam as seen in \ref{fig:Amsterdam}. The OGC standard offers a mature and thorough set of geospatial features that MongoDB does not support. As the required data types, operations and predicates exist in both SQL and NoSQL, it is beneficial to opt for MongoDB for its performance and alignment with the teams experience. Although if robustness is desired, or extra GIS functionalities required, SQL should be taken into consideration. Overlapping areas in conflicting rules can be resolved by assigning priorities to rules. This enables users to reason about their pricing rules more easily, and makes the intent of these pricing rules more interpretable for other people.
+
