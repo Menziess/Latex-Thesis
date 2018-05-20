@@ -34,24 +34,24 @@ A basic dynamic price calculation system was implemented in the first sprint, ai
 Company pricing rules can be used by applications so that each application uses a subset of the pricing rules. For this reason, TPS requires two identifiers to make a price calculation using rules for a particular company application: a companyId and a daAppInstallId. JSON Web Tokens that are signed by the core system contain the identifiers in the payload, so that TPS can use the identifiers after decrypting the token. Companies have one country assigned by default, which determines the currency and VAT percentage. In the breakdown, the VAT percentage is calculated from the actual price, as VAT is included. Discounts are part of the breakdown, being a percentage of the route price, or a fixed price. On top of that, it is possible that a company application uses rules that are related to a debtor, instead of its own subset of rules. Finally, the project is deployed to a staging environment so that the system could be used by the applications in the staging environment.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sprint 3 - Pricing Rules and Products
+% Sprint 3 - Products and Pricing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Sprint 3 - Setting up the Portal}
+\section{Sprint 3 - Products and Pricing}
 At this point the system is fully operational, but company and daAppInstall information has to be inserted in the database manually. An endpoint is made that inserts a full company setup into the database so that prices can be calculated with five products by default. No wireframes were made beforehand, making it a task for the current sprint being executed while setting up the portal project. Angular in conjunction with Covalents UI platform is used to make the user interface, consisting of an overview and detail page for products and pricing rules. The pricing rules overview shows pricing information for each product that a company has. Whenever a product is added, the pricing information for that new project is automatically added to each rule. Conversely, whenever a new rule is added, all the existing products get their pricing information added to the new rule. On top of that, threshold rules can be added or deleted for distances and durations, making this particular view very complex. This final task was only operational in the backend.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sprint 4 - Discounts and Apps
+% Sprint 4 - Apps and Timeframes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Sprint 4 - Expanding the Portal}
+\section{Sprint 4 - Apps and Timeframes}
 Feedback was given by the product owner after each sprint, resulting into new requirements and modifications to requirements. A functionality was required that enabled the user to sort pricing rules and special rates (discounts), by dragging the rows in a table to the correct positions. Whenever a priority changed, all subsequent rows needed to be updated to maintain a consistent prioritized list without duplicates. Another requirement would enable products to be returned in the breakdown as 'on-meter' results. This meant that, whenever a destination or departure location was undefined, the system would return products without a price, so that the apps could assign a price later, but would still be aware of the available products. A view was added that displayed all apps of a company, and a detail page was added in which rules and discounts could be associated with those apps. This detail page was created in three iterations. The titles and labels of all pages were replaced by references to the localization api for internationalization as seen in Figure \ref{fig:Architecture}. Timeframe components were added to multiple views, in which hours per week could be specified between two dates.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sprint 5 - Expanding the Portal
+% Sprint 5 - Thresholds
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Sprint 5 - Expanding the Portal}
+\section{Sprint 5 - Thresholds}
 Thresholds, just like prioritized rules and discounts, had to be ordered, as they were independently embedded in multiple price entities that had to be synchronized consistently. A rule has pricing information for every product, and every product has many thresholds. Whenever a threshold property is mutated, every other threshold must be updated as well. Also no duplicates were allowed, and no empty price values were allowed inside the thresholds. Thresholds could independently be removed and added, where in the last case values would be copied from the last to the newly added threshold so that the user would not need to manually insert all values. The timeframes were expanded so that either hours per week were used to determine whether a rule should be triggered, or a time could be set to further restrict the begin and end date of the timeframes. Price estimations were added as a setting on all relations between all entities and rules, or discounts. Portal authentication was implemented so that a JWT was requested at the core system, the token stored in localstorage and used to communicate with TPS. The automatic call to generate synchronized company data was enabled for the core system, such that every time a company was created in the core system, it was also created in TPS. A locations overview was added that displayed a list of areas and points. The detail page for each location shows a map with the shape or point displayed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
