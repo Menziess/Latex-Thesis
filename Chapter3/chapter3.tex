@@ -12,7 +12,7 @@
 %
 \chapter{System Architecture}
 \section{Introduction}
-In order to succesfully integrate a new system component in an existing system architecture, flows of information must be aligned with adjacent system components, so that data dependencies of the new component are satisfied, and expected functionalities can be provided in return. This chapter explains which important aspects dictate the systems architecture to implement TPS, taking quality metrics into account. ISO/IEC 25010 is the latest objective standard for systems and software engineering, providing a common understanding of software quality characteristics \cite{iso-25010}.
+In order to succesfully integrate a new system component in an existing system architecture, flows of information must be aligned with adjacent system components, so that data dependencies of the new component are satisfied, and expected functionalities can be provided in return. The technologies and methods that are going to be used are depending on these decisions, but must be looked at in isolation for comparison.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Architectural Patterns
@@ -33,11 +33,11 @@ The bigger and smaller shapes in the Figure represent large API's and smaller se
 
 \subsection{Monoliths}
 \[\mu ov \acute{o} \lambda \iota \theta o \sigma \qquad monolithos\]
-In greek it means: one stone. Monoliths are large single upright blocks of stone, especially shaped into or serving as a pillar or monument --- almost what you see when you go into legacy code. You theorize; how was it that ancient primitive people were able to put together this codebase. In the context of computer software, a monolithic system may have different definitions. Rod Stephens captures the meaning of a monolithic architecture quite broadly: "In a monolithic architecture, a single program does everything. It displays the user interface, accesses data, processes customer offers, prints invoices, launches missiles, and does whatever else the application needs to do" in \cite{rod-BSE}. In general, a monolith describes a software application which is designed without modularity. The bigger shapes in Figure \ref{fig:Architecture} can be classified as monoliths. Even though the frontend is separated in some cases, it fits the description most accurately. Integration of TPS could be achieved by implementing TPS as a component of a monolith. What logically follows is either duplication, or dependencies between large systems. The first contradicts an important principle of software engineering; don't repeat yourself (DRY), the second limits scalability and independence of deployment. The legacy system has demonstrated this issue because it has its price calculation system in this manner, now facing difficulties of providing the price calculation functionality to new projects. If the previous price calculation system was implemented as a service, it could have been reused or redeployed as a second separate price calculation system for YDA.
+In the context of computer software, a monolithic system may have different definitions. Rod Stephens captures the meaning of a monolithic architecture quite broadly: "In a monolithic architecture, a single program does everything. It displays the user interface, accesses data, processes customer offers, prints invoices, launches missiles, and does whatever else the application needs to do" in \cite{rod-BSE}. In general, a monolith describes a software application which is designed without modularity. The bigger shapes in Figure \ref{fig:Architecture} can be classified as monoliths. Even though the frontend is separated in some cases, it fits the description most accurately. Integration of TPS could be achieved by implementing TPS as a component of a monolith. What logically follows is either duplication, or dependencies between large systems. The first contradicts an important principle of software engineering; don't repeat yourself (DRY), the second limits scalability and independence of deployment. The legacy system has demonstrated this issue because it has its price calculation system in this manner, now facing difficulties of providing the price calculation functionality to new projects. If the previous price calculation system was implemented as a service, it could have been reused or redeployed as a second separate price calculation system for YDA.
 
 \subsection{Microservices}
 % https://resources.sei.cmu.edu/asset_files/Presentation/2016_017_001_454683.pdf
-A consensual definition of microservices does not exist, but can be described as a development technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in Figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}, mentioning; improvements in development speed through parallel development, isolated deployment and continuous delivery (CD), scalability and potential parallelism, and independence in case of failure. Fiar points of criticism have also been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, security, and message formats.
+A consensual definition of microservices does not exist, but can be described as a development technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in Figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}, mentioning; improvements in development speed through parallel development, isolated deployment and continuous delivery (CD), scalability and potential parallelism, and independence in case of failure. Fair points of criticism have been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, security, and message formats.
 
 \subsection{Frontend and Backend}
 The requirements state that the frontend should be integrated in multiple portals. This would mean that separate views have to be developed for each portal, or the views should be provided to the portals via iframes, or some similar technique. In the last case, it may be benificial to combine the frontend and backend in the same project structure. This would be in conflict with this three-tier pattern, which is not desired in respect to the evolution of the system architecture. Integration of the backend would mean that the core system should contain the price calculation system as a component, and separation of the backend would mean that the backend would be set up as a separate service. Possibilities of separation and integration of the frontend and the backend are another aspect that has to be taken into account before implementation of TPS.
@@ -111,18 +111,22 @@ A decision must be made whether company and product information is stored in a s
 % - How can authentication between services be implemented or improved?
 %
 \section{Authentication and Authorization}
-Mobile applications should be able to make requests, just like the portals that are to be developed, but portal users and mobile app users consume microservices in different ways. Mobile apps merely request prices of products, based on the rules that group admins define through the portal. To make sure that only the portal users have the right to mutate their data, users have to be authenticated and authorized within the microservice. Identity management becomes a problem if data duplication is not desired. If a user makes a direct request to the microservice, the credentials have to be compared to user data in a database. In the legacy system architecture, different services implement different authentication methods, store different pieces of information of different users. One consistent piece of identity in all systems within taxiID is the combination of the company and application installment. These two identifiers describe which resources a user is authorized for. In the legacy system, authorization is achieved by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. To prevent duplication, the microservice could be connected to the database that is used by the core system. But this makes the microservice less decoupled, and directly contradicts the desire to separate data dependencies as described in the previous section. In Appendix \ref{appendix:slides_2_authentication}, four proposals were made in which the problem of information dependencies, authentication and authorization were solved using different approaches.
+Mobile applications should be able to make requests, just like the portals that are to be developed, but portal users and mobile app users consume microservices in different ways. Mobile apps merely request prices of products, based on the rules that group admins define through the portal. To make sure that only the portal users have the right to mutate their data, users have to be authenticated and authorized within the microservice. Identity management becomes a problem if data duplication is not desired. If a user makes a direct request to the microservice, the credentials have to be compared to user data in a database. In the legacy system architecture, different services implement different authentication methods, store different pieces of information of different users. One consistent piece of identity in all systems within taxiID is the combination of the company and application installment. These two identifiers describe which resources a user is authorized for.
+
+In the legacy system, authorization is achieved by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. To prevent duplication, the microservice could be connected to the database that is used by the core system. But this makes the microservice less decoupled, and directly contradicts the desire to separate data dependencies as described in the previous section.
+
+In Appendix \ref{appendix:slides_2_authentication}, four solutions were proposed capable of solving the problem of information dependencies, authentication and authorization, using different approaches.
 
 \begin{itemize}
 	\item Example 1: The microservice authenticates and authorizes users all by itself, managing sessions and storing user data in its database.
-	\item Example 2: The microservice connects to an exising databases to acquire the required information about the user.
+	\item Example 2: The microservice connects to an exising databases to acquire user information.
 	\item Example 3: The core system authenticates the user and provides a token that can be verified by the microservice, containing user identity.
 	\item Example 4: A separate service is used for authentication and authorization so that the core system is not involved at all.
 \end{itemize}
 
 In the first example, the microservice seems to work independently, because it has knowledge about the users identity without making requests to adjacent systems, or connecting to external databases. But this is not true. If data about the user is mutated in the core system, the microservice needs to be notified or synced. This greatly hinders scaling and makes it harder to keep data consistent. Example two solves the inconsistency part by connecting to the central database that holds user data, but contradicts the strive for encapsulation.
 
-\subsection{OAuth 2.0}
+\subsection{OAuth 2.0 Proposal}
 Example four delegates managing user identity to a separate authentication service that, similar to the pricing microservice, has its own single task of authenticating users. OAuth 2.0 is a protocol that has been designed to allow third-party apps to grant access to an HTTP service on behalf of the resource owner. This behaviour could be utilized to allow users to make use of services within the architecture, controlled by a single service, stored in a single token. A proposal was made in the Pregame document to combine oAuth with JWT and an API Gateway to introduce an automated authentication flow with a single token, instead of sending multiple headers, see Appendix \ref{appendix:pregame}.
 
 \begin{figure}[H]
@@ -132,7 +136,7 @@ Example four delegates managing user identity to a separate authentication servi
 	\label{fig:Auth1}
 \end{figure}
 
-\subsection{JSON Web Tokens}
+\subsection{JSON Web Token Proposal}
 Example three entirely removes the database connection to any user data. This is possible when a JSON Web Token (JWT) is used. A JWT may be signed with a cryptographic algorithm or even a public/private key pair using RSA. After the user enters valid credentials, the core system validates the credentials by comparing them with user data in the database.
 
 \begin{lstlisting}[caption={Two user identifiers and registered claim names stored inside the payload of a JSON web token.}, label={lst:payload}]
@@ -156,7 +160,7 @@ The core system signs a token that with a secret that is known by the microservi
 	\label{fig:Auth2}
 \end{figure}
 
-\subsection{API Gateway}
+\subsection{API Gateway Proposal}
 Another common structure that allows services to be used by external agents is the API Gateway. It allows for a central middleware in which authentication and authorization is handled, where the microservices are shielded from public access, and all communication is established through the API Gateway \cite{api-gateway}. Next to authentication, the gateway could optimize the endpoints so that no multiple requests are needed from external agents to gather different types of resources. These calls could be made internally to the microservices behind the gateway. This also opens the possibility the freely change the microservices without changing the public endpoints exposed by the gateway, and even offers slow or instant transitions to different versions of microservices. The different proposals explain the improvements they may bring over some system. But the advice given is not tied to this project, instead to the entire Dispatch API. It’s advised to have a constructive dialogue about the future of the company, and the way it’s planning to scale. One could put a API Gateway in front of a monolithic app to help with transitioning to a microservice-oriented app.
 
 \begin{figure}[H]
@@ -166,34 +170,77 @@ Another common structure that allows services to be used by external agents is t
 	\label{fig:Auth3}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Languages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Languages}
+PHP
+Typescript
+Java
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Technologies
+% Frameworks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Which methods and technologies can be used to ensure suitability and
-%   improve maintainability and testability?
 %
-\section{Technologies}
-\mynote{Rewrite section: why not PHP, MySQL, GraphQL??}
-% Node JS, PHP, MongoDB, MySQL, Microservice, Loopback, Graph QL,
+\section{Frameworks}
+Loopback
+NodeJS
+GraphQL
+
 An important choice that has to be made is the framework in which the project is going to be built. The team has experience with LoopBack 3.0 \cite{lb}, but considering the fact that this microservice is very small, and may not need the large amount of abstractions, Express.js is more suitable for the job. Although this means that required functionalities, that come out of the box with Loopback, have to be replaced. The API should be capable of exposing endpoints (that are going to be specified in more detail in the next phase) that are available to the DriverPortal and to external services. The endpoints for the DriverPortal should expose CRUD operations on resources that are used to calculate a trip. The endpoint for external services has only one task, given some trip information, a price has to be calculated based on the rules of the application that has been used. As mentioned, the team has experience with Loopback, and having most code written in Loopback, making it easier to transfer pieces of functionality between projects. It has a built in ORM including CRUD endpoints. On the other hand, Loopback has a steeper learning curve, stagnating velocity among external or new developers. Keeping the code base up to date may be harder because of increased amount of dependencies. There’s no clear winner. The best choice should be the result of a consensus between core developers.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Methods and Techniques
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Which methods and technologies can be used to ensure suitability and
-%   improve maintainability and testability?
-%
-\section{Methods and Techniques}
-Software Reliability is defined as the probability of an item to perform a required function under stated conditions for a specified period of time. New features often introduce bugs by adding functionalities that are broken, although the reliability of the existing functionalities may also be impacted because of changes in the existing code. To prevent units of code from malfunctioning, regression tests may be implemented to validate whether a unit still functions according to a set of conditions. Static and dynamic tests may be performed using the framework Mocha \cite{mocha} and the assertion library Chai \cite{chai}. To further reduce the chances of introducing bugs, some additional techniques could be used.
+The backend should be loosely coupled, but should be accessible by all users who are able to authenticate and authorize themselves. It’s advised to implement the system as a microservice, because it separates the concern effectively. By implementing the system as a module, the implementation is entirely dependent on the existing system it’s implemented in, stalling modernization of architecture in the long run. The solution that is presented in the pregame solves this challenge by having one microservice handle the requests that are in some cases routed through the DispatchAPI. The requests sent by a user from any portal should be directed at the microservice, while price calculation requests should be routed through the DispatchAPI. Loopback should be used as a framework, preferably in combination with typescript.
 
-\mynote{Expand upon choices: CircleCI, Buddy-Works, Typescript, and what is functional programming?}
-\begin{enumerate}
-	\item Typescript
-	\item Functional Programming Paradigm
-	\item Linting
-	\item Automated Software Validation
-\end{enumerate}
+Angular
+
+The first non-functional requirement states that the solution should be seamlessly integrated in the portal. On top of that, a user shouldn’t have to log in again to make use of the pricing service from within that portal. Iframes, objects and embeds have been mentioned as potential solutions to integrate a frontend in several distinct portals. This problem affects more than just the pricing project, therefore a decision must be made on a higher level before the frontend will be integrated, but the decision is not required for the first sprint to start. The options that are available are: an integrated view inside the existing DispatchAPI project or a separate solution built in Vue2 with a material design style that can be integrated using an iframe. The user interface will contain an overview showing the main concepts that a user has to maintain: pricing rules, locations, discounts. The UI should be focussed on linear navigation with overviews of detail pages. The UI will contain a screen to assign rules and discounts to DaAppInstallations and debtors, a screen to define locations, a screen to edit rules, a screen to modify vehicle types, and a screen to define timeframes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Databases
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Databases}
+MySQL
+MariaDB
+MongoDB
+
+MongoDB should be used over an SQL database because of its scalability. MongoDB supports geographical location types, geospatial queries including the predicate to check which polygons contain a single point, or retrieving all points contained within a single polygon.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Paradigms
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Paradigms}
+The object-oriented programming (OOP) paradigm offers many ways to keep a system structured. Good software design has low coupling and high cohesion, meaning that software components should have a high degree of belongingness, and a low degree of dependence in respect of eachother.
+
+As stated in the previous chapter, another paradigm that could potentially improve the price calculation system is called: functional programming (FP).
+
+These two paradigms together are capable of providing a modular system that is highly cohesive, and very low coupled. To understand more about the structure of the system, a class diagram visualizes the most important components in \ref{fig:ClassDiagram}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Tests
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Tests}
+Mocha
+Chai
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Software Validation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Software Validation}
+
+Linting is the process of running a program that will analyse code for potential errors.
+
+Sonarqube
+
+Buddy-Works
+
+CircleCI
+
+Software Reliability is defined as the probability of an item to perform a required function under stated conditions for a specified period of time. New features often introduce bugs by adding functionalities that are broken, although the reliability of the existing functionalities may also be impacted because of changes in the existing code. To prevent units of code from malfunctioning, regression tests may be implemented to validate whether a unit still functions according to a set of conditions. Static and dynamic tests may be performed using the framework Mocha \cite{mocha} and the assertion library Chai \cite{chai}. To further reduce the chances of introducing bugs, some additional techniques could be used.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Conclusion
@@ -202,3 +249,19 @@ Software Reliability is defined as the probability of an item to perform a requi
 %
 \section{Conclusion}
 Taking all the different aspects in this chapter into account, the advised architectural design of TPS comprises of integrated frontend views in each required portal using the associated available technologies, a separate NodeJS microservice with its own MongoDB database, Loopback as a framework to quickly implement functionalities using Typescript and a combination of OOP and FP, authentication via JWT, automated tests using mocha and chai, and continuous delivery and automated testing using Buddy-Works.
+
+\begin{table}[htbp!]
+	\centering
+	\begin{tabular}{ccc|c|c|c|c|c|c|c|c}
+		\toprule
+		\multicolumn{3}{c}{Phase I - Pregame}   &
+		\multicolumn{8}{c}{Phase II - Game}  		\\
+		\midrule
+
+		\midrule
+
+		\bottomrule
+	\end{tabular}
+	\caption[Planning]{Project roadmap}
+	\label{tab:planning}
+\end{table}

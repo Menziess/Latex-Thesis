@@ -53,7 +53,7 @@ YDA depends on the price calculation module that is part of the legacy system fo
 %   \label{fig:dependencies}
 % \end{figure}
 %
-The current price calculation module knows three types of pricing rules: fixed prices based on postal codes, tier prices based on kilometer thresholds, and dynamic calculations based on distance and duration of a ride. A company may have as many rules as required, only one rule will be used to calculate the final price, and the rules are matched in the same order respectively. The fixed rules are defined by downloading, modifying, and uploading a .csv file as presented in Table \ref{tab:fixedprices}, the other types of rules are simply managed through a web form.
+The current price calculation module knows three types of pricing rules: fixed prices based on postal codes or addresses, tier prices based on kilometer thresholds, and dynamic calculations based on the distance and duration of a ride. A company may have as many rules as required, only one rule will be used to calculate the final price, and the rules are matched in the same order respectively. The fixed rules are defined by downloading, modifying, and uploading a .csv file as presented in Table \ref{tab:fixedprices}, the other types of rules are simply managed through a web form.
 
 \begin{table}[htbp!]
 	\centering
@@ -77,7 +77,7 @@ The current price calculation module knows three types of pricing rules: fixed p
 	\label{tab:fixedprices}
 \end{table}
 
-When a passenger books a ride, the price calculation module will first compare the postal codes, amount of passengers, and vehicle types in the fixed pricing rules with the information provided by the passenger's application. The fixed price is returned as soon as a match is found. If no match is found in any of the fixed pricing rules, the system proceeds to calculate a price using a kilometer threshold based rule, given that at least one exists. This type of calculation decreases or increases the price per kilometer for every successive amount of kilometers that have surpassed a predetermined threshold. This concept will be discussed in chapter 4. If this rule does not exist, a dynamic rule is used to calculate the price based on distance and duration of the ride. Finally, on top of the prices that have been calculated, a discount may be applied as a fixed amount, as a percentage of the price, or as a so called alternative fixed pricing table. When this last option is selected, the price will be calculated all over, using a newly referenced fixed pricing rule. This process is not just hard to understand for a user, who has to reason about the companies prices. But it is also hard to understand for programmers, who have to maintain the code that supports this functionality. A small mistake in the csv file could lead to great issues if the mistake goes through processing undetected.
+When a passenger books a ride, the price calculation module will first compare the postal codes / addresses, amount of passengers, and vehicle types in the fixed pricing rules with the information provided by the passenger's application. The fixed price is returned as soon as a match is found. If no match is found in any of the fixed pricing rules, the system proceeds to calculate a price using a kilometer threshold based rule, given that at least one exists. This type of calculation decreases or increases the price per kilometer for every successive amount of kilometers that have surpassed a predetermined threshold. This concept will be discussed in chapter 4. If this rule does not exist, a dynamic rule is used to calculate the price based on distance and duration of the ride. Finally, on top of the prices that have been calculated, a discount may be applied as a fixed amount, as a percentage of the price, or as a so called alternative fixed pricing table. When this last option is selected, the price will be calculated all over, using a newly referenced fixed pricing rule. This process is not just hard to understand for a user, who has to reason about the companies prices. But it is also hard to understand for programmers, who have to maintain the code that supports this functionality. A small mistake in the csv file could lead to great issues if the mistake goes through processing undetected.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Assignment
@@ -117,9 +117,9 @@ This question encapsulates the four important challenges that have to be dealt w
 		      % Area, Polygon, Zipcode, Gps pair, Place, Collections
 					\item Which location types matter for this project?
 					% 3 words, gps, geospatial,
-					\item How can postal codes be abstracted to geospatial data while retaining the same usefulness in the system?
+					\item How can legacy system location definitions be abstracted?
 					% Polygons overlapping
-		      \item Can a system be created that does not rely on postal codes and addresses?
+					\item Is there a way to match locations more effectively?
 					% Show queries with box and star
 		      \item Which Database Management Systems (DBMS)s cover the location storage use cases for this project?
 	      \end{enumerate}
