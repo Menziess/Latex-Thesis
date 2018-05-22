@@ -18,15 +18,15 @@ In the previous chapter, information dependencies were discussed. This chapter c
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{The System}
+A database schema design was created
 
-
-removev class diagram
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\textwidth]{ClassDiagram}
-	\caption[Class Diagram]{Class diagram.}
-	\label{fig:ClassDiagram}
-\end{figure}
+% removev class diagram
+% \begin{figure}[H]
+% 	\centering
+% 	\includegraphics[width=1\textwidth]{ClassDiagram}
+% 	\caption[Class Diagram]{Class diagram.}
+% 	\label{fig:ClassDiagram}
+% \end{figure}
 
 \mynote{Expand on
 	interfaces,
@@ -42,14 +42,9 @@ removev class diagram
 	Strategy pattern,
 }
 
-The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. The entire class diagram should adhere to Uncle Bob's SOLID principles. State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. As discussed in the previous chapter, Typescript plays an important role in mixing OOP and FP together. The database schema desgin as shown in the previous chapter gives an inpression on the different pieces of information required to calculate a price. Such a schema provides a good insight in the relationships that different entities have, but may distract from the actual story that is happening within each calculation. In Figure \ref{fig:DataModel} a conceptual model can be seen having association and composition relations in UML notation. This model will be used to refer to throughout this chapter.
+The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. The entire class diagram should adhere to Uncle Bob's SOLID principles. State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. As discussed in the previous chapter, Typescript plays an important role in mixing OOP and FP together. The database schema desgin as shown in the previous chapter gives an inpression on the different pieces of information required to calculate a price. Such a schema provides a good insight in the relationships that different entities have, but may distract from the actual story that is happening within each calculation.
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\textwidth]{DataModel}
-	\caption[DataModel]{Conceptual data model showing database entity relations.}
-	\label{fig:DataModel}
-\end{figure}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Locations
@@ -312,10 +307,10 @@ Keep in mind that unlike the listings the prices in the proposal are not display
 The first proposal is chosen to be implemented, where the flag 'fixedPrice' is replaced by the 'isEstimated' flag to clearly reflect its purpose.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Conclusion
+% Premise
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Conclusion}
+\section{Premise}
 \mynote{Conclusion for chapter 4}
 
 

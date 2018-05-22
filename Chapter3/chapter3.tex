@@ -12,7 +12,7 @@
 %
 \chapter{System Architecture}
 \section{Introduction}
-In order to succesfully integrate a new system component in an existing system architecture, flows of information must be aligned with adjacent system components, so that data dependencies of the new component are satisfied, and expected functionalities can be provided in return. The technologies and methods that are going to be used are depending on these decisions, but must be looked at in isolation for comparison.
+In order to succesfully integrate a new system component in an existing system architecture, flows of information must be aligned with adjacent system components, so that data dependencies of the new component are satisfied, and expected functionalities can be provided in return. This chapter explains how system components are decoupled as much as possible, keeping user identity synchronized and communications between systems secure.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Architectural Patterns
@@ -40,70 +40,62 @@ In the context of computer software, a monolithic system may have different defi
 A consensual definition of microservices does not exist, but can be described as a development technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in Figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}, mentioning; improvements in development speed through parallel development, isolated deployment and continuous delivery (CD), scalability and potential parallelism, and independence in case of failure. Fair points of criticism have been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, security, and message formats.
 
 \subsection{Frontend and Backend}
-The requirements state that the frontend should be integrated in multiple portals. This would mean that separate views have to be developed for each portal, or the views should be provided to the portals via iframes, or some similar technique. In the last case, it may be benificial to combine the frontend and backend in the same project structure. This would be in conflict with this three-tier pattern, which is not desired in respect to the evolution of the system architecture. Integration of the backend would mean that the core system should contain the price calculation system as a component, and separation of the backend would mean that the backend would be set up as a separate service. Possibilities of separation and integration of the frontend and the backend are another aspect that has to be taken into account before implementation of TPS.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Accessing Necessary Data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Which data are required to make TPS operational?
-%
-\section{Information Dependencies}
-TPS will provide two types of services based around the same data. Portal users can mutate pricing information, mobile apps can retrieve trip prices. To effectively calculate the price of a ride, or to allow the portal user to mutate pricing data, the app or portal sending the request must be identified and authorized, which will be discussed in the next section. Assuming this has succesfully been achieved, some data may or may not be required from other services or databases in the system architecture. In the case of a price calculation, some extra required data are sent in the body of the request:
+The requirements state that the frontend should be integrated in multiple portals. This would mean that separate views have to be developed for each portal, or the views should be provided to the portals via iframes. In the last case, it may be benificial to combine the frontend and backend in the same project structure. However, this would be in conflict with this three-tier pattern, which is not desired in respect to the evolution of the system architecture. Integration of the backend would mean that the core system should contain the price calculation system as a component, and separation of the backend would mean that the backend would be set up as a separate service. The four possibilities are listed as:
 
 \begin{enumerate}
-	\item vehicleTypes: string[]
-	\item passengerCount: number
-	\item requestedDate: ISODate
-	\item departure: \{ gps: \{ lat: string, lng: string \} \}
-	\item destination: \{ gps: \{ lat: string, lng: string \} \}
+	\item Integrate views in existing portal, build TPS as a separate microservice
+	\item Build separate service providing iframe views, build TPS as a separate microservice
+	\item Integrate views in existing portal, integrate TPS as monolith component
+	\item Build separate service providing iframe views, integrate TPS as monolith component
 \end{enumerate}
 
-% In both the price calculation and the portal data mutation case, required data are stored in one or more databases. The proposed database schema for TPS in Figure \ref{fig:Schema} shows the general structure of the data that must be stored for TPS in order to be operational.
+A more in-depth comparison can be found in table 4.1.1 in Appendix \ref{appendix:pregame}. An advice is given to separate the backend, and integrate the frontend. The final conclusion of Appendix \ref{appendix:pregame} states that the decision has to be made on a higher level, as many external factors play a role in the decision.
 
-% \begin{figure}[ht!]
-% 	\centering
-% 	\includegraphics[width=1\textwidth]{Schema}
-% 	\caption[Database Schema]{Proposed Database Schema Design}
-% 	\label{fig:Schema}
-% \end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Information Dependencies
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Information Dependencies}
+The frontend separation or integration cases have little influence on the further design of the system. The backend separation case however, is only possible if information dependencies are met. This section lays out the information dependencies between systems. A conceptual model can be derived from the database schema design as found in Figure 4.7.1.1 of Appendix \ref{appendix:pregame}, having association and composition relations, see Figure \ref{fig:DataModel}.
 
-% The Company and DaAppInstall entities are fundamental concepts that are found throughout the systems architecture. A company may have multiple dispatch application installations, hence the DaAppInstall abbreviation. To make the schema ready to be implemented, some assumptions were made, for example: the DaAppInstall entity contains a authentication token. This would enable a basic form of authentication and authorization to be present.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{DataModel}
+	\caption[DataModel]{Conceptual data model showing database entity relations.}
+	\label{fig:DataModel}
+\end{figure}
 
-% A large portion of that data are only relevant for price calculations, and should therefore not be stored in existing databases. Data that are relevant to all systems may include but not be limited to:
+Figure \ref{fig:DataModel} will be used as reference throughout the upcoming chapters. In isolation, this model contains all the required information to calculate a price, given the parameters shown in Listing \ref{lst:request}.
 
-\begin{multicols}{2}
-	\begin{enumerate}
-		\item Company
-		      \begin{enumerate}
-			      \item id
-			      \item name
-			      \item taxing / VAT
-			      \item Country
-			      \item Application
-			      \item Debtors
-			      \item Rules
-			      \item Discounts
-			      \item ...
-		      \end{enumerate}
-		\item Country
-		      \begin{enumerate}
-			      \item name
-			      \item language
-			      \item code
-			      \item default VAT
-			      \item currency
-		      \end{enumerate}
-		\item Appliation
-		      \begin{enumerate}
-			      \item id
-			      \item name
-			      \item Rules
-			      \item Discounts
-		      \end{enumerate}
-	\end{enumerate}
-\end{multicols}
+\begin{lstlisting}[caption={Minimal external information required for a trip price calculation.}, label={lst:request}]
+	{
+		"companyId": string
+		"daAppInstallId": string,
+		"vehicleTypes": string[],
+		"passengerCount": number,
+		"requestedDate": ISODate,
+		"departure": { "gps": { "lat": string, "lng": string } },
+		"destination": { "gps": { "lat": string, "lng": string } }
+	}
+\end{lstlisting}
 
-A decision must be made whether company and product information is stored in a shared database that can be accessed by a subset of system architecture components, or whether data should be synchronized in some fashion, or whether there is a possibility that enables dependencies to be eliminated all together.
+A user is identified by a combination of two identifiers: companyId and daAppInstallId. Assuming that companyId and daAppInstallId are provided in the authentication headers, the user can be identified. But this identity is futile if no pricing data is associated with it. There are two options with regard to storing the data in a way that user identity can be used to associate pricing information:
+
+\begin{enumerate}
+	\item A single shared database
+	\item Multiple synchronized databases
+\end{enumerate}
+
+The first option allows TPS to have access to all neccesary data by default. The second option requires systems to drill changes down to depending systems.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.6\textwidth]{DataSync}
+	\caption[DataSync]{Flow of data requests.}
+	\label{fig:DataSync}
+\end{figure}
+
+If a company is added to the core system for example, the same company must be added to the TPS database. Multiple proposal were made aiming to solve the combination of authentication, authorization and data consistency problems. The next section expands on the accepted solution.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Authentication and Authorization
@@ -111,23 +103,19 @@ A decision must be made whether company and product information is stored in a s
 % - How can authentication between services be implemented or improved?
 %
 \section{Authentication and Authorization}
-Mobile applications should be able to make requests, just like the portals that are to be developed, but portal users and mobile app users consume microservices in different ways. Mobile apps merely request prices of products, based on the rules that group admins define through the portal. To make sure that only the portal users have the right to mutate their data, users have to be authenticated and authorized within the microservice. Identity management becomes a problem if data duplication is not desired. If a user makes a direct request to the microservice, the credentials have to be compared to user data in a database. In the legacy system architecture, different services implement different authentication methods, store different pieces of information of different users. One consistent piece of identity in all systems within taxiID is the combination of the company and application installment. These two identifiers describe which resources a user is authorized for.
+In the legacy system, authorization was achieved by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. To prevent duplication, the microservice could be connected to the database that is used by the core system, as example one in Appendix \ref{appendix:slides_2_authentication} suggests. But this makes the microservice less decoupled, and directly contradicts the desire to separate data dependencies. Appendix \ref{appendix:slides_2_authentication} lists four proposals that aim to solve this problem, from which the third option is accepted, as shown in Figure \ref{fig:Authentication}.
 
-In the legacy system, authorization is achieved by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. To prevent duplication, the microservice could be connected to the database that is used by the core system. But this makes the microservice less decoupled, and directly contradicts the desire to separate data dependencies as described in the previous section.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{Authentication}
+	\caption[Authentication]{Accepted authentication proposal.}
+	\label{fig:Authentication}
+\end{figure}
 
-In Appendix \ref{appendix:slides_2_authentication}, four solutions were proposed capable of solving the problem of information dependencies, authentication and authorization, using different approaches.
+The solution completely decouples the information requirements by keeping Core data and TPS data in their respective databases separated. A single directional flow of data to TPS ensures that the Core system remains the single source of truth. This accepted proposal is based on three other separate proposals, that will be explained in the upcoming subsections: OAuth 2.0 Proposal, JSON Web Token Proposal, and API Gateway Proposal. Only JSON Web Tokens were implemented, solving the problem of synchronizing user identity.
 
-\begin{itemize}
-	\item Example 1: The microservice authenticates and authorizes users all by itself, managing sessions and storing user data in its database.
-	\item Example 2: The microservice connects to an exising databases to acquire user information.
-	\item Example 3: The core system authenticates the user and provides a token that can be verified by the microservice, containing user identity.
-	\item Example 4: A separate service is used for authentication and authorization so that the core system is not involved at all.
-\end{itemize}
-
-In the first example, the microservice seems to work independently, because it has knowledge about the users identity without making requests to adjacent systems, or connecting to external databases. But this is not true. If data about the user is mutated in the core system, the microservice needs to be notified or synced. This greatly hinders scaling and makes it harder to keep data consistent. Example two solves the inconsistency part by connecting to the central database that holds user data, but contradicts the strive for encapsulation.
-
-\subsection{OAuth 2.0 Proposal}
-Example four delegates managing user identity to a separate authentication service that, similar to the pricing microservice, has its own single task of authenticating users. OAuth 2.0 is a protocol that has been designed to allow third-party apps to grant access to an HTTP service on behalf of the resource owner. This behaviour could be utilized to allow users to make use of services within the architecture, controlled by a single service, stored in a single token. A proposal was made in the Pregame document to combine oAuth with JWT and an API Gateway to introduce an automated authentication flow with a single token, instead of sending multiple headers, see Appendix \ref{appendix:pregame}.
+\subsection{Proposal OAuth 2.0}
+This proposal delegates managing user identity to a separate authentication service that, similar to the pricing microservice, has its own single task of authenticating users. OAuth 2.0 is a protocol that has been designed to allow third-party apps to grant access to an HTTP service on behalf of the resource owner. This behaviour could be utilized to allow users to make use of services within the architecture, controlled by a single service, stored in a single token. A proposal was made in the Pregame document to combine oAuth with JWT and an API Gateway to introduce an automated authentication flow with a single token, instead of sending multiple headers, see Appendix \ref{appendix:pregame}.
 
 \begin{figure}[H]
 	\centering
@@ -136,8 +124,8 @@ Example four delegates managing user identity to a separate authentication servi
 	\label{fig:Auth1}
 \end{figure}
 
-\subsection{JSON Web Token Proposal}
-Example three entirely removes the database connection to any user data. This is possible when a JSON Web Token (JWT) is used. A JWT may be signed with a cryptographic algorithm or even a public/private key pair using RSA. After the user enters valid credentials, the core system validates the credentials by comparing them with user data in the database.
+\subsection{Proposal JSON Web Token}
+This proposal entirely removes the database connection to any user data. This is possible when a JSON Web Token (JWT) is used. A JWT may be signed with a cryptographic algorithm or even a public/private key pair using RSA. After the user enters valid credentials, the core system validates the credentials by comparing them with user data in the database.
 
 \begin{lstlisting}[caption={Two user identifiers and registered claim names stored inside the payload of a JSON web token.}, label={lst:payload}]
 	{
@@ -160,8 +148,8 @@ The core system signs a token that with a secret that is known by the microservi
 	\label{fig:Auth2}
 \end{figure}
 
-\subsection{API Gateway Proposal}
-Another common structure that allows services to be used by external agents is the API Gateway. It allows for a central middleware in which authentication and authorization is handled, where the microservices are shielded from public access, and all communication is established through the API Gateway \cite{api-gateway}. Next to authentication, the gateway could optimize the endpoints so that no multiple requests are needed from external agents to gather different types of resources. These calls could be made internally to the microservices behind the gateway. This also opens the possibility the freely change the microservices without changing the public endpoints exposed by the gateway, and even offers slow or instant transitions to different versions of microservices. The different proposals explain the improvements they may bring over some system. But the advice given is not tied to this project, instead to the entire Dispatch API. It’s advised to have a constructive dialogue about the future of the company, and the way it’s planning to scale. One could put a API Gateway in front of a monolithic app to help with transitioning to a microservice-oriented app.
+\subsection{Proposal API Gateway}
+The final proposal allows services to be used by external agents is the API Gateway. It allows for a central middleware in which authentication and authorization is handled, where the microservices are shielded from public access, and all communication is established through the API Gateway \cite{api-gateway}. Next to authentication, the gateway could optimize the endpoints so that no multiple requests are needed from external agents to gather different types of resources. These calls could be made internally to the microservices behind the gateway. This also opens the possibility the freely change the microservices without changing the public endpoints exposed by the gateway, and even offers slow or instant transitions to different versions of microservices. The different proposals explain the improvements they may bring over some system. But the advice given is not tied to this project, instead to the entire Dispatch API. It’s advised to have a constructive dialogue about the future of the company, and the way it’s planning to scale. One could put a API Gateway in front of a monolithic app to help with transitioning to a microservice-oriented app.
 
 \begin{figure}[H]
 	\centering
@@ -169,6 +157,8 @@ Another common structure that allows services to be used by external agents is t
 	\caption[API Gateway]{API Gateway}
 	\label{fig:Auth3}
 \end{figure}
+
+\subsection{Reflection}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Languages
@@ -247,21 +237,31 @@ Software Reliability is defined as the probability of an item to perform a requi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - Which decisions could be made following the research in this chapter?
 %
-\section{Conclusion}
+\section{Premise}
+
+integration vs separation frontend
+integration vs separation backend
+
+
+
+
 Taking all the different aspects in this chapter into account, the advised architectural design of TPS comprises of integrated frontend views in each required portal using the associated available technologies, a separate NodeJS microservice with its own MongoDB database, Loopback as a framework to quickly implement functionalities using Typescript and a combination of OOP and FP, authentication via JWT, automated tests using mocha and chai, and continuous delivery and automated testing using Buddy-Works.
 
 \begin{table}[htbp!]
 	\centering
-	\begin{tabular}{ccc|c|c|c|c|c|c|c|c}
+	\begin{tabular}{c|c|c}
 		\toprule
-		\multicolumn{3}{c}{Phase I - Pregame}   &
-		\multicolumn{8}{c}{Phase II - Game}  		\\
+		& MySQL & MongoDB \\
 		\midrule
-
-		\midrule
-
+		Point & \checkmark & \checkmark \\
+		Polygon & \checkmark & \checkmark \\
+		MultiPolygon & \checkmark & \checkmark \\
+		MultiPolygon & \checkmark & \checkmark \\
+		MultiPolygon & \checkmark & \checkmark \\
+		MultiPolygon & \checkmark & \checkmark \\
+		Intersect & \checkmark & \checkmark \\
 		\bottomrule
 	\end{tabular}
-	\caption[Planning]{Project roadmap}
-	\label{tab:planning}
+	\caption[Databases]{Required database features.}
+	\label{tab:databases}
 \end{table}
