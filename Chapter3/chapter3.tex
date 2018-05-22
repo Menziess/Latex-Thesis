@@ -32,18 +32,14 @@ The current system architecture consists of three API's and nine services that c
 The bigger and smaller shapes in the Figure represent large API's and smaller services respectively. The orange colored services are used internally, the green shapes are used by external partners. The smaller services adhere to the pattern that is called service-oriented architecture, where application components provide services over a network typically.
 
 \subsection{Monoliths}
-The bigger shapes in Figure \ref{fig:Architecture} may be classified as monoliths.
-
-% \[\mu ov \acute{o} \lambda \iota \theta o \sigma \qquad monolithos\]
-\[Mo \nu \acute{o} \lambda \iota \theta o \varsigma \qquad monolithos\]
-In the context of computer software, a monolithic system may have different definitions. Rod Stephens captures the meaning of a monolithic architecture quite broadly: "In a monolithic architecture, a single program does everything. It displays the user interface, accesses data, processes customer offers, prints invoices, launches missiles, and does whatever else the application needs to do" in \cite{rod-BSE}. In general, a monolith describes a software application which is designed without modularity. Even though the frontend is separated in some cases, it fits the description most accurately. Integration of TPS could be achieved by implementing TPS as a component of a monolith. But what logically follows is either duplication, or dependencies between large systems. The first contradicts an important principle of software engineering; don't repeat yourself (DRY), the second limits scalability and independence of deployment. The legacy system has demonstrated this issue because it has its price calculation system implemented in this manner, now facing difficulties providing the price calculation functionality to newer projects.
+The bigger shapes in Figure \ref{fig:Architecture} may be classified as monoliths. In the context of computer software, a monolithic system may have different definitions. Rod Stephens captures the meaning of a monolithic architecture quite broadly: "In a monolithic architecture, a single program does everything. It displays the user interface, accesses data, processes customer offers, prints invoices, launches missiles, and does whatever else the application needs to do" in \cite{rod-BSE}. In general, a monolith describes a software application which is designed without modularity. Even though the frontend is separated in some cases, it fits the description most accurately. Integration of TPS could be achieved by implementing TPS as a component of a monolith. But what logically follows is either duplication, or dependencies between large systems. The first contradicts an important principle of software engineering; don't repeat yourself (DRY), the second limits scalability and independence of deployment. The legacy system has demonstrated this issue because it has its price calculation system implemented in this manner, now facing difficulties providing the price calculation functionality to newer projects.
 
 \subsection{Microservices}
 % https://resources.sei.cmu.edu/asset_files/Presentation/2016_017_001_454683.pdf
 If the previous price calculation system was implemented as a service, it could have been reused or redeployed as a second separate price calculation system for YDA instead. A consensual definition of microservices does not exist, but can be defined as a development technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in Figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}, mentioning; improvements in development speed through parallel development, isolated deployment and continuous delivery (CD), scalability and potential parallelism, and independence in case of failure. Fair points of criticism have been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, security, and message formats.
 
 \subsection{Frontend and Backend}
-A model-view-controller pattern is separating the business and presentation layers in various frontend projects. The requirements state that the frontend should be integrated in multiple portals. This would mean that separate views have to be developed for each portal, or the views should be provided to the portals via iframes. In the last case, it may be beneficial to combine the frontend and backend in the same project structure. However, this would be in conflict with this three-tier pattern, which is not desired in respect to the evolution of the system architecture. Integration of the backend would mean that the core system should contain the price calculation system as a component, and separation of the backend would mean that the backend would be set up as a separate service. Four possibilities may be listed as:
+A model-view-controller pattern is separating the business and presentation layers in various frontend projects. The requirements state that the frontend should be integrated in multiple portals. This would mean that separate views have to be developed for each portal, or the views should be provided to the portals via iframes. In the last case, it may be beneficial to combine the frontend and backend in the same project structure. However, this would be in conflict with this three-tier pattern, which is not desired in respect to the evolution of the system architecture. Integration of the backend would mean that the core system should contain the price calculation system as a component, and separation of the backend would mean that the backend would be set up as a separate service. As an overview, the four possibilities may be listed as:
 
 \begin{enumerate}
 	\item Integrate views in existing portal, build TPS as a separate microservice
@@ -52,14 +48,14 @@ A model-view-controller pattern is separating the business and presentation laye
 	\item Build separate service providing iframe views, integrate TPS as monolith component
 \end{enumerate}
 
-The final decision is based on a more in-depth comparison, that can be found in table 4.1.1 in Appendix \ref{appendix:pregame}. An advice is given to separate the backend, and integrate the frontend. The final conclusion of Appendix \ref{appendix:pregame} states that the decision has to be made on a higher level, as many external factors play a role in the decision.
+The final decision is based on a comparison found in table 4.1.1 in Appendix \ref{appendix:pregame}. An advice is given to separate the backend, and integrate the frontend. The final conclusion of Appendix \ref{appendix:pregame} states that the decision has to be made on a higher level, as many factors outside the scope of this project play a role in the decision.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Information Dependencies
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Information Dependencies}
-The frontend separation or integration cases have little influence on the further design of the system. The backend separation case however, is only possible if information dependencies are met. This section lays out the information dependencies between systems. A conceptual model can be derived from the database schema design as found in Figure 4.7.1.1 of Appendix \ref{appendix:pregame}, having association and composition relations, see Figure \ref{fig:DataModel}.
+The frontend separation or integration cases have little influence on the further design of the system. The backend separation case however, is only possible if information dependencies are satisfied. A conceptual model can be derived from the database schema design in Figure 4.7.1.1 of Appendix \ref{appendix:pregame}, see Figure \ref{fig:DataModel}. This model shows all entities and relations that make up the price calculation system.
 
 \begin{figure}[H]
 	\centering
@@ -68,7 +64,7 @@ The frontend separation or integration cases have little influence on the furthe
 	\label{fig:DataModel}
 \end{figure}
 
-Figure \ref{fig:DataModel} will be used as reference throughout the upcoming chapters. In isolation, this model contains all the required information to calculate a price, given the parameters shown in Listing \ref{lst:request}.
+In isolation, this model contains all the required information to calculate a price, provided the parameters shown in Listing \ref{lst:request}.
 
 \begin{lstlisting}[caption={Minimal external information required for a trip price calculation.}, label={lst:request}]
 	{
@@ -82,14 +78,15 @@ Figure \ref{fig:DataModel} will be used as reference throughout the upcoming cha
 	}
 \end{lstlisting}
 
-A user is identified by a combination of two identifiers: companyId and daAppInstallId. Assuming that companyId and daAppInstallId are provided in the authentication headers, the user can be identified. But this identity is futile if no pricing data is associated with it. There are two options with regard to storing the data in a way that user identity can be used to associate pricing information:
+The concrete data from the conceptual model could in theory be stored in one database, separate from the existing core database. How would the company data be synchronized? And does the system know which pricing rules should be used for the calculation? A user is identified by a combination of two identifiers: companyId and daAppInstallId. Assuming that companyId and daAppInstallId are provided in the authentication headers, the user can be identified. But this identity is futile if no pricing data is associated with it. There are three options with regard to storing the data in a way that user identity can be used to associate pricing information:
 
 \begin{enumerate}
-	\item A single shared database
-	\item Multiple synchronized databases
+	\item Centralized state - a single centralized database
+	\item Distributed state - multiple distributed synchronized databases
+	\item Minimal state - multiple independent databases with stateless references
 \end{enumerate}
 
-The first option allows TPS to have access to all neccesary data by default. The second option requires systems to drill changes down to depending systems.
+A single source of truth, central database, would avoid having duplicate data all together. No synchronization, thus no network communication is neccesary, and all data is always readily available. This design desecrates the independency aspect of microservices. The multiple synchronized databases option raises the problem of having duplicate, out of sync data.
 
 \begin{figure}[H]
 	\centering
@@ -98,7 +95,7 @@ The first option allows TPS to have access to all neccesary data by default. The
 	\label{fig:DataSync}
 \end{figure}
 
-If a company is added to the core system for example, the same company must be added to the TPS database. Multiple proposal were made aiming to solve the combination of authentication, authorization and data consistency problems. The next section expands on the accepted solution.
+A one-way dataflow could reduce this problem, but it is not always entirely avoidable. This design does adhere to the concept of microservices by allowing independent deployments still. The minimal state option would improve on the previous option, by only allowing data to be referenced back in a stateless manner. This means that a company in the core database could have related data stored in the TPS database, without being 'aware' of it. The entities that reference the company can be used in an autonomous fashion, where only the neccesary information is sent to TPS whenever a request is made. Multiple proposal were made aiming to solve the combination of authentication, authorization and data consistency problems. The next section expands on the accepted solution.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Authentication and Authorization
@@ -106,7 +103,7 @@ If a company is added to the core system for example, the same company must be a
 % - How can authentication between services be implemented or improved?
 %
 \section{Authentication and Authorization}
-In the legacy system, authorization was achieved by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. To prevent duplication, the microservice could be connected to the database that is used by the core system, as example one in Appendix \ref{appendix:slides_2_authentication} suggests. But this makes the microservice less decoupled, and directly contradicts the desire to separate data dependencies. Appendix \ref{appendix:slides_2_authentication} lists four proposals that aim to solve this problem, from which the third option is accepted, as shown in Figure \ref{fig:Authentication}.
+In the legacy system, authorization was achieved by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. To prevent duplication, the microservice could be connected to the database that is used by the core system. But this makes the microservice less decoupled, and directly contradicts the desire to separate data dependencies. Appendix \ref{appendix:slides_2_authentication} lists four proposals, based on three proposals listed in Appendix \ref{appendix:pregame}, chapter 4.4, which are further explained in the subsections below. The third proposal is accepted, as shown in Figure \ref{fig:Authentication}. This solution closely resembles the minimal state option discussed in the previous section.
 
 \begin{figure}[H]
 	\centering
@@ -115,17 +112,7 @@ In the legacy system, authorization was achieved by sending extra headers for ea
 	\label{fig:Authentication}
 \end{figure}
 
-The solution completely decouples the information requirements by keeping Core data and TPS data in their respective databases separated. A single directional flow of data to TPS ensures that the Core system remains the single source of truth. This accepted proposal is based on three other separate proposals, that will be explained in the upcoming subsections: OAuth 2.0 Proposal, JSON Web Token Proposal, and API Gateway Proposal. Only JSON Web Tokens were implemented, solving the problem of synchronizing user identity.
-
-\subsection{Proposal OAuth 2.0}
-This proposal delegates managing user identity to a separate authentication service that, similar to the pricing microservice, has its own single task of authenticating users. OAuth 2.0 is a protocol that has been designed to allow third-party apps to grant access to an HTTP service on behalf of the resource owner. This behaviour could be utilized to allow users to make use of services within the architecture, controlled by a single service, stored in a single token. A proposal was made in the Pregame document to combine oAuth with JWT and an API Gateway to introduce an automated authentication flow with a single token, instead of sending multiple headers, see Appendix \ref{appendix:pregame}.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=.7\textwidth]{Auth1}
-	\caption[OAuth 2.0]{OAuth requests where tokens are verified by Auth Server}
-	\label{fig:Auth1}
-\end{figure}
+The only synchronization steps are executed when a new company or application is created, or when they are deleted. The accepted proposal completely decouples the information requirements by keeping Core data and TPS data in their respective databases separated. But without the means of sharing the user identity, this solution wouldn't work. JSON Web Tokens are part of the solution that solves the problem of synchronizing user identity.
 
 \subsection{Proposal JSON Web Token}
 This proposal entirely removes the database connection to any user data. This is possible when a JSON Web Token (JWT) is used. A JWT may be signed with a cryptographic algorithm or even a public/private key pair using RSA. After the user enters valid credentials, the core system validates the credentials by comparing them with user data in the database.
@@ -142,13 +129,23 @@ This proposal entirely removes the database connection to any user data. This is
 	}
 \end{lstlisting}
 
-The core system signs a token that with a secret that is known by the microservice. The token consists of three parts, separated by a fullstop. The first part (header) of the token contains information about the hashing algorithm that was used to encrypt the payload. This part is Base64Url encoded. The payload itself contains information stored in JSON format as shown in Listing \ref{lst:payload}. The identity of the user is stored in the payload that can only be revealed by whoever holds the secret with which it was signed. Then the message can be verified using the third part of the token, which is the signature. The verification step prevents tampering with the payload. Claims can be added to the payload as shown in \ref{lst:payload} to provide information about the token, as explained in \cite{JWT}.
+The keys other than companyId and daAppInstallId describe expiration date of the token, and other meta information. The core system signs a token that with a secret that is known by the microservice. The token consists of three parts, separated by a fullstop. The first part (header) of the token contains information about the hashing algorithm that is used to encrypt the payload. This part is Base64Url encoded. The payload itself contains information stored in JSON format as shown in Listing \ref{lst:payload}. The identity of the user is stored in the payload that can only be revealed by whoever holds the secret with which it is signed. Then the message can be verified using the third part of the token, which is the signature. The verification step prevents tampering with the payload. Claims can be added to the payload as shown in \ref{lst:payload} to provide information about the token, as explained in \cite{JWT}.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=.7\textwidth]{Auth2}
 	\caption[Stateless JWT]{OAuth with stateless JWT token requests}
 	\label{fig:Auth2}
+\end{figure}
+
+\subsection{Proposal OAuth 2.0}
+This proposal delegates managing user identity to a separate authentication service that, similar to the pricing microservice, has its own single task of authenticating users. OAuth 2.0 is a protocol that has been designed to allow third-party apps to grant access to an HTTP service on behalf of the resource owner. This behaviour could be utilized to allow users to make use of services within the architecture, controlled by a single service, stored in a single token. A proposal is made in the Pregame document to combine oAuth with JWT and an API Gateway to introduce an automated authentication flow with a single token, instead of sending multiple headers, see Appendix \ref{appendix:pregame}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.7\textwidth]{Auth1}
+	\caption[OAuth 2.0]{OAuth requests where tokens are verified by Auth Server}
+	\label{fig:Auth1}
 \end{figure}
 
 \subsection{Proposal API Gateway}
@@ -160,6 +157,8 @@ The final proposal allows services to be used by external agents is the API Gate
 	\caption[API Gateway]{API Gateway}
 	\label{fig:Auth3}
 \end{figure}
+
+This proposal is partly implemented, by sending requests via the core system.
 
 \subsection{Reflection}
 
