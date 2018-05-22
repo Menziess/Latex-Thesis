@@ -20,16 +20,16 @@ In order to succesfully integrate a new system component in an existing system a
 % - Which architectural patterns fit in with the exising architecture?
 %
 \section{Architectural Patterns}
-The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in Figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. The user interface, business logic, and data storage are separated, following the three-tier or multi-tier architecture as described in \cite{IBM-3-tier}.
+The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in Figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. A separation exists between user interface, business logic and data storage that is known as the three-tier or multi-tier architecture, as described in \cite{IBM-3-tier}.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\textwidth]{Architecture}
-	\caption[Current System Architecture]{Current System Architecture provided by taxiID}
+	\caption[Current System Architecture]{Current System Architecture provided by taxiID.}
 	\label{fig:Architecture}
 \end{figure}
 
-The bigger and smaller shapes in the Figure represent large API's and smaller services respectively. The orange colored services are used internally, the green ones can be used by other companies. The smaller services adhere to the pattern that is called service-oriented architecture (SOA), where application components provide services over a network typically.
+The bigger and smaller shapes in the Figure represent large API's and smaller services respectively. The orange colored services are used internally, the green ones can be used by other companies. The smaller services adhere to the pattern that is called service-oriented architecture, where application components provide services over a network typically.
 
 \subsection{Monoliths}
 \[\mu ov \acute{o} \lambda \iota \theta o \sigma \qquad monolithos\]
@@ -58,18 +58,18 @@ TPS will provide two types of services based around the same data. Portal users 
 	\item destination: \{ gps: \{ lat: string, lng: string \} \}
 \end{enumerate}
 
-In both the price calculation and the portal data mutation case, required data are stored in one or more databases. The proposed database schema for TPS in Figure \ref{fig:Schema} shows the general structure of the data that must be stored for TPS in order to be operational.
+% In both the price calculation and the portal data mutation case, required data are stored in one or more databases. The proposed database schema for TPS in Figure \ref{fig:Schema} shows the general structure of the data that must be stored for TPS in order to be operational.
 
-\begin{figure}[ht!]
-	\centering
-	\includegraphics[width=1\textwidth]{Schema}
-	\caption[Database Schema]{Proposed Database Schema Design}
-	\label{fig:Schema}
-\end{figure}
+% \begin{figure}[ht!]
+% 	\centering
+% 	\includegraphics[width=1\textwidth]{Schema}
+% 	\caption[Database Schema]{Proposed Database Schema Design}
+% 	\label{fig:Schema}
+% \end{figure}
 
-The Company and DaAppInstall entities are fundamental concepts that are found throughout the systems architecture. A company may have multiple dispatch application installations, hence the DaAppInstall abbreviation. To make the schema ready to be implemented, some assumptions were made, for example: the DaAppInstall entity contains a authentication token. This would enable a basic form of authentication and authorization to be present.
+% The Company and DaAppInstall entities are fundamental concepts that are found throughout the systems architecture. A company may have multiple dispatch application installations, hence the DaAppInstall abbreviation. To make the schema ready to be implemented, some assumptions were made, for example: the DaAppInstall entity contains a authentication token. This would enable a basic form of authentication and authorization to be present.
 
-A large portion of that data are only relevant for price calculations, and should therefore not be stored in existing databases. Data that are relevant to all systems may include but not be limited to:
+% A large portion of that data are only relevant for price calculations, and should therefore not be stored in existing databases. Data that are relevant to all systems may include but not be limited to:
 
 \begin{multicols}{2}
 	\begin{enumerate}
