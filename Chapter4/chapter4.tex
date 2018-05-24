@@ -8,31 +8,26 @@
 % Trip Price Calculation System
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - Which logic and information is required to calculate a trip price?
-%
+% #region
 \chapter{Trip Price Calculation System}
 \section{Introduction}
-In the previous chapter, information dependencies were discussed. This chapter clarifies which information should comprise a price breakdown to reflect that of the legacy system, how the system should be structured, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed should restrict the time and space dimensions of a price rule without blurring the straightforwardness of the system.
+This chapter clarifies which information should comprise a price breakdown to reflect that of the legacy system, how the system should be structured, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed should restrict the time and space dimensions of a price rule without blurring the straightforwardness of the system.
+% #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Data Model
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\section{The System}
-A database schema design was created
+% #region
+\section{The Project Structure}
+The conceptual model of the database entities as shown in the previous chapter
 
-% removev class diagram
-% \begin{figure}[H]
-% 	\centering
-% 	\includegraphics[width=1\textwidth]{ClassDiagram}
-% 	\caption[Class Diagram]{Class diagram.}
-% 	\label{fig:ClassDiagram}
-% \end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{ClassDiagram}
+	\caption[Class Diagram]{Class diagram.}
+	\label{fig:ClassDiagram}
+\end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Paradigms
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% \section{Paradigms}
 The object-oriented programming (OOP) paradigm offers many ways to keep a system structured. Good software design has low coupling and high cohesion, meaning that software components should have a high degree of belongingness, and a low degree of dependence in respect of eachother. As stated in the previous chapter, another paradigm that could potentially improve the price calculation system is called: functional programming (FP).
 
 \mynote{Expand on
@@ -51,21 +46,23 @@ The object-oriented programming (OOP) paradigm offers many ways to keep a system
 
 The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. The entire class diagram should adhere to Uncle Bob's SOLID principles. State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. As discussed in the previous chapter, Typescript plays an important role in mixing OOP and FP together. The database schema desgin as shown in the previous chapter gives an inpression on the different pieces of information required to calculate a price. Such a schema provides a good insight in the relationships that different entities have, but may distract from the actual story that is happening within each calculation.
 
-
+% #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Locations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% #region
 \section{Locations}
 Locations and timeframes are the big filters that reduce the amount of potential matching rules and discounts based on space and time. The implementation for location queries ...
 \mynote{Working on locations}
+
+% #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Timeframes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - What was proposed as a solution to store a week schedule in a database?
-%
+% #region
 \section{Timeframes}
 Time plays a role in determining whether a rule has matched. The implementation of this concept should preferably offer enough freedom in the future, and should not be tailored toward one specific entity relation. Being able to reuse the timeframe entity improves maintainability of the system. The requirements state that the user must be able to define a start and end time, the days on which the times are active, and the start and end date of the timeframe. This either means that the timeframe one window of time, or that each given day has a single window of time. But if a discount should be active during night of New Years Eve, between 23h and 5h, this description would not be sufficient to cover this use case under any interpretation.
 
@@ -122,10 +119,12 @@ export const regexFromDate = (date: Date) => {
 
 The regexFromDate could be used to create a regex that could be used in a query to check whether a single hour within a week is set. Skip is an integer representing the number of bits that should be skipped to get to the moment represented by the date. So in order to get 11 AM - 12 AM in the presented schedule, 3 * 24 skips + 11 skip = 83 skips are to be made to find the digit 1 on thursday. Because the getDay method on JavaScript date objects return an integer resembling the day, starting at sunday, the startMonday function is used to pretend that it starts on monday.
 
+% #endregion
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Directions Service
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% #region
 \section{The Trip Price Calculation}
 The directions class will provide an interface to retrieve trip related data. The BasicDirections class returns a base case result, while the GoogleDirections class retrieves the data from the Google Directions API. The trip price calculation flow changes drastically when no destination or departure locations are provided in the request body. For this reason, a base case and the google case should be defined using a behavioral strategy pattern as described in \cite{gof}. This improves the systems resistance to change. The flowchart in Figure \ref{fig:Calculation} shows the on-meter (3) and dynamic and fixed (5) rule queries. Just like the directions, the calculator has its strategies to adapt to other circumstances.
 
@@ -138,15 +137,9 @@ The directions class will provide an interface to retrieve trip related data. Th
 
 When the user is authenticated, the system immediately requests the distance and duration of a ride by providing the departure and destination locations to the directions service. The directions service is provided to a Price class instantiation. The Price class waits for matched rules, upon which it will perform the price calculation. If all steps were succesfull, pricing rules were fetched for each requested product, discounts were either available or not, and the directions service is ready to provide the distance and duration of a ride.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Discounts %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 \subsection{Discounts}
 The price calculation matches rules and discounts separately. Discounts were associated with rules in the legacy system, eliminating the amount of combinations of prices with or without discounts. A discount was either always active, or it was not. Having separation between the two enables users to define other locations and timeframes to both of them separately.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Rules
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 \subsection{Rules}
 \mynote{Changes a lot, needs final version}
 Rules and discounts are queried for each requested product as shown in step three and five of Figure \ref{fig:Calculation}. MongoDB’s aggregation framework allows documents to be aggregated in a multi-staged pipeline.
@@ -164,11 +157,13 @@ Prices are retrieved for each product that is associated with the matched rule. 
 \subsubsection{Sorting and Formatting}
 The final step in the aggregate sorts and formats the results so that the Price class can calculate a price breakdown for each result.
 
+% #endregion
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Price Calculation Types
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - What was proposed as a solution to store a week schedule in a database?
-%
+% #region
 \section{Price Calculation Types}
 Pricing information is validated before the calculation is started using the method shown in Listing \ref{lst:check-pricing-props}. The system should throw an error, as a price calculation can not proceed without the required information.
 
@@ -206,10 +201,12 @@ The word fixed in the fixed price calculation means that a price is a given fixe
 \subsection{Meter}
 The on-meter calculation simply returns a breakdown for which all values are zero. This is done by convention at taxiID, so that the mobile apps can calculate their own price based on a integrated meter inside the taxi.
 
+% #endregion
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Threshold Calculations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% #region
 \section{Threshold Calculations}
 On top of each calculation type, prices can be defined after certain thresholds are surpassed. For example: if a taxi travels 25km, a threshold could be defined at 20km, after which the price will be 10 cents cheaper. In this case, the passenger pays a normal price for the 20 kilometers, and a cheaper price for the last 5 kilometers. The same holds for minute prices, but only for the dynamic price calculation. In the fixed price calculation, only kilometer thresholds can be defined. After a threshold is met, the fixed price will be replaced by a newly defined value. For any type of calculation, the algorithm works the same. Only the name of the metric used to measure thresholds and the actual calculation functions may change. For this reason, it is possible to define a function that recursively walks through all surpassed thresholds, then calculates a price using different calculations after each threshold was surpassed, as shown in Listing \ref{lst:threshold-recursion}
 
@@ -243,13 +240,15 @@ public static recursiveThreshold(
 
 The Typescript type definitions reveal that calculation is of type Function, and thresholds is of type threshold[]. The base case returns the calculation with an undefined first argument. This forces the calculation method to use its default value, which is actually the normal kilometer or minute price. The base case will have the value of the first threshold that is met, assuring that the passenger pays the normal price up until that point. If the base case is not satisfied, the function checks whether the cascading boolean is true. This boolean determines whether each threshold should be evaluated, or only the last one. In case of the fixed price calculation, only the last threshold fixed price will be computed. But for the dynamic prices, each step has to be added to the total amount. Finally, the calculation is made using the next threshold,  and the recusive call is summed up with the calculated price. It is worth noting that even though this function is static and does not modify instance data, it is impure, leaving the passed thresholds array empty at the end.
 
+% #endregion
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Breakdown
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - What should be included in the price breakdown?
 % - VAT
 % - Cents
-%
+% #region
 \section{Breakdown}
 The final result of the trip price calculation is a breakdown for every requested product. For example: if the mobile application requests prices for 'saloon' and 'limo' vehicle types, the response will at most contain an array with two breakdowns, for saloon and limo products. To ensure a seamless transition from the legacy price calculation system to TPS, the response formats should be identical. Still an improvement, if profitable enough, could be taken into consideration. One requirement of the price breakdown states that the tax should be included, but as shown in Listing \ref{lst:legacy-breakdown} the included tax is part of the breakdown. Is it by mistake or design?
 
@@ -313,16 +312,22 @@ Keep in mind that unlike the listings the prices in the proposal are not display
 
 The first proposal is chosen to be implemented, where the flag 'fixedPrice' is replaced by the 'isEstimated' flag to clearly reflect its purpose.
 
+% #endregion
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Tests
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% #region
 \section{Tests}
+
+
+
+% #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Premise
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% #region
 \section{Premise}
 \mynote{Conclusion for chapter 4}
 
@@ -336,3 +341,5 @@ The first proposal is chosen to be implemented, where the flag 'fixedPrice' is r
 % 		            % Timeframes proposal
 % 		      \item How should the concept of time schedules be realised?
 % 	      \end{enumerate}
+
+% #endregion

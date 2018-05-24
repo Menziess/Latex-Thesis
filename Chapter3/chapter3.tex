@@ -114,7 +114,7 @@ In the legacy system, authorization was achieved by sending extra headers for ea
 
 The only synchronization steps are executed when a new company or application is created, or when they are deleted. The accepted proposal completely decouples the information requirements by keeping Core data and TPS data in their respective databases separated. But without the means of sharing the user identity, this solution wouldn't work. JSON Web Tokens are part of the solution that solves the problem of synchronizing user identity.
 
-\subsection{Proposal OAuth 2.0}
+\subsection{OAuth 2.0}
 This proposal delegates managing user identity to a separate authentication service that, similar to the pricing microservice, has its own single task of authenticating users. OAuth 2.0 is a protocol that has been designed to allow third-party apps to grant access to an HTTP service on behalf of the resource owner. This behaviour could be utilized to allow users to make use of services within the architecture, controlled by a single service, stored in a single token.
 
 \begin{figure}[H]
@@ -126,7 +126,7 @@ This proposal delegates managing user identity to a separate authentication serv
 
 This proposal is used in example four of Appendix \ref{appendix:slides_2_authentication}. The proposal will take too long to implement right away, but may be implemented in the future.
 
-\subsection{Proposal JSON Web Token}
+\subsection{JSON Web Token}
 This proposal entirely removes the database connection to any user data. This is possible when a JSON Web Token (JWT) is used. A JWT may be signed with a cryptographic algorithm or even a public/private key pair using RSA. After the user enters valid credentials, the core system validates the credentials by comparing them with user data in the database.
 
 \begin{lstlisting}[caption={Two user identifiers and registered claim names stored inside the payload of a JSON web token.}, label={lst:payload}]
@@ -150,7 +150,7 @@ The keys other than companyId and daAppInstallId describe expiration date of the
 	\label{fig:Auth2}
 \end{figure}
 
-\subsection{Proposal API Gateway}
+\subsection{API Gateway}
 The final proposal allows services to be used by external agents via the API Gateway. This solution allows for a central middleware in which authentication and authorization is handled, where the microservices are shielded from public access, and all communication is established through the API Gateway \cite{api-gateway}. Next to authentication, the gateway could optimize the endpoints so that no multiple requests are needed from external agents to gather different types of resources. These calls could be made internally to the microservices behind the gateway. This also opens the possibility the freely change the microservices without changing the public endpoints exposed by the gateway, and even offers slow or instant transitions to different versions of microservices. The different proposals explain the improvements they may bring over some system. But the advice given is not tied to this project, instead to the entire Dispatch API. It’s advised to have a constructive dialogue about the future of the company, and the way it’s planning to scale. One could put a API Gateway in front of a monolithic app to help with transitioning to a microservice-oriented app.
 
 \begin{figure}[H]
@@ -163,29 +163,19 @@ The final proposal allows services to be used by external agents via the API Gat
 The single entry point approach is not going to be implemented during this project, as the core system already handles delegation of tasks in the exiting architecture. Although this pattern may be applied when a transition or replacement of the core system is required.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Frameworks
+% Methods and Techniques
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Frameworks}
+\section{Methods and Techniques}
 All API projects in taxiID have been developed using PHP or JavaScript. Java and Swift are used for mobile applications. It is not benificial to explore every single possible combination of technologies, as the range of possibilities is too big. It is important to look at some popular alternatives along the way. NodeJS offers more modern features and abilities to separate concerns in comparison with PHP. Speed and consistency of the codebase are important reasons to opt for a JavaScript NodeJS project, as advised in Appendix \ref{appendix:pregame}, chapter 4.6. Two proofs of concept were made, one showcasing an Express solution using GraphQL to expose resource, and the other exposing resources using Loopback in a hybrid JavaScript Typescript project.
 
-\subsection{ExpressJS GraphQL}
-This proof of concept allows consumers of the API to dictate the information that they want to receive. Using this concept, an API Gateway could easily chain requests, mapping resources from multiple services to a single endpoint. The proof of concept is available at \url{github.com/Menziess/Typescript-GraphQL-API}. This proof of concept was not advised to be used for TPS, because the inconsistencies between services introduce unnecessary complexity for developers.
+\subsection{Backend Framework}
+This proof of concept allows consumers of the API to dictate the information that they want to receive. Using this concept, an API Gateway could easily chain requests, mapping resources from multiple services to a single endpoint. The proof of concept is available at \url{github.com/Menziess/Typescript-GraphQL-API}. This proof of concept was not advised to be used for TPS, because the inconsistencies between services introduce unnecessary complexity for developers. The second proof of concept, next to being the advised solution, is selected through concensus of developers working at taxiID. The team has experience with LoopBack 3.0 \cite{lb}, enabling the team to reuse code, maintain their development velocity, and reason about this project more effectively. The project structure as shown in Appendix \ref{appendix:slides_2} is made up of of loopback configuration files, and Typepscript files containing important logic. This separation is not ideal, but expresses the fact that some JavaScript files belong to a framework, and must adhere to a special framework format. The Typescript files offer more strict checks through static typing, interfaces and classes.
 
-\subsection{Loopback Typescript}
-The second proof of concept, next to being the advised solution, is selected through concensus of developers working at taxiID. The team has experience with LoopBack 3.0 \cite{lb}, enabling the team to reuse code, maintain their development velocity, and reason about this project more effectively. The project structure as shown in Appendix \ref{appendix:slides_2} is made up of of loopback configuration files, and Typepscript files containing important logic. This separation is not ideal, but expresses the fact that some JavaScript files belong to a framework, and must adhere to a special framework format. The Typescript files offer more strict checks through static typing, interfaces and classes.
+\subsection{Frontend Framework}
+The first non-functional requirement states that the solution should be seamlessly integrated in the portal. On top of that, a user shouldn’t have to log in again to make use of the pricing service from within that portal. For the portal, a proof of concept was made for the case of having the portal implemented as a separate project. The proof of concept is available at \url{github.com/Menziess/Typescript-Reiskosten}. This concept was used to illustrate the differences between Vue and Angular, embodying mostly application structure. Angular being more suitable for large corporate application, while Vue caters toward smaller, more flexible, less structured applications. Iframes, objects and embeds have been mentioned as potential solutions to integrate a frontend in several distinct portals. This problem affects more than just the pricing project, therefore a decision must be made on a higher level before the frontend will be integrated, but the decision is not required for the first sprint to start. The YourDriverApp portal has been constructed using Angular 5. If the frontend is to be integrated, Angular will be the framework that is used to construct the views.
 
-\subsection{Vue}
-The first non-functional requirement states that the solution should be seamlessly integrated in the portal. On top of that, a user shouldn’t have to log in again to make use of the pricing service from within that portal. For the portal, a proof of concept was made for the case of having the portal implemented as a separate project. The proof of concept is available at \url{github.com/Menziess/Typescript-Reiskosten}. This concept was used to illustrate the differences between Vue and Angular, embodying mostly application structure. Angular being more suitable for large corporate application, while Vue caters toward smaller, more flexible, less structured applications. Iframes, objects and embeds have been mentioned as potential solutions to integrate a frontend in several distinct portals. This problem affects more than just the pricing project, therefore a decision must be made on a higher level before the frontend will be integrated, but the decision is not required for the first sprint to start.
-
-\subsection{Angular}
-The YourDriverApp portal has been constructed using Angular 5. If the frontend is to be integrated, Angular will be the framework that is used to construct the views.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Databases
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\section{Databases}
+\subsection{Database}
 Agarwal and Rajan state that NoSQL takes advantage of cheap memory and processing power, thereby handling the four V’s of big data more effectively, but lacks robustness in comparison to SQL databases in \cite{AGS}. Performance of geoWithin and geoIntersect queries have been tested between PostGIS and MongoDB. The report dives deeper into spatial queries and concludes that their tests suggest that MongoDB performs better by an average factor of 10, which increases exponentially as the data size increases, but lacks spatial functions that OpenGIS supports. Indexing of spatial fields is said to have a big impact on performance. The conclusion states that the downside of using NoSQL compared to SQL is the limitation in respect to spatial functions. The previous chapter discussed the important features that were required for the location matching functionality to operate properly. Both OGC and GeoJSON standards offered these features. After the paper Schmid et al. 2015 \cite{SCS} was published. The team argues that clustering is much easier in MongoDB, which may be important in the future when a company grows. In respect to the CAP theorem, and ACID properties, SQL and MySQL have different strengths:
 
 \begin{table}[htbp!]
@@ -217,15 +207,8 @@ Agarwal and Rajan state that NoSQL takes advantage of cheap memory and processin
 % Testing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Testing}
-Unit tests are to be written to cover the most important aspects of the system. New features often introduce bugs by adding functionalities that are broken, although the reliability of the existing functionalities may also be impacted because of changes in the existing code. To prevent units of code from malfunctioning, regression tests may be implemented to validate whether a unit still functions according to a set of conditions. Static and dynamic tests may be performed using the framework Mocha \cite{mocha} and the assertion library Chai \cite{chai}. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Software Validation
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\section{Software Validation}
-Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. A comparison was made in Appendix \ref{appendix:pregame}, chapter 4.9, between CI tools. Various CI tools were implemented in previously mentioned proofs of concept.
+\section{Maintainability and Testibility}
+Unit tests are to be written to cover the most important aspects of the system. New features often introduce bugs by adding functionalities that are broken, although the reliability of the existing functionalities may also be impacted because of changes in the existing code. To prevent units of code from malfunctioning, regression tests may be implemented to validate whether a unit still functions according to a set of conditions. Static and dynamic tests may be performed using the framework Mocha \cite{mocha} and the assertion library Chai \cite{chai}. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. A comparison was made in Appendix \ref{appendix:pregame}, chapter 4.9, between CI tools. Various CI tools were implemented in previously mentioned proofs of concept.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Conclusion
