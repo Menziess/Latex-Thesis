@@ -25,7 +25,7 @@ What was once an ordinary startup known as Uber, is now the most famous taxi dis
 % - Cooperation
 %
 \section{Context}
-taxiID was founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, offering a wide variety of IT solutions to serve the taxi market, including a passenger app, a driver app, and administrative panels. More specifically: an app for passengers to order a taxi, an app for drivers to receive their job assignments, and services for all size businesses, offering convenient planning and dispatching without requiring local installations. Businesses that make use of taxiID's services can be found anywhere in the world. This intoduces complicated challenges when developing applications that rely on clearly defined locations and infrastructures, often vastly differing between countries, if these countries have such a system to begin with. The taxiID development team responsible for solving these problems is located in Medemblik. Consisting of two mobile app developers (iOS and Android), two backend developers, a designer and two project managers.
+taxiID was founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, offering a wide variety of IT solutions to serve the taxi market, including a passenger app, a driver app, and administrative panels. More specifically: an app for passengers to order a taxi, an app for drivers to receive their job assignments, and services for all size businesses, offering convenient planning and dispatching without requiring local installations. Businesses that make use of taxiID's services can be found anywhere in the world. This intoduces complicated challenges when developing applications that rely on clearly defined locations and infrastructures, often vastly differing between countries, if these countries have such a postal code system to begin with. The taxiID development team responsible for solving these problems is located in Medemblik. Consisting of two mobile app developers (iOS and Android), two backend developers, a designer and two project managers.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Problem Definition
@@ -34,7 +34,7 @@ taxiID was founded as a startup that successfully introduced smartphone taxi boo
 % - Why is that a problem
 %
 \section{Problem Definition}
-YDA depends on the price calculation module that is part of the legacy system for which it was designed and implemented. When a passenger books a ride, the departure and destination locations that have been selected are sent to the legacy system. It then proceeds and constructs a list of prices for each vehicle type that is available based on matching pricing rules that have been defined by the taxi company offering the rides. If directors of a taxi company using YDA want to modify their pricing rules, they will be obligated to use the taxiID portal, which has to store company information in a platform that is different from YDA. This makes little sense, as much as it is efficient from a technical point of view, and being easy to maintain and extend.
+YDA depends on the price calculation module that is part of the legacy system for which it was designed and implemented. When a passenger books a ride, the departure and destination locations that have been selected are sent to the legacy system. It then proceeds and constructs a list of prices for each vehicle type that is available, based on matching pricing rules that have been defined by the taxi company offering the rides. If directors of a taxi company using YDA want to modify their pricing rules, they will be obligated to use the taxiID portal, which has to store company information in a platform that is different from YDA. This makes little sense, as much as it is efficient from a technical point of view, and being easy to maintain and extend.
 %
 % \begin{figure}[htbp!]
 % 	\centering
@@ -53,7 +53,7 @@ YDA depends on the price calculation module that is part of the legacy system fo
 %   \label{fig:dependencies}
 % \end{figure}
 %
-The current price calculation module knows three types of pricing rules: fixed prices based on postal codes or addresses, tier prices based on kilometer thresholds, and dynamic calculations based on the distance and duration of a ride. A company may have as many rules as required, only one rule will be used to calculate the final price, and the rules are matched in the same order respectively. The fixed rules are defined by downloading, modifying, and uploading a .csv file as presented in Table \ref{tab:fixedprices}, the other types of rules are simply managed through a web form.
+The current price calculation module knows three types of pricing rules: fixed prices based on postal codes or addresses, tier prices based on kilometer thresholds, and dynamic calculations based on the distance and duration of a ride. A company may have as many rules as required, only one rule will be used to calculate the final price, and the rules are matched in the same order as mentioned. The fixed rules are defined by downloading, modifying, and uploading a .csv file as presented in Table \ref{tab:fixedprices}, the other types of rules are simply managed through a web form.
 
 \begin{table}[htbp!]
 	\centering
@@ -82,14 +82,13 @@ When a passenger books a ride, the price calculation module will first compare t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Assignment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Description
 %
 \section{Assignment}
 The title of this thesis reads:
 
 \[\textit{"A rule-based geospatial reasoning system for trip price calculations"}.\] \hfill
 
-A Trip Pricing System (TPS) must be designed and implemented to calculate trip prices based on user defined pricing rules. Concisely, YourDriverApp requires its own pricing calculation functionality that is similar to the existing taxiID implementation but must not be incorporated into a non-related monolithical, highly coupled system, as it is today. Also, the response body should have the exact same format, and the new system must be able to handle the exact same requests that are made to the current system. Clients must be able to set up pricing rules through the YDA portal, and potentially other portals as well. It is also important that the feature allowing clients to define locations, is usable in countries without a workable postal code system.
+A Trip Pricing System (TPS) must be designed and implemented to calculate trip prices based on user defined pricing rules. Concisely, YourDriverApp requires its own pricing calculation functionality that is similar to the existing taxiID implementation but must not be incorporated into a non-related monolithical, highly coupled system, as it is today. Also, the response body should have the exact same format, and the new system must be able to handle the exact same requests that are made to the current system. Clients must be able to set up pricing rules through the YDA portal, and potentially other portals as well. It is also important that the feature which allows clients to define locations is usable in countries without a workable postal code system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Research
@@ -97,9 +96,7 @@ A Trip Pricing System (TPS) must be designed and implemented to calculate trip p
 % - How to get the required knowledge
 %
 \section{Research}
-% Hoe wordt dit onderzoek aangepakt?
-% Designing research involves two separate sets of activities. The first involves determining everything you wish to achieve through the research project. This has to do with modelling the content of the research; we call this the conceptual design of a research project. The second set of activities concerns howto realise all this during the implementation stage of the project. This is called the technical research design.
-Three main challenges that construct the assignment can be identified. Research must be conducted to attain the best possible way of mapping locations to pricing rules. What this means is that locations must be storable, comparable, and interpretable. The database must be able to store locations in an efficient manner, to which queries can be made as efficiently in order to find out whether a pricing rule applies to a given ride. For this to be the case, the stored locations must be comparable to the departure and destination location of the passenger. The user must be able to reason about his pricing rules, from which an understanding of his defined locations logically follows. But edge cases must be covered completely. For example, a rule in the current system dictates that a user traveling to Schiphol should receive a discount. But how would the system detect that this is the case? Or what if hotel guests receive discounts, but the neighbour living next to the hotel shouldn't be allowed to benefit from these discounts unless he actually sleeps at the hotel? Secondly, a system has to be developed that encapsulates the solution that is the result of the finished research. It is helpful to extend the research of the problem beyond finding out how to incorporate the answers into a working system, where architecture has a major influence in the tools that are available. For example: if a solution to the main problem requires a database system capable of handling high quantities of geospatial queries, this requirement has to be satisfied in order to proceed in finding the final solution. Finally, a user interface has to be created that enables users to define the pricing rules. The complexity of the interface depends on how straight forward the price calculation system is constructed. The user interface should also be available in multiple portals. The best way of making the systems capabilities available to the user through the UI in the portal, must be investigated. The UI must be built keeping the user in mind, simplifying complex rule management as much as possible.
+Four main challenges that construct the assignment can be identified. Research must be conducted to attain the best possible way of mapping locations to pricing rules. What this means is that locations must be storable, comparable, and interpretable. The database must be able to store locations in an efficient manner, to which queries can be made as efficiently in order to find out whether a pricing rule applies to a given ride. For this to be the case, the stored locations must be comparable to the departure and destination location of the passenger. The user must be able to reason about his pricing rules, from which an understanding of his defined locations logically follows. But edge cases must be covered completely. For example, a rule in the current system dictates that a user traveling to Schiphol should receive a discount. But how would the system detect that this is the case? Or what if hotel guests receive discounts, but the neighbour living next to the hotel shouldn't be allowed to benefit from these discounts unless he actually sleeps at the hotel? Secondly, a system has to be developed that encapsulates the solution that is the result of the finished research. It is helpful to extend the research of the problem beyond finding out how to incorporate the answers into a working system, where architecture has a major influence in the tools that are available. For example: if a solution to the main problem requires a database system capable of handling high quantities of geospatial queries, this requirement has to be satisfied in order to proceed in finding the final solution. Finally, a user interface has to be created that enables users to define the pricing rules. The complexity of the interface depends on how straight forward the price calculation system is constructed. The user interface should also be available in multiple portals. The best way of making the systems capabilities available to the user through the UI in the portal, must be investigated. The UI must be built keeping the user in mind, simplifying complex rule management as much as possible.
 
 \subsection{Questions}
 
@@ -108,39 +105,36 @@ From the description of the problem, one main important research question can be
 \[\textit{How can a generic location-based price calculation system be implemented}\]
 \[\textit{that could be used in every country?}\] \hfill
 
-This question encapsulates the four important challenges that have to be dealt with before the project can successfully be implemented. In order to give a clear direction to the research, sub-questions are separated into four groups; location mapping, architecture, trip pricing system, and user interface.
+This question encapsulates the four important challenges that have to be dealt with before the project can successfully be implemented. In order to give a clear direction to the research, sub-questions are separated into four groups; location mapping, architecture, trip pricing system, and user interface. All questions apply to this project unless explicitly stated.
 
 \begin{enumerate}
-
-	\item In what way can locations be represented to be universally interpretable and precise?
-	      \begin{enumerate}[label*=\arabic*.]
-					\item Which location types matter for this project?
-					\item How can legacy system location definitions be abstracted?
-					\item Is there a way to match locations more effectively?
-		      \item Which Database Management Systems (DBMS)s cover the location storage use cases for this project?
-	      \end{enumerate}
+	\item In what way can locations be represented to be universally interpretable?
+	\begin{enumerate}[label*=\arabic*.]
+		\item Which concepts of locations matter?
+		\item Can legacy location concepts be abstracted?
+		\item Is there a way to improve location matching?
+	\end{enumerate}
 
 	\item What is most fitting solution to integrate the backend and frontend into the existing architecture?
-	      \begin{enumerate}[label*=\arabic*.]
-		      \item Which architectural patterns fit in with the exising architecture?
-					\item How is state shared and synchronized between system components?
-		      \item In what is authentication to be implemented between services?
-					\item What methods and technologies ensure suitability, and improve maintainability and testability of the system?
-	      \end{enumerate}
+	\begin{enumerate}[label*=\arabic*.]
+		\item Which architectural patterns fit in with the exising system architecture?
+		\item How is state shared and synchronized between system components?
+		\item What is the most applicable authentication method?
+	\end{enumerate}
 
-	\item Which logic and information is required to calculate a trip price breakdown?
-	      \begin{enumerate}[label*=\arabic*.]
-		      \item How are rules matched?
-		      \item Which parts of the system have an impact on the calculation result?
-		      \item How should the concept of time schedules be realised?
-	      \end{enumerate}
+	\item Which logic and data is required in the backend to reliably calculate a trip price?
+	\begin{enumerate}[label*=\arabic*.]
+		\item Which criteria determine whether rules match?
+		\item How can determinism of price computations be guarenteed?
+		\item In what way can the three original pricing rule types be implemented? (fixed, dynamic, and threshold prices)
+	\end{enumerate}
 
-	\item How can complex pricing rules be communicated through the UI?
-	      \begin{enumerate}[label*=\arabic*.]
-		      \item Which views are essential?
-		      \item In what way can visual hierarchy guide the user through processes naturally?
-		      \item How should complex elements impacting price calculations be communicated to the user through UI components?
-	      \end{enumerate}
+	\item Is it possible to communicate the inner workings of the system through the user interface?
+	\begin{enumerate}[label*=\arabic*.]
+		\item Which backend concepts are essential to display in the frontend?
+		\item Which design practices allow users to understand coherence of different elements that make up a rule?
+		\item How should a user know what the outcome of his interactions with the system are?
+	\end{enumerate}
 
 \end{enumerate}
 

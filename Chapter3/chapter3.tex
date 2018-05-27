@@ -12,7 +12,7 @@
 %
 \chapter{System Architecture}
 \section{Introduction}
-The family of systems that has formed through preceding architectural design decisions forms a collection of constrained connectors ready for new systems to assimilate. Flows of information are to be aligned with adjecent system components so that dependencies are satisfied, while making use of the most fitting technologies for great adaptation. Existing conventions, methods and styles throughout the technical and conceptual spectrums are applied, enabling the system architecture to evolve consistently at one pace. Additionally, adjecent systems are improved by solutions introduced in this chapter.
+The term 'system' denotes "a set of things working together as parts of a mechanism or an interconnecting network". The family of systems that has formed through preceding architectural design decisions forms a collection of constrained connectors ready for new systems to assimilate. Flows of information are to be aligned with adjecent system components so that dependencies are satisfied, while making use of the most fitting technologies for great adaptation. Existing conventions, methods and styles throughout the technical and conceptual spectrums are applied, enabling the system architecture to evolve consistently at one pace. Additionally, adjecent systems are improved by solutions introduced in this chapter.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Architectural Patterns
@@ -207,7 +207,10 @@ Agarwal and Rajan state that NoSQL takes advantage of cheap memory and processin
 % Testing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Maintainability and Testibility}
+\section{}
+CI
+
+
 Unit tests are to be written to cover the most important aspects of the system. New features often introduce bugs by adding functionalities that are broken, although the reliability of the existing functionalities may also be impacted because of changes in the existing code. To prevent units of code from malfunctioning, regression tests may be implemented to validate whether a unit still functions according to a set of conditions. Static and dynamic tests may be performed using the framework Mocha \cite{mocha} and the assertion library Chai \cite{chai}. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. A comparison was made in Appendix \ref{appendix:pregame}, chapter 4.9, between CI tools. Various CI tools were implemented in previously mentioned proofs of concept.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

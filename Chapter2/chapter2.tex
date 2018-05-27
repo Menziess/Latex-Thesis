@@ -7,12 +7,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Encoding Locations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - In what way can locations be represented to be universally interpretable
-%   and precise?
+% - In what way can locations be represented to be universally interpretable?
 %
 \chapter{Encoding Locations}
 \section{Introduction}
-Encoding of locations has historically been of great importance, and is always being modernized. This chapter explains the general definition of locations, which types of locations are important for this project, and how to represent these locations so that they are universally interpretable and do not rely on a postal code system.
+The term 'geospatial' denotes "relating to the relative position of things on earth's surface". This chapter explains the general definition of locations, which types of locations are important for this project, and how these location types are to be abstracted in a way that is understood in every country on earth while allowing the system to aggregate locations that are associated with the pick up and drop off locations of a taxi ride.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A Brief History Of Geographic Locations
@@ -21,7 +20,7 @@ Encoding of locations has historically been of great importance, and is always b
 % - Who and what played a big role in navigation?
 %
 \section{A Brief History Of Geographic Locations}
-A location is roughly described as a place or position. Throughout history, various navigational techniques and tools like the sextant, nautical chart and marinner's compass were used, measuring the altitude of the North Star to determine the latitude $\phi$, in conjunction with a chronometer to determine the longitude $\lambda$ of a location on the Earth's surface. The combination of coordinates is a distinct encoding of a location. This particular system is still commonly used today.
+A location is roughly described as a place or position. Throughout history, various navigational techniques and tools like the sextant, nautical chart and marinner's compass were used, measuring the altitude of the North Star to determine the latitude $\phi$, in conjunction with a chronometer to determine the longitude $\lambda$ of a location on the earth's surface. The combination of coordinates is a distinct encoding of a location. This particular system is still commonly used today.
 
 \begin{figure}[htbp!]
 	\centering
@@ -57,8 +56,8 @@ An area is a set of points points with an infinite granularity. This definition 
 \[a_1 \subseteq P \]
 The set of all possible areas can be defined by the power set of P:
 \[A = \mathcal{P}(P)\]
-such that a subset of points, called an area, is in all possible areas A:
-\[a_1 \in A\]
+such that an arbitrary subset of points, called an area, is an element of all possible areas A:
+\[a \in A\]
 At the equator, 1 degree is 111320m, so 0.000001 degrees is
 around 11cm. Six decimal places will be sufficient for location matching for this application. But even when reducing coordinates to having six decimal places, it would be impractical. For this reason, it is more realistic to only describe the rough edges of an area using a polygon shape. Instead of checking for a single point in a non-terminating iteration over all points in an area, a mathematical calculations could be used to check whether a unique point is contained within the polygon.
 
@@ -293,6 +292,6 @@ All listed solutions will work in the databases listed in this chapter, as the c
 %
 \section{Premise}
 
-\[\textit{"In what way can locations be represented to be universally interpretable and precise?"}\] \hfill
+\[\textit{"In what way can locations be represented to be universally interpretable?"}\] \hfill
 
 Locations types that are of importance for this project are points and areas. Addresses and postal codes can be classified as one of these location categories. Every point and area that fits the definition used in this chapter, can be abstracted into geometric datatypes such as Polygons or MultiPolygons, yielding a consistent and universal solution of storing spatial data. Location matching is done at database level, depending on the selected database for this project. The OGC standard offers a mature and thorough set of geospatial features, of which some may not be included in MongoDB. The GeoJSON standard offers similar features that are sufficient for this project. The database selection depends on architectural trade-offs discussed in the next chapter, assuming that the selected database implements the required features layed out in this chapter.
