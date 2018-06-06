@@ -12,15 +12,15 @@
 % #region
 \chapter{Trip Price Calculation System}
 \section{Introduction}
-The 'rule-based' term in the title caters to the proposition that trip price calculations hinge on information defined as something called a rule. This chapter demonstrates how determinism in calculations can be achieved to comprise a price breakdown that reflects that of the legacy system. And how the system should be structured, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed should restrict the time and space dimensions of a price rule.
+The term 'rule-based' in the title caters to the proposition that trip price calculations hinge on information defined as something called a rule. This chapter demonstrates how the system should be structured, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed should restrict the price rule dimensions of space and time. Also, how determinism in calculations can be achieved to consistently calculate a price breakdown that reflects that of the legacy system.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Data Model
+% Project Structure
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{The Project Structure}
-The conceptual model of the database entities as shown in the previous chapter
+The proof of concept as discussed in the previous chapter has been used to further develop the backend of this project. Framework related code is separated from the logic that is used to calculates the prices. Figure \ref{fig:ClassDiagram} shows a high level class design.
 
 \begin{figure}[H]
 	\centering
@@ -29,23 +29,105 @@ The conceptual model of the database entities as shown in the previous chapter
 	\label{fig:ClassDiagram}
 \end{figure}
 
-The object-oriented programming (OOP) paradigm offers many ways to keep a system structured. Good software design has low coupling and high cohesion, meaning that software components should have a high degree of belongingness, and a low degree of dependence in respect of eachother. As stated in the previous chapter, another paradigm that could potentially improve the price calculation system is called: functional programming (FP).
+The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. Loopback is used to expose model endpoints, connect to databases, and handle request. When a price calculation request is made, it is handled by a model endpoint, which processes the request parameters, fetches all the data required for the calculation from the database, passes it to the calculation logic, and returns the results. The calculation logic takes the request parameters and database data to convert the request parameters describing a trip into a price breakdown using the database data.
+% #endregion
 
-\mynote{Expand on
-	interfaces,
-	static strong types,
-	type hinting,
-	OOP en FP mixen,
-	OOP voor grote structuur,
-	FP voor solide operaties,
-	SOLID,
-	Gang of Four,
-	Loose coupling high cohesion,
-	Async,
-	Strategy pattern,
-}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The Trip Price Calculation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% #region
+\section{The Trip Price Calculation}
+This section will elaborate on the steps mentioned previously. The flowchart in Figure \ref{fig:Calculation} shows the on-meter (3) and dynamic and fixed (5) rule queries. The process is complicated, and contains many edge- and corner cases.
 
-The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. The entire class diagram should adhere to Uncle Bob's SOLID principles. State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. As discussed in the previous chapter, Typescript plays an important role in mixing OOP and FP together. The database schema desgin as shown in the previous chapter gives an inpression on the different pieces of information required to calculate a price. Such a schema provides a good insight in the relationships that different entities have, but may distract from the actual story that is happening within each calculation.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{Calculation}
+	\caption[Calculation Flow]{The condensed flow of a trip price calculation.}
+	\label{fig:Calculation}
+\end{figure}
+
+The process of handling the incoming request, finding the matching price rule, and calculating the prices is explained coarsely in the following subsections. Individual parts are explained in the upcoming sections.
+
+\subsection{Request Parameters}
+When the request is received, the user is authenticated. The JSON Web Token contains the user identity, the companyId and daAppInstallId. The request body contains information about the ride: vehicle types, passenger count, requested date, departure, and destination. All preconditions of handling the request are met. The directions class will provide an interface to retrieve trip related data. The departure and destination are fed to the directions class, which will proceed and work out the distance and duration of the trip. The BasicDirections class returns a base case result, if the GoogleDirections class is unable to determine the trip details. For example, the trip price calculation flow changes drastically when no destination or departure locations are provided in the request body. For this reason, a base case and the google case are defined using a behavioral strategy pattern as described in \cite{gof}. This also improves the systems resistance to change. If a different service is needed to determine the trip details in the future, it can easily take the place of one of the current services. If the trip details have not been obtained, but at least one of the two, departure or destination locations, have been provided, a database query could still work out the best matching price rule.
+
+\subsection{Database Data}
+When the user is authenticated, the system immediately requests the distance and duration of a ride by providing the departure and destination locations to the directions service. This service awaits the trip details response while it is fed to a Price class instantiation. The Price class will wait until matched pricing rules are provided, upon which it will perform the price calculation. At this point, an aggregate query is performed, trying to find a matching rule, and retrieve the associated pricing and discount information. The aggregate starts by finding the application and company combination for which a price is calculated see Figure \ref{fig:DataModel}. If a reference to a debtor is provided, rules and discounts linked to it are used instead. The rules and discounts contain criteria in the form of timeframes and locations. A discount has basic properties, while the rule has complex pricing information for products that are activated for that given rule.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{DataModel}
+	\caption[DataModel]{Conceptual data model showing database entity relations.}
+	\label{fig:DataModel}
+\end{figure}
+
+A price can be of type 'dynamic' or 'fixed'. Both of which can have threshold information, as explained in earlier chapters. All this information can be traced back to the company to which it belongs.
+
+\mynote{Aggregates (including discounts)}
+
+\subsection{Calculation Logic}
+A single rule has price information for each available product of that rule. If a company offers three products, it is possible to only offer two products in a given timeframe or area by associating them with a rule. For each product that is related to the price rule fetched from the database, a price breakdown is calculated. If the array of matched rules is empty, a map over the array will result in an empty array of price breakdowns. A price breakdown follows a series of logical steps, in which functions are created that have a certain default behaviour. The strategy pattern is once again applied to use the appropriate calculator for the type of calculation that is required.
+
+type pricing = {
+  name: string;
+  maxPassengers: number;
+  type: vehicleType;
+  imagePath: string;
+  companyId: ObjectId;
+  company: {
+    name: string;
+    countryId: ObjectId;
+  };
+  country: {
+    name: string;
+    code: string;
+    defaultTax: number;
+    defaultCurrency: string;
+  };
+  discount?: discount;
+  prices: {
+    isEnabled: boolean;
+    isEstimated: boolean;
+    minuteWaitingPrice: number;
+    fixedPrice: number;
+    dynamicStartPrice: number;
+    dynamicMinimumPrice: number;
+    dynamicMinutePrice: number;
+    dynamicDistancePrice: number;
+    cascadingThresholdCalculation: boolean;
+    dynamicThresholds: threshold[];
+    fixedThresholds: threshold[];
+  };
+  rules: {
+    name: string;
+    type: string;
+    priority: number;
+    companyId: ObjectId;
+  };
+};
+
+
+In this case, the best match is found, and price breakdowns are returned without a calculated price. This is handled by the mobile applications, as it is the case with the legacy system. But if the trip details have sucesfully been obtained, the sys
+
+\subsection{Discounts}
+The price calculation matches rules and discounts separately. Discounts were associated with rules in the legacy system, eliminating the amount of combinations of prices with or without discounts. A discount was either always active, or it was not. Having separation between the two enables users to define other locations and timeframes to both of them separately.
+
+\subsection{Rules}
+\mynote{Changes a lot, needs final version}
+Rules and discounts are queried for each requested product as shown in step three and five of Figure \ref{fig:Calculation}. MongoDB’s aggregation framework allows documents to be aggregated in a multi-staged pipeline.
+
+\subsubsection{Identification}
+The first step in the pipeline matches all DaAppInstall entities with the identifiers sent along in the JWT payload: companyId and daAppInstallId.
+\subsubsection{Links}
+As shown in Figure \ref{fig:DataModel}, the DaAppInstall entities have multiple Links; ruleLinks and discountLinks. These links store data in a polymorphic hasManyThrough relation.
+\subsubsection{Country}
+Each company has a country, used to determine the default VAT and currency.
+\subsubsection{Rules}
+All documents are filtered based on geolocation and timeframes.
+\subsubsection{Prices}
+Prices are retrieved for each product that is associated with the matched rule. DynamicPrices and related thresholds, and FixedPrices and related thresholds.
+\subsubsection{Sorting and Formatting}
+The final step in the aggregate sorts and formats the results so that the Price class can calculate a price breakdown for each result.
 
 % #endregion
 
@@ -119,44 +201,6 @@ export const regexFromDate = (date: Date) => {
 \end{lstlisting}
 
 The regexFromDate could be used to create a regex that could be used in a query to check whether a single hour within a week is set. Skip is an integer representing the number of bits that should be skipped to get to the moment represented by the date. So in order to get 11 AM - 12 AM in the presented schedule, 3 * 24 skips + 11 skip = 83 skips are to be made to find the digit 1 on thursday. Because the getDay method on JavaScript date objects return an integer resembling the day, starting at sunday, the startMonday function is used to pretend that it starts on monday.
-
-% #endregion
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Directions Service
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% #region
-\section{The Trip Price Calculation}
-The directions class will provide an interface to retrieve trip related data. The BasicDirections class returns a base case result, while the GoogleDirections class retrieves the data from the Google Directions API. The trip price calculation flow changes drastically when no destination or departure locations are provided in the request body. For this reason, a base case and the google case should be defined using a behavioral strategy pattern as described in \cite{gof}. This improves the systems resistance to change. The flowchart in Figure \ref{fig:Calculation} shows the on-meter (3) and dynamic and fixed (5) rule queries. Just like the directions, the calculator has its strategies to adapt to other circumstances.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\textwidth]{Calculation}
-	\caption[Calculation Flow]{The flow of a trip price calculation.}
-	\label{fig:Calculation}
-\end{figure}
-
-When the user is authenticated, the system immediately requests the distance and duration of a ride by providing the departure and destination locations to the directions service. The directions service is provided to a Price class instantiation. The Price class waits for matched rules, upon which it will perform the price calculation. If all steps were succesfull, pricing rules were fetched for each requested product, discounts were either available or not, and the directions service is ready to provide the distance and duration of a ride.
-
-\subsection{Discounts}
-The price calculation matches rules and discounts separately. Discounts were associated with rules in the legacy system, eliminating the amount of combinations of prices with or without discounts. A discount was either always active, or it was not. Having separation between the two enables users to define other locations and timeframes to both of them separately.
-
-\subsection{Rules}
-\mynote{Changes a lot, needs final version}
-Rules and discounts are queried for each requested product as shown in step three and five of Figure \ref{fig:Calculation}. MongoDB’s aggregation framework allows documents to be aggregated in a multi-staged pipeline.
-
-\subsubsection{Identification}
-The first step in the pipeline matches all DaAppInstall entities with the identifiers sent along in the JWT payload: companyId and daAppInstallId.
-\subsubsection{Links}
-As shown in Figure \ref{fig:DataModel}, the DaAppInstall entities have multiple Links; ruleLinks and discountLinks. These links store data in a polymorphic hasManyThrough relation.
-\subsubsection{Country}
-Each company has a country, used to determine the default VAT and currency.
-\subsubsection{Rules}
-All documents are filtered based on geolocation and timeframes.
-\subsubsection{Prices}
-Prices are retrieved for each product that is associated with the matched rule. DynamicPrices and related thresholds, and FixedPrices and related thresholds.
-\subsubsection{Sorting and Formatting}
-The final step in the aggregate sorts and formats the results so that the Price class can calculate a price breakdown for each result.
 
 % #endregion
 
@@ -312,16 +356,36 @@ Keep in mind that unlike the listings the prices in the proposal are not display
 \end{enumerate}
 
 The first proposal is chosen to be implemented, where the flag 'fixedPrice' is replaced by the 'isEstimated' flag to clearly reflect its purpose.
-
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Tests
+% Testing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% #region
-\section{Tests}
+%
+\section{Deterministic Outcomes}
+- Database query return same result
+- Classes and project structure operate in the same way each time
+- Side effects like google maps reduced by enlarging points locations
+- FP pure functions programming styles
+- tests
+- CI CD
+- interfaces
+- static strong types
+- type hinting
+- OOP en FP mixen
+- OOP voor grote structuur
+- FP voor solide operaties
+- SOLID
+- Gang of Four
+- Loose coupling high cohesion
+- Async
+- Strategy pattern
 
+Unit tests are to be written to cover the most important aspects of the system. New features often introduce bugs by adding functionalities that are broken, although the reliability of the existing functionalities may also be impacted because of changes in the existing code. To prevent units of code from malfunctioning, regression tests may be implemented to validate whether a unit still functions according to a set of conditions. Static and dynamic tests may be performed using the framework Mocha \cite{mocha} and the assertion library Chai \cite{chai}. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. A comparison was made in Appendix \ref{appendix:pregame}, chapter 4.9, between CI tools. Various CI tools were implemented in previously mentioned proofs of concept.
 
+State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. As discussed in the previous chapter, Typescript plays an important role in mixing OOP and FP together. The database schema desgin as shown in the previous chapter gives an inpression on the different pieces of information required to calculate a price. Such a schema provides a good insight in the relationships that different entities have, but may distract from the actual story that is happening within each calculation.
+
+The object-oriented programming (OOP) paradigm offers many ways to keep a system structured. Good software design has low coupling and high cohesion, meaning that software components should have a high degree of belongingness, and a low degree of dependence in respect of eachother. As stated in the previous chapter, another paradigm that could potentially improve the price calculation system is called: functional programming (FP).
 
 % #endregion
 
@@ -330,17 +394,9 @@ The first proposal is chosen to be implemented, where the flag 'fixedPrice' is r
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{Premise}
+\[\textit{Which logic and data is required in the backend to reliably calculate a trip price?}\]\hfill
+
 \mynote{Conclusion for chapter 4}
-
-
-% \item Which logic and information is required to calculate a trip price breakdown?
-% 	      \begin{enumerate}[label*=\arabic*.]
-% 		      % Timeframes, Locations, Vehicle types, priority, (broad view)
-% 		      \item How are rules matched?
-% 		            % VAT, rounding, discount, result breakdown, (all the parts explained)
-% 		      \item Which parts of the system have an impact on the calculation result?
-% 		            % Timeframes proposal
-% 		      \item How should the concept of time schedules be realised?
-% 	      \end{enumerate}
-
-% #endregion
+% How can determinism of price computations be guarenteed?
+% Which criteria determine whether rules match?
+% In what way can the three original pricing rule types be implemented? (fixed, dynamic, and threshold prices)

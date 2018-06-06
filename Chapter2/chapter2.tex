@@ -291,7 +291,5 @@ All listed solutions will work in the databases listed in this chapter, as the c
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Premise}
-
 \[\textit{"In what way can locations be represented to be universally interpretable?"}\] \hfill
-
 Locations types that are of importance for this project are points and areas. Addresses and postal codes can be classified as one of these location categories. Every point and area that fits the definition used in this chapter, can be abstracted into geometric datatypes such as Polygons or MultiPolygons, yielding a consistent and universal solution of storing spatial data. Location matching is done at database level, depending on the selected database for this project. The OGC standard offers a mature and thorough set of geospatial features, of which some may not be included in MongoDB. The GeoJSON standard offers similar features that are sufficient for this project. The database selection depends on architectural trade-offs discussed in the next chapter, assuming that the selected database implements the required features layed out in this chapter.

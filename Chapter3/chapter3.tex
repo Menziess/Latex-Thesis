@@ -39,7 +39,7 @@ The bigger shapes in Figure \ref{fig:Architecture} may be classified as monolith
 If the legacy price calculation system was implemented as a service, it could have been reused or redeployed as a second separate price calculation system for YDA instead. A consensual definition of microservices does not exist, but can be defined as a development technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in Figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}, mentioning; improvements in development speed through parallel development, isolated deployment and continuous delivery (CD), scalability and potential parallelism, and independence in case of failure. Fair points of criticism have been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, security, and message formats.
 
 \subsection{Frontend and Backend}
-A model-view-controller pattern is separating the business and presentation layers in various frontend projects. The requirements state that the frontend should be integrated in multiple portals. This would mean that separate views have to be developed for each portal, or the views should be provided to the portals via iframes. In the last case, it may be beneficial to combine the frontend and backend in the same project structure. However, this would be in conflict with this three-tier pattern, which is not desired in respect to the evolution of the system architecture. Integration of the backend would mean that the core system should contain the price calculation system as a component, and separation of the backend would mean that the backend would be set up as a separate service. As an overview, the four possibilities may be listed as:
+A model-view-controller pattern is separating the business and presentation layers in various frontend projects. This would mean that separate views have to be developed for each portal, or the views should be provided to the portals via iframes. In the last case, it may be beneficial to combine the frontend and backend in the same project structure. However, this would be in conflict with this three-tier pattern, which is not desired in respect to the evolution of the system architecture. Integration of the backend would mean that the core system should contain the price calculation system as a component, and separation of the backend would mean that the backend would be set up as a separate service. If this pattern is to be respected, four possibilities remain with which the frontend and backend could be implemented:
 
 \begin{enumerate}
 	\item Integrate views in existing portal, build TPS as a separate microservice
@@ -48,23 +48,14 @@ A model-view-controller pattern is separating the business and presentation laye
 	\item Build separate service providing iframe views, integrate TPS as monolith component
 \end{enumerate}
 
-The final decision is based on a comparison found in table 4.1.1 in Appendix \ref{appendix:pregame}. An advice is given to separate the backend, and integrate the frontend. The final conclusion of Appendix \ref{appendix:pregame} states that the decision has to be made on a higher level, as many factors outside the scope of this project play a role in the decision.
+The final decision, based on a comparison seen in table 4.1.1 in Appendix \ref{appendix:pregame}, proposes to separate the backend and integrate the frontend. This leaves the requirement of implementing the frontend in multiple portals at once unresolved, but improves consistency of each individual portal implementation, and reduces dependencies of having to implement iframes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Information Dependencies
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Information Dependencies}
-The frontend separation or integration cases have little influence on the further design of the system. The backend separation case however, is only possible if information dependencies are satisfied. A conceptual model can be derived from the database schema design in Figure 4.7.1.1 of Appendix \ref{appendix:pregame}, see Figure \ref{fig:DataModel}. This model shows all entities and relations that make up the price calculation system.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\textwidth]{DataModel}
-	\caption[DataModel]{Conceptual data model showing database entity relations.}
-	\label{fig:DataModel}
-\end{figure}
-
-In isolation, this model contains all the required information to calculate a price, if the parameters shown in Listing \ref{lst:request} are provided.
+The frontend separation or integration cases have little influence on the further design of the system. The backend separation case however, is only possible if information dependencies are satisfied. A conceptual model can be derived from the database schema design in Figure 4.7.1.1 of Appendix \ref{appendix:pregame}. This conceptual model can be found in the next chapter, where the data for a price calcualtion is discussed, see chapter 4, Figure \ref{fig:DataModel}. Important information that must be aquired are: products, companies, applications, users, settings and VAT amounts. In isolation, this model contains all the required information to calculate a price, if the parameters shown in Listing \ref{lst:request} are provided.
 
 \begin{lstlisting}[caption={Minimal external information required for a trip price calculation.}, label={lst:request}]
 	{
@@ -86,7 +77,7 @@ The concrete data from the conceptual model could in theory be stored in one dat
 	\item Minimal state - Multiple independent databases with stateless references
 \end{enumerate}
 
-A single source of truth, central database, would avoid having duplicate data all together. No synchronization, thus no network communication is neccesary, and all data is always readily available. This design desecrates the independency aspect of microservices. The multiple synchronized databases option raises the problem of having duplicate, out of sync data.
+A single source of truth, central database, would avoid having duplicate data all together. No synchronization, thus no network communication is neccesary, and all data is always readily available. This design desecrates the independency aspect of microservices. The multiple synchronized databases in option 2, raises the problem of having duplicate, out of sync data.
 
 \begin{figure}[H]
 	\centering
@@ -95,7 +86,7 @@ A single source of truth, central database, would avoid having duplicate data al
 	\label{fig:DataSync}
 \end{figure}
 
-A one-way dataflow could reduce this problem, but it is not always entirely avoidable. This design does adhere to the concept of microservices by allowing independent deployments still. The minimal state option would improve on the previous option, by only allowing data to be referenced back in a stateless manner. This means that a company in the core database could have related data stored in the TPS database, without being 'aware' of it. The entities that reference the company can be used in an autonomous fashion, where only the neccesary information is sent to TPS whenever a request is made. Multiple proposal were made aiming to solve the combination of authentication, authorization and data consistency problems. The next section expands on the accepted solution.
+A one-way dataflow could reduce this problem, but it is not always entirely avoidable. This design does adhere to the concept of microservices by allowing independent deployments still. The minimal state option 3, would improve on the previous option 2, by only allowing data to be referenced back in a stateless manner. This means that a company in the core database could have related data stored in the TPS database, without being 'aware' of it. The entities that reference the company can be used in an autonomous fashion, where only the neccesary information is sent to TPS whenever a request is made. Multiple proposal were made aiming to solve the combination of authentication, authorization and data consistency problems.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Authentication and Authorization
@@ -103,19 +94,10 @@ A one-way dataflow could reduce this problem, but it is not always entirely avoi
 % - How can authentication between services be implemented or improved?
 %
 \section{Authentication and Authorization}
-In the legacy system, authorization was achieved by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. To prevent duplication, the microservice could be connected to the database that is used by the core system. But this makes the microservice less decoupled, and directly contradicts the desire to separate data dependencies. Appendix \ref{appendix:slides_2_authentication} lists four proposals, based on three proposals listed in Appendix \ref{appendix:pregame}, chapter 4.4, which are further explained in the subsections below. The third proposal is accepted, as shown in Figure \ref{fig:Authentication}. This solution closely resembles the minimal state option discussed in the previous section.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\textwidth]{Authentication}
-	\caption[Authentication]{Accepted authentication proposal.}
-	\label{fig:Authentication}
-\end{figure}
-
-The only synchronization steps are executed when a new company or application is created, or when they are deleted. The accepted proposal completely decouples the information requirements by keeping Core data and TPS data in their respective databases separated. But without the means of sharing the user identity, this solution wouldn't work. JSON Web Tokens are part of the solution that solves the problem of synchronizing user identity.
+In the legacy system, authorization was achieved by sending extra headers for each crucial piece of information, this is clarified in Appendix \ref{appendix:pregame}, chapter 3.4. To prevent data duplication, the microservice could be connected to the database that is used by the core system. But this makes the microservice less decoupled, and directly contradicts the desire to separate data dependencies. In the slides of Appendix \ref{appendix:slides_2_authentication} four examples options are listed as to which authentication could be implemented. These examples are based on three proposals listed in Appendix \ref{appendix:pregame}, chapter 4.4, which are further explained in the subsections below.
 
 \subsection{OAuth 2.0}
-This proposal delegates managing user identity to a separate authentication service that, similar to the pricing microservice, has its own single task of authenticating users. OAuth 2.0 is a protocol that has been designed to allow third-party apps to grant access to an HTTP service on behalf of the resource owner. This behaviour could be utilized to allow users to make use of services within the architecture, controlled by a single service, stored in a single token.
+This authentication mechanism delegates user identity management to a separate authentication service that, similar to the pricing microservice, has its own single task of authenticating users. OAuth 2.0 is a protocol that has been designed to allow third-party apps to grant access to an HTTP service on behalf of the resource owner. Although granting permissions should not neccesarily be done by any user, this mechanism could be used for authentication purposes in the way that Facebook login would work as a central verification authority. The token is verfied by the authority authentication server on each request, keeping the user identity management centralized inside one single service.
 
 \begin{figure}[H]
 	\centering
@@ -124,7 +106,7 @@ This proposal delegates managing user identity to a separate authentication serv
 	\label{fig:Auth1}
 \end{figure}
 
-This proposal is used in example four of Appendix \ref{appendix:slides_2_authentication}. The proposal will take too long to implement right away, but may be implemented in the future.
+This proposal is used in example four of Appendix \ref{appendix:slides_2_authentication}.
 
 \subsection{JSON Web Token}
 This proposal entirely removes the database connection to any user data. This is possible when a JSON Web Token (JWT) is used. A JWT may be signed with a cryptographic algorithm or even a public/private key pair using RSA. After the user enters valid credentials, the core system validates the credentials by comparing them with user data in the database.
@@ -160,7 +142,17 @@ The final proposal allows services to be used by external agents via the API Gat
 	\label{fig:Auth3}
 \end{figure}
 
-The single entry point approach is not going to be implemented during this project, as the core system already handles delegation of tasks in the exiting architecture. Although this pattern may be applied when a transition or replacement of the core system is required.
+The fourth example is proposed as the best possible solution, as shown in Figure \ref{fig:Authentication}. This solution closely resembles the single responsibility authentication service as shown in Figure \ref{fig:Auth1}, and the minimal state option as shown in Figure \ref{fig:Auth2}. The user data resambles a database that holds the single source of truth.
+
+\mynote{Add fourth option from authentication proposals}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{Authentication}
+	\caption[Authentication]{Accepted authentication proposal.}
+	\label{fig:Authentication}
+\end{figure}
+
+The only synchronization steps are executed when a new company or application is created, or when they are deleted. The proposal completely decouples the information requirements by keeping Core data and TPS data in their respective databases separated. But without the means of sharing the user identity, this solution wouldn't work. JSON Web Tokens are part of the solution that solves the problem of synchronizing user identity.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Methods and Techniques
@@ -170,7 +162,7 @@ The single entry point approach is not going to be implemented during this proje
 All API projects in taxiID have been developed using PHP or JavaScript. Java and Swift are used for mobile applications. It is not benificial to explore every single possible combination of technologies, as the range of possibilities is too big. It is important to look at some popular alternatives along the way. NodeJS offers more modern features and abilities to separate concerns in comparison with PHP. Speed and consistency of the codebase are important reasons to opt for a JavaScript NodeJS project, as advised in Appendix \ref{appendix:pregame}, chapter 4.6. Two proofs of concept were made, one showcasing an Express solution using GraphQL to expose resource, and the other exposing resources using Loopback in a hybrid JavaScript Typescript project.
 
 \subsection{Backend Framework}
-This proof of concept allows consumers of the API to dictate the information that they want to receive. Using this concept, an API Gateway could easily chain requests, mapping resources from multiple services to a single endpoint. The proof of concept is available at \url{github.com/Menziess/Typescript-GraphQL-API}. This proof of concept was not advised to be used for TPS, because the inconsistencies between services introduce unnecessary complexity for developers. The second proof of concept, next to being the advised solution, is selected through concensus of developers working at taxiID. The team has experience with LoopBack 3.0 \cite{lb}, enabling the team to reuse code, maintain their development velocity, and reason about this project more effectively. The project structure as shown in Appendix \ref{appendix:slides_2} is made up of of loopback configuration files, and Typepscript files containing important logic. This separation is not ideal, but expresses the fact that some JavaScript files belong to a framework, and must adhere to a special framework format. The Typescript files offer more strict checks through static typing, interfaces and classes.
+The first proof of concept allows consumers of the API to dictate the information that they want to receive. Using this concept, an API Gateway could easily chain requests, mapping resources from multiple services to a single endpoint. The proof of concept is available at \url{github.com/Menziess/Typescript-GraphQL-API}. This proof of concept was not advised to be used for TPS, because the inconsistencies between services introduce unnecessary complexity for developers. The second proof of concept, next to being the advised solution, is selected through concensus of developers working at taxiID. The team has experience with LoopBack 3.0 \cite{lb}, enabling the team to reuse code, maintain their development velocity, and reason about this project more effectively. The project structure as shown in Appendix \ref{appendix:slides_2} is made up of of loopback configuration files, and Typepscript files containing important logic. This separation is not ideal, but expresses the fact that some JavaScript files belong to a framework, and must adhere to a special framework format. The Typescript files offer more strict checks through static typing, interfaces and classes.
 
 \subsection{Frontend Framework}
 The first non-functional requirement states that the solution should be seamlessly integrated in the portal. On top of that, a user shouldn’t have to log in again to make use of the pricing service from within that portal. For the portal, a proof of concept was made for the case of having the portal implemented as a separate project. The proof of concept is available at \url{github.com/Menziess/Typescript-Reiskosten}. This concept was used to illustrate the differences between Vue and Angular, embodying mostly application structure. Angular being more suitable for large corporate application, while Vue caters toward smaller, more flexible, less structured applications. Iframes, objects and embeds have been mentioned as potential solutions to integrate a frontend in several distinct portals. This problem affects more than just the pricing project, therefore a decision must be made on a higher level before the frontend will be integrated, but the decision is not required for the first sprint to start. The YourDriverApp portal has been constructed using Angular 5. If the frontend is to be integrated, Angular will be the framework that is used to construct the views.
@@ -184,6 +176,7 @@ Agarwal and Rajan state that NoSQL takes advantage of cheap memory and processin
 		\toprule
 		& SQL & NoSQL \\
 		\midrule
+		Integrity & \checkmark\checkmark & x \\
 		Scaling & x & \checkmark\checkmark \\
 		Atomicity & \checkmark & \checkmark \\
 		Consistency & \checkmark\checkmark & \checkmark \\
@@ -193,44 +186,32 @@ Agarwal and Rajan state that NoSQL takes advantage of cheap memory and processin
 		Partition Tolerance & \checkmark & \checkmark \\
 		Performance & \checkmark & \checkmark\checkmark \\
 		Maturity & \checkmark\checkmark & \checkmark \\
-		Solid data structure & \checkmark\checkmark & x \\
 		JSON Documents & x & \checkmark \\
 		Clustering & \checkmark & \checkmark \\
-		Sharding & \checkmark & \checkmark \\
+		Sharding & \checkmark & \checkmark\checkmark \\
 		\bottomrule
 	\end{tabular}
 	\caption[Databases Comparison]{Comparison between SQL and NoSQL databases.}
 	\label{tab:databases-comparison}
 \end{table}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Testing
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\section{}
-CI
+MySQL offers more robust data structures via integrity checks. MongoDB offers the possibility to embed one to many relationships in a single document, keeping the data locality
+Within the systems architecture, MongoDB is highly represented,
 
 
-Unit tests are to be written to cover the most important aspects of the system. New features often introduce bugs by adding functionalities that are broken, although the reliability of the existing functionalities may also be impacted because of changes in the existing code. To prevent units of code from malfunctioning, regression tests may be implemented to validate whether a unit still functions according to a set of conditions. Static and dynamic tests may be performed using the framework Mocha \cite{mocha} and the assertion library Chai \cite{chai}. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. A comparison was made in Appendix \ref{appendix:pregame}, chapter 4.9, between CI tools. Various CI tools were implemented in previously mentioned proofs of concept.
+
+
+Performance of spatial queries is very important,
+
+
+NoSQL document storage allows for great horizontal scaling and sharding, catering more towards use cases that do not require overal consistency of the data, but makes the data highly available.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Conclusion
+% Premise
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Which decisions could be made following the research in this chapter?
 %
 \section{Premise}
-\[\textit{What is most fitting solution to integrate the backend and frontend into the existing architecture?}\]
-The advised architectural design of TPS comprises of integrated frontend views in each required portal using the associated available technologies, a separate NodeJS microservice with its own MongoDB database, Loopback as a framework to quickly implement functionalities using Typescript and a combination of OOP and FP, authentication via JWT, automated tests using mocha and chai, and continuous delivery and automated testing using Buddy-Works.
-
-integration vs separation frontend
-integration vs separation backend
-Information dependencies
-Authentication and authorization
-Frameworks
-	Loopback Typescript
-	Vue was not used for development, because the frontend was integrated in the existing portal.
-Databases
-	SQL
-	NoSQL
-Testing
-Software Validation
+\[\textit{What is most fitting solution to integrate the backend and frontend into the existing architecture?}\] \hfill
+\mynote{how is state shared(jwt), why are all the choices made and why are they good? Talk about the patterns applied.}
+It is advised to integrated frontend views in each required portal using the associated available technologies to maintain consistency within each portal and reduce dependencies. A separate NodeJS microservice with its own MongoDB database using Loopback as a framework to quickly implement functionalities written in Typescript should make the system readily available to all adjecent system components. Authentication should be established using a JWT provided by a single responsibility authentication service.

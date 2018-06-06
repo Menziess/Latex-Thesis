@@ -17,49 +17,100 @@ During the second phase, issues from the backlog were implemented in an iterativ
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Methods and Techniques}
-In the first sprint, a project was set up in NodeJS using Typescript. The existing projects were built using Javascript, but Typescript is a much safer language, preventing bugs because the compiler can catch errors early on, warning programmers instead before the application crashes. Types also document code, expressing the intention of the programmer.
+In the first sprint, a project was set up in NodeJS using Typescript. The existing projects were built using Javascript, but Typescript is a much safer language due to type checks warning programmers early on. Types also document code, expressing the intention of the programmer.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 1 - Dynamic Price Calculations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 1 - Dynamic Price Calculations}
-A basic dynamic price calculation system was implemented in the first sprint, aiming to deliver a first version of the system, including fake data generators, validation of models, a single service to determine the distance and duration of a ride, rules that contain pricing information, a calculation that produces the total price of a ride using a companies rules, a formatter that produces an expected response, and tests for all of the functionalities.
+A basic dynamic price calculation system was implemented in the first sprint, aiming to deliver a first version of the price calculation system, including fake data generators, validation of models, a single service to determine the distance and duration of a ride, rules that contain pricing information, a calculation that produces the total price of a ride using a companies rules, a formatter that produces an expected response, and tests for all of the functionalities. Before the beginning of the sprint, different techniques and project structures have been tried, providing a headstart.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 2 - Authentication and Authorization
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 2 - Authentication and Authorization}
-Company pricing rules can be used by applications so that each application uses a subset of the pricing rules. For this reason, TPS requires two identifiers to make a price calculation using rules for a particular company application: a companyId and a daAppInstallId. JSON Web Tokens that are signed by the core system contain the identifiers in the payload, so that TPS can use the identifiers after decrypting the token. Companies have one country assigned by default, which determines the currency and VAT percentage. In the breakdown, the VAT percentage is calculated from the actual price, as VAT is included. Discounts are part of the breakdown, being a percentage of the route price, or a fixed price. On top of that, it is possible that a company application uses rules that are related to a debtor, instead of its own subset of rules. Finally, the project is deployed to a staging environment so that the system could be used by the applications in the staging environment.
+Company pricing rules can be used by applications so that each application uses a subset of the pricing rules. For this reason, TPS requires two identifiers to make a price calculation using rules for a particular company application: a companyId and a daAppInstallId. Authentication has been implemented in this sprint using JSON Web Tokens that are signed by the core system. This implementation saves a lot of maintenance in relation to the TPS project, and other projects that adopt this token format. The token stores two important identifiers that are structurally used in taxiId projects: companyId and daAppInstallId. Companies have one country assigned by default, which determines the currency and VAT percentage. In the breakdown, the VAT percentage is calculated from the actual price, as VAT is included. Discounts are part of the breakdown, being a percentage of the route price, or a fixed price. On top of that, it is possible that a company application uses rules that are related to a debtor, instead of its own subset of rules. These basic steps have been implemented during this sprint. Finally, the project is deployed to a staging environment so that the system could be used by the applications in the staging environment for testing.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 3 - Products and Pricing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 3 - Products and Pricing}
-At this point the system is fully operational, but company and daAppInstall information has to be inserted in the database manually. An endpoint is made that inserts a full company setup into the database so that prices can be calculated with five products by default. No wireframes were made beforehand, making it a task for the current sprint being executed while setting up the portal project. Angular in conjunction with Covalents UI platform is used to make the user interface, consisting of an overview and detail page for products and pricing rules. The pricing rules overview shows pricing information for each product that a company has. Whenever a product is added, the pricing information for that new project is automatically added to each rule. Conversely, whenever a new rule is added, all the existing products get their pricing information added to the new rule. On top of that, threshold rules can be added or deleted for distances and durations, making this particular view very complex. This final task was only operational in the backend.
+At this point the system is fully operational, but company and daAppInstall information has to be inserted in the database manually. An endpoint is made that inserts a full company setup into the database so that prices can be calculated with five products by default. No wireframes were made beforehand, adding to the preliminary tasks of setting up the portal project. Angular in conjunction with Covalents UI platform is used to make the user interface, consisting of an overview and detail page for products and pricing rules. The pricing rules overview shows pricing information for each product that a company has. Whenever a product is added, the pricing information for that new project is automatically added to each rule. Conversely, whenever a new rule is added, all the existing products get their pricing information added to the new rule. On top of that, threshold rules can be added or deleted for distances and durations, making this particular view very complex. This final task is only operational in the backend, so the task of displaying thresholds in the frontend is moved to the next sprint.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 4 - Apps and Timeframes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 4 - Apps and Timeframes}
-Feedback was given by the product owner after each sprint, resulting into new requirements and modifications to requirements. A functionality was required that enabled the user to sort pricing rules and special rates (discounts), by dragging the rows in a table to the correct positions. Whenever a priority changed, all subsequent rows needed to be updated to maintain a consistent prioritized list without duplicates. Another requirement would enable products to be returned in the breakdown as 'on-meter' results. This meant that, whenever a destination or departure location was undefined, the system would return products without a price, so that the apps could assign a price later, but would still be aware of the available products. A view was added that displayed all apps of a company, and a detail page was added in which rules and discounts could be associated with those apps. This detail page was created in three iterations. The titles and labels of all pages were replaced by references to the localization api for internationalization as seen in Figure \ref{fig:Architecture}. Timeframe components were added to multiple views, in which hours per week could be specified between two dates.
+Feedback is given by the product owner after each sprint, resulting in new requirements and modifications to requirements. A functionality is desired that enables users to sort pricing rules and special rates (discounts), by dragging the rows in a table to the correct positions. Whenever a priority changes, all subsequent rows need to be updated in order to maintain a consistent prioritized list without duplicate priorities. Another requirement will enable products to be returned in the breakdown as 'on-meter' results. This means that, whenever a destination or departure location is undefined, the system will return products without a price, so that the apps can assign a price later, but will still be aware of the available products. A view is added that displays all apps of a company, and a detail page is added in which rules and discounts can be associated with those apps. This detail page is created in three short iterations. All titles, labels and other texts are replaced by references to a localization api for internationalization purposes as seen in Figure \ref{fig:Architecture}. Timeframe components are added to multiple views, in which hours per week can be specified between two dates.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 5 - Thresholds
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 5 - Thresholds}
-Thresholds, just like prioritized rules and discounts, had to be ordered, as they were independently embedded in multiple price entities that had to be synchronized consistently. A rule has pricing information for every product, and every product has many thresholds. Whenever a threshold property is mutated, every other threshold must be updated as well. Also no duplicates were allowed, and no empty price values were allowed inside the thresholds. Thresholds could independently be removed and added, where in the last case values would be copied from the last to the newly added threshold so that the user would not need to manually insert all values. The timeframes were expanded so that either hours per week were used to determine whether a rule should be triggered, or a time could be set to further restrict the begin and end date of the timeframes. Price estimations were added as a setting on all relations between all entities and rules, or discounts. Portal authentication was implemented so that a JWT was requested at the core system, the token stored in localstorage and used to communicate with TPS. The automatic call to generate synchronized company data was enabled for the core system, such that every time a company was created in the core system, it was also created in TPS.
+Thresholds, just like prioritized rules and discounts, had to be ordered, as they were independently embedded in multiple price entities that had to be synchronized consistently. A rule has pricing information for every product, and every product has many thresholds. Whenever a threshold property is mutated, every other threshold must be updated as well. Also no duplicates were allowed, and no empty price values were allowed inside the thresholds. Thresholds can independently be removed and added, where in the last case values will be copied from the last to the newly added threshold so that the user will not need to manually insert all values. The timeframes were expanded so that either hours per week were used to determine whether a rule should be triggered, or a time can be set to further restrict the begin and end date of the timeframes. Price estimations were added as a setting on all relations between all entities and rules, or discounts. Authentication is implemented in the portal so that a JWT is requested at the core system, the token stored in localstorage and used to communicate with TPS. The automatic call to generate synchronized company data is enabled for the core system, such that every time a company is created in the core system, it is also created in TPS.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sprint 5 - Locations
+% Sprint 6 - Locations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 6 - Locations}
-A locations overview was added that displayed a list of areas and points. The detail page for each location shows a map with the shape or point displayed. These views were split up in two subcategories.
+A locations overview is added, displaying a list of areas and points.
+
+The detail page for each location is showing a map with the shape or point displayed.
+
+These views were split up in two subcategories to resamble smaller and bigger locations.
+
+A search bar allows users to find addresses, provinces, cities, and allows a polygon to be drawn around them. This polygon can be edited on the map.
+
+- query
+	- destination
+	- departure
+- overview
+	- locations
+	- areas
+- new
+	- locations
+		- search (google places)
+		- addresses
+		- name
+		- locations types
+	- areas
+		- search (osm)
+		- map
+			- drawing polygons
+		- name
+		- locations types
+- edit
+	- locations
+		- map
+		  - editing polygons
+		- name
+		- locations types
+	- areas
+		- search (osm)
+		- map
+			- drawing polygons
+			- editing polygons
+		- name
+		- locations types
+
+Rule subrules had to be added in the rule detail page, for the user to be able to edit multiple rules at once. This issue was not resolved during this sprint, and was moved to the next sprint.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Sprint 7 - Subrules
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Sprint 7 - Subrules}
+- on meter results removed
+- sub rules choice between frontend or backend responsibility
+- sorting trouble
+-
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Result
