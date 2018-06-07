@@ -106,6 +106,7 @@ Rule subrules had to be added in the rule detail page, for the user to be able t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 7 - Subrules}
+Sub rules were initially estimated to take up two days of development. Each time a sub rule was added, it had to be activated for the same apps as the parent rule. Whenever the parent rule changed its type from 'fixed' to 'dynamic', all sub rules had to be deactivated somehow. Whenever a parent rule ws deleted, all relations had to be deleted in a cascading fashion. And whenever a parent rule's priority changed, the ordering that had to be maintained had to keep the child rules separately updated. This task of micromanaging small properties, keeping data consistent, caused this task to take twice the estimated story points. The dropdown in the app detail page was
 - on meter results removed
 - sub rules choice between frontend or backend responsibility
 - sorting trouble

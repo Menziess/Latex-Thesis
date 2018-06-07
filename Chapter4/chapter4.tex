@@ -21,7 +21,7 @@ The term 'rule-based' in the title caters to the proposition that trip price cal
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{The System Structure}
-Framework related code is separated from the calculation logic, previously described as the second backend framework proof of concept. Figure \ref{fig:Class Diagram} shows a high level class design. When a price calculation request is made, it is to be handled by a Loopback model endpoint, which processes the request parameters, aggregates all the data required for the calculation from the database, passes it to the calculation logic and returns the results. The calculation logic is only concerned about the calculation of a single product. The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. The behaviour of the gathering of directions information and calculation type is achieved by applying the strategy pattern as described in \cite{gof}. Smaller classes and types are omitted in this diagram. The conceptual model mentioned in the previous chapter that is derived from the database schema design in Figure 4.7.1.1 of Appendix \ref{appendix:pregame} can be seen in Figure \ref{fig:Data Model}.
+Framework related code is separated from the calculation logic, previously described as the second backend framework proof of concept. Figure \ref{fig:Class Diagram} shows a high level class design. The calculation logic is only concerned about the calculation of a single product. The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. The behaviour of the gathering of directions information and calculation type is achieved by applying the strategy pattern as described in \cite{gof}. Smaller classes and types are omitted in this diagram. The conceptual model mentioned in the previous chapter that is derived from the database schema design in Figure 4.7.1.1 of Appendix \ref{appendix:pregame} can be seen in Figure \ref{fig:Data Model}. These model names and relations will be referenced throughout this chapter. When a price calculation request is made, it is to be handled by a Loopback model endpoint, which processes the request parameters, aggregates all the data required for the calculation from the database, passes it to the calculation logic and returns the results.
 
 \begin{figure}[H]
 	\centering
@@ -37,6 +37,25 @@ Framework related code is separated from the calculation logic, previously descr
 	\label{fig:Data Model}
 \end{figure}
 
+\subsection{Rules}
+\mynote{Changes a lot, needs final version}
+Rules and discounts are queried for each requested product as shown in step three and five of Figure \ref{fig:Calculation}. MongoDB’s aggregation framework allows documents to be aggregated in a multi-staged pipeline.
+
+\subsubsection{Identification}
+The first step in the pipeline matches all DaAppInstall entities with the identifiers sent along in the JWT payload: companyId and daAppInstallId.
+\subsubsection{Links}
+As shown in Figure \ref{fig:DataModel}, the DaAppInstall entities have multiple Links; ruleLinks and discountLinks. These links store data in a polymorphic hasManyThrough relation.
+\subsubsection{Country}
+Each company has a country, used to determine the default VAT and currency.
+\subsubsection{Rules}
+All documents are filtered based on geolocation and timeframes.
+\subsubsection{Prices}
+Prices are retrieved for each product that is associated with the matched rule. DynamicPrices and related thresholds, and FixedPrices and related thresholds.
+\subsubsection{Sorting and Formatting}
+The final step in the aggregate sorts and formats the results so that the Price class can calculate a price breakdown for each result.
+
+\subsection{Discounts}
+The price calculation matches rules and discounts separately. Discounts were associated with rules in the legacy system, eliminating the amount of combinations of prices with or without discounts. A discount was either always active, or it was not. Having separation between the two enables users to define other locations and timeframes to both of them separately.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,67 +99,46 @@ When both queries are finished, potential discounts are added to each pricing ru
 % 	\label{fig:Calculation}
 % \end{figure}
 
-type pricing = {
-  name: string;
-  maxPassengers: number;
-  type: vehicleType;
-  imagePath: string;
-  companyId: ObjectId;
-  company: {
-    name: string;
-    countryId: ObjectId;
-  };
-  country: {
-    name: string;
-    code: string;
-    defaultTax: number;
-    defaultCurrency: string;
-  };
-  discount?: discount;
-  prices: {
-    isEnabled: boolean;
-    isEstimated: boolean;
-    minuteWaitingPrice: number;
-    fixedPrice: number;
-    dynamicStartPrice: number;
-    dynamicMinimumPrice: number;
-    dynamicMinutePrice: number;
-    dynamicDistancePrice: number;
-    cascadingThresholdCalculation: boolean;
-    dynamicThresholds: threshold[];
-    fixedThresholds: threshold[];
-  };
-  rules: {
-    name: string;
-    type: string;
-    priority: number;
-    companyId: ObjectId;
-  };
-};
+% type pricing = {
+%   name: string;
+%   maxPassengers: number;
+%   type: vehicleType;
+%   imagePath: string;
+%   companyId: ObjectId;
+%   company: {
+%     name: string;
+%     countryId: ObjectId;
+%   };
+%   country: {
+%     name: string;
+%     code: string;
+%     defaultTax: number;
+%     defaultCurrency: string;
+%   };
+%   discount?: discount;
+%   prices: {
+%     isEnabled: boolean;
+%     isEstimated: boolean;
+%     minuteWaitingPrice: number;
+%     fixedPrice: number;
+%     dynamicStartPrice: number;
+%     dynamicMinimumPrice: number;
+%     dynamicMinutePrice: number;
+%     dynamicDistancePrice: number;
+%     cascadingThresholdCalculation: boolean;
+%     dynamicThresholds: threshold[];
+%     fixedThresholds: threshold[];
+%   };
+%   rules: {
+%     name: string;
+%     type: string;
+%     priority: number;
+%     companyId: ObjectId;
+%   };
+% };
 
 
 In this case, the best match is found, and price breakdowns are returned without a calculated price. This is handled by the mobile applications, as it is the case with the legacy system. But if the trip details have sucesfully been obtained, the sys
-
-\subsection{Discounts}
-The price calculation matches rules and discounts separately. Discounts were associated with rules in the legacy system, eliminating the amount of combinations of prices with or without discounts. A discount was either always active, or it was not. Having separation between the two enables users to define other locations and timeframes to both of them separately.
-
-\subsection{Rules}
-\mynote{Changes a lot, needs final version}
-Rules and discounts are queried for each requested product as shown in step three and five of Figure \ref{fig:Calculation}. MongoDB’s aggregation framework allows documents to be aggregated in a multi-staged pipeline.
-
-\subsubsection{Identification}
-The first step in the pipeline matches all DaAppInstall entities with the identifiers sent along in the JWT payload: companyId and daAppInstallId.
-\subsubsection{Links}
-As shown in Figure \ref{fig:DataModel}, the DaAppInstall entities have multiple Links; ruleLinks and discountLinks. These links store data in a polymorphic hasManyThrough relation.
-\subsubsection{Country}
-Each company has a country, used to determine the default VAT and currency.
-\subsubsection{Rules}
-All documents are filtered based on geolocation and timeframes.
-\subsubsection{Prices}
-Prices are retrieved for each product that is associated with the matched rule. DynamicPrices and related thresholds, and FixedPrices and related thresholds.
-\subsubsection{Sorting and Formatting}
-The final step in the aggregate sorts and formats the results so that the Price class can calculate a price breakdown for each result.
-
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -150,7 +148,6 @@ The final step in the aggregate sorts and formats the results so that the Price 
 \section{Locations}
 Locations and timeframes are the big filters that reduce the amount of potential matching rules and discounts based on space and time. The implementation for location queries ...
 \mynote{Working on locations}
-
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
