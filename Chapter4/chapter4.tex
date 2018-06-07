@@ -21,7 +21,7 @@ The term 'rule-based' in the title caters to the proposition that trip price cal
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{The System Structure}
-Framework related code is separated from the calculation logic, previously described as the second backend framework proof of concept. Figure \ref{fig:Class Diagram} shows a high level class design. When a price calculation request is made, it is to be handled by a Loopback model endpoint, which processes the request parameters, aggregates all the data required for the calculation from the database, passes it to the calculation logic and returns the results. The calculation logic is only concerned about the calculation of a single product. The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively.
+Framework related code is separated from the calculation logic, previously described as the second backend framework proof of concept. Figure \ref{fig:Class Diagram} shows a high level class design. When a price calculation request is made, it is to be handled by a Loopback model endpoint, which processes the request parameters, aggregates all the data required for the calculation from the database, passes it to the calculation logic and returns the results. The calculation logic is only concerned about the calculation of a single product. The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. The behaviour of the gathering of directions information and calculation type is achieved by applying the strategy pattern as described in \cite{gof}. Smaller classes and types are omitted in this diagram. The conceptual model mentioned in the previous chapter that is derived from the database schema design in Figure 4.7.1.1 of Appendix \ref{appendix:pregame} can be seen in Figure \ref{fig:Data Model}.
 
 \begin{figure}[H]
 	\centering
@@ -30,7 +30,13 @@ Framework related code is separated from the calculation logic, previously descr
 	\label{fig:Class Diagram}
 \end{figure}
 
-The behaviour of the gathering of directions information and calculation type is achieved by applying the strategy pattern as described in \cite{gof}. Smaller classes and types are omitted in this diagram.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{DataModel}
+	\caption[Data Model]{Conceptual data model showing database entity relations.}
+	\label{fig:Data Model}
+\end{figure}
+
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,14 +61,7 @@ The Directions class will provide an interface to retrieve trip related data. Th
 \subsection{Data Aggregation}
 When the user is authenticated, the system immediately requests the distance and duration of a ride by providing the departure and destination locations to the directions service. This service awaits the trip details response while it is fed to a Price class instantiation (5). The Price class will wait until matched pricing rules are provided, upon which it will perform the price calculation. Before this is the case, the aggregate queries are performed (6), trying to find a matching rule and discount for a particular company/app combination.
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\textwidth]{DataModel}
-	\caption[Data Model]{Conceptual data model showing database entity relations.}
-	\label{fig:Data Model}
-\end{figure}
-
-Two separate queries start by finding the application and company combination for which a price is calculated see Figure \ref{fig:Data Model}. If a reference to a debtor is provided, rules and discounts linked to it are used instead. The rules and discounts contain criteria in the form of timeframes and locations. A discount has basic properties while the rule has complex pricing information for products. Figure \ref{fig:Data Aggregation} shows the most important stages of the rule aggregation pipeline. The discount aggregate is a more simple version and has some of the same stages, its flowchart is therefore excluded.
+Two separate queries start by finding the application and company combination for which a price is calculated. If a reference to a debtor is provided, rules and discounts linked to it are used instead. The rules and discounts contain criteria in the form of timeframes and locations. A discount has basic properties while the rule has complex pricing information for products. Figure \ref{fig:Data Aggregation} shows the most important stages of the rule aggregation pipeline. The discount aggregate is a more simple version and has some of the same stages, its flowchart is therefore excluded.
 
 \begin{figure}[H]
 	\centering
@@ -73,6 +72,13 @@ Two separate queries start by finding the application and company combination fo
 
 \subsection{Calculation}
 When both queries are finished, potential discounts are added to each pricing rule, which are then fed to the Price class asynchronously. A single rule has price information for each available product of that rule. If a company offers three products, it is possible to only offer two products in a given timeframe or area by associating them with a rule. For each product that is related to the price rule fetched from the database, a price breakdown is calculated. If the array of matched rules is empty, a map over the array will result in an empty array of price breakdowns. A price breakdown follows a series of logical steps, in which functions are created that have a certain default behaviour. The strategy pattern is once again applied to use the appropriate calculator for the type of calculation that is required.
+
+% \begin{figure}[H]
+% 	\centering
+% 	\includegraphics[width=1\textwidth]{Calculation}
+% 	\caption[Calculation]{The condensed flow of a trip price calculation - calculation.}
+% 	\label{fig:Calculation}
+% \end{figure}
 
 type pricing = {
   name: string;
