@@ -12,24 +12,25 @@
 % #region
 \chapter{Trip Price Calculation System}
 \section{Introduction}
+\mynote{Doen alsof dit programma nog niet bestaat (dit gaan we doen, en dan dat...)}
 The term 'rule-based' in the title caters to the proposition that trip price calculations hinge on information defined as something called a rule. This chapter demonstrates how the system should be structured, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed should restrict the price rule dimensions of space and time. Also, how determinism in calculations can be achieved to consistently calculate a price breakdown that reflects that of the legacy system.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Project Structure
+% The System Structure
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
-\section{The Project Structure}
-Framework related code is separated from the logic that is used to calculate the prices. Figure \ref{fig:ClassDiagram} shows a high level class design.
+\section{The System Structure}
+Framework related code is separated from the calculation logic, previously described as the second backend framework proof of concept. Figure \ref{fig:Class Diagram} shows a high level class design. When a price calculation request is made, it is to be handled by a Loopback model endpoint, which processes the request parameters, aggregates all the data required for the calculation from the database, passes it to the calculation logic and returns the results. The calculation logic is only concerned about the calculation of a single product. The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\textwidth]{ClassDiagram}
-	\caption[Class Diagram]{Class diagram.}
-	\label{fig:ClassDiagram}
+	\caption[Class Diagram]{High level class diagram.}
+	\label{fig:Class Diagram}
 \end{figure}
 
-The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. Loopback is used to expose model endpoints, connect to databases, and handle request. When a price calculation request is made, it is handled by a model endpoint, which processes the request parameters, fetches all the data required for the calculation from the database, passes it to the calculation logic, and returns the results. The calculation logic takes the request parameters and database data to convert the request parameters describing a trip into a price breakdown using the database data.
+The behaviour of the gathering of directions information and calculation type is achieved by applying the strategy pattern as described in \cite{gof}. Smaller classes and types are omitted in this diagram.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -40,31 +41,38 @@ The Price object is composed of a Directions and a Calculator Class, both of whi
 This section will elaborate on the steps mentioned previously. The process from start to end is has many edge- and corner cases. The process of handling the incoming request, finding the matching price rule, and calculating the prices is explained coarsely in the following subsections. Individual parts are explained in later sections.
 
 \subsection{Incoming Request}
-When the request is received, the user is authenticated. The JSON Web Token contains the user identity, the companyId and daAppInstallId. The request body contains information about the ride: vehicle types, passenger count, requested date, departure, and destination. All preconditions of handling the request are met. The flowchart in Figure \ref{fig:Incoming Request} shows point where the request is received, up until the point where enough information is known to query rules and discounts.
+The flowchart in Figure \ref{fig:Incoming Request} shows the point where the request is received, up until the point where enough information is known to fetch rules and discounts from the database. When the request is received (1), the user is authenticated. The JSON Web Token contains the user identity, the companyId and daAppInstallId (2). The request body contains information about the ride: vehicle types, passenger count, requested date, departure, and destination.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\textwidth]{IncomingRequest}
-	\caption[Incoming Request]{The condensed flow of a trip price calculation.}
+	\caption[Incoming Request]{The condensed flow of a trip price calculation - incoming request.}
 	\label{fig:Incoming Request}
 \end{figure}
 
-The directions class will provide an interface to retrieve trip related data. The departure and destination are fed to the directions class, which will proceed and work out the distance and duration of the trip. The BasicDirections class returns a base case result, if the GoogleDirections class is unable to determine the trip details. For example, the trip price calculation flow changes drastically when no destination or departure locations are provided in the request body. For this reason, a base case and the google case are defined using a behavioral strategy pattern as described in \cite{gof}. This also improves the systems resistance to change. If a different service is needed to determine the trip details in the future, it can easily take the place of one of the current services. If the trip details have not been obtained, but at least one of the two, departure or destination locations, have been provided, a database query could still work out the best matching price rule.
+The Directions class will provide an interface to retrieve trip related data. The departure and destination are fed to the Directions class, which will proceed and work out the distance and duration of the trip (3). If the GoogleDirections class is unable to determine the trip details, the BasicDirections class returns a base case result. The trip price calculation flow changes drastically when no destination or departure locations are provided in the request body. Having alternative behaviours helps dealing with providing the most accurate information possible. The strategy pattern also improves the systems resistance to change. If a different service is needed to determine the trip details in the future, it can easily take the place of one of the current services. If the trip details have not been obtained, but at least one of the two, departure or destination locations, have been provided, a database query could still work out the best matching price rule based on partial information. The requestedDate is to be converted to a regex pattern (4) for reasons explained in the timeframes section of this chapter.
 
 \subsection{Data Aggregation}
-When the user is authenticated, the system immediately requests the distance and duration of a ride by providing the departure and destination locations to the directions service. This service awaits the trip details response while it is fed to a Price class instantiation. The Price class will wait until matched pricing rules are provided, upon which it will perform the price calculation. Before this is the case, the aggregate query is performed, trying to find a matching rule, and retrieve the associated pricing and discount information.
+When the user is authenticated, the system immediately requests the distance and duration of a ride by providing the departure and destination locations to the directions service. This service awaits the trip details response while it is fed to a Price class instantiation (5). The Price class will wait until matched pricing rules are provided, upon which it will perform the price calculation. Before this is the case, the aggregate queries are performed (6), trying to find a matching rule and discount for a particular company/app combination.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\textwidth]{DataModel}
-	\caption[DataModel]{Conceptual data model showing database entity relations.}
-	\label{fig:DataModel}
+	\caption[Data Model]{Conceptual data model showing database entity relations.}
+	\label{fig:Data Model}
 \end{figure}
 
-Two separate queries start by finding the application and company combination for which a price is calculated see Figure \ref{fig:DataModel}. If a reference to a debtor is provided, rules and discounts linked to it are used instead. The rules and discounts contain criteria in the form of timeframes and locations. A discount has basic properties while the rule has complex pricing information for products. When both queries are finished, potential discounts are added to each pricing rule, which are then fed to the Price class in asynchronously.
+Two separate queries start by finding the application and company combination for which a price is calculated see Figure \ref{fig:Data Model}. If a reference to a debtor is provided, rules and discounts linked to it are used instead. The rules and discounts contain criteria in the form of timeframes and locations. A discount has basic properties while the rule has complex pricing information for products. Figure \ref{fig:Data Aggregation} shows the most important stages of the rule aggregation pipeline. The discount aggregate is a more simple version and has some of the same stages, its flowchart is therefore excluded.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{DataAggregation}
+	\caption[Data Aggregation]{The condensed flow of a trip price calculation - data aggregation.}
+	\label{fig:Data Aggregation}
+\end{figure}
 
 \subsection{Calculation}
-A single rule has price information for each available product of that rule. If a company offers three products, it is possible to only offer two products in a given timeframe or area by associating them with a rule. For each product that is related to the price rule fetched from the database, a price breakdown is calculated. If the array of matched rules is empty, a map over the array will result in an empty array of price breakdowns. A price breakdown follows a series of logical steps, in which functions are created that have a certain default behaviour. The strategy pattern is once again applied to use the appropriate calculator for the type of calculation that is required.
+When both queries are finished, potential discounts are added to each pricing rule, which are then fed to the Price class asynchronously. A single rule has price information for each available product of that rule. If a company offers three products, it is possible to only offer two products in a given timeframe or area by associating them with a rule. For each product that is related to the price rule fetched from the database, a price breakdown is calculated. If the array of matched rules is empty, a map over the array will result in an empty array of price breakdowns. A price breakdown follows a series of logical steps, in which functions are created that have a certain default behaviour. The strategy pattern is once again applied to use the appropriate calculator for the type of calculation that is required.
 
 type pricing = {
   name: string;

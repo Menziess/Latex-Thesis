@@ -213,5 +213,7 @@ NoSQL document storage allows for great horizontal scaling and sharding, caterin
 %
 \section{Premise}
 \[\textit{What is most fitting solution to integrate the backend and frontend into the existing architecture?}\] \hfill
+
+\mynote{second poc is used}
 \mynote{how is state shared(jwt), why are all the choices made and why are they good? Talk about the patterns applied.}
 It is advised to integrated frontend views in each required portal using the associated available technologies to maintain consistency within each portal and reduce dependencies. A separate NodeJS microservice with its own MongoDB database using Loopback as a framework to quickly implement functionalities written in Typescript should make the system readily available to all adjecent system components. Authentication should be established using a JWT provided by a single responsibility authentication service.
