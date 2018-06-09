@@ -12,8 +12,7 @@
 % #region
 \chapter{Trip Price Calculation System}
 \section{Introduction}
-\mynote{Doen alsof dit programma nog niet bestaat (dit gaan we doen, en dan dat...)}
-The term 'rule-based' in the title caters to the proposition that trip price calculations hinge on information defined as something called a rule. This chapter demonstrates how the system should be structured, what logical flow of information is to be contrived, and how different pieces of information that are stored and processed should restrict the price rule dimensions of space and time. Also, how determinism in calculations can be achieved to consistently calculate a price breakdown that reflects that of the legacy system.
+The term 'rule-based' in the title caters to the proposition that trip price calculations hinge on information defined as something called a rule. In this chapter, the important questions in regard to the implementation of the backend are answered, resulting in a system that deterministically calculates trip prices using rules that are restricted by user defined criteria.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,7 +20,8 @@ The term 'rule-based' in the title caters to the proposition that trip price cal
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{The System Structure}
-Framework related code is separated from the calculation logic, previously described as the second backend framework proof of concept. Figure \ref{fig:Class Diagram} shows a high level class design. The calculation logic is only concerned about the calculation of a single product. The Price object is composed of a Directions and a Calculator Class, both of which expose only one instance method, directions and calculate respectively. The behaviour of the gathering of directions information and calculation type is achieved by applying the strategy pattern as described in \cite{gof}. Smaller classes and types are omitted in this diagram. The conceptual model mentioned in the previous chapter that is derived from the database schema design in Figure 4.7.1.1 of Appendix \ref{appendix:pregame} can be seen in Figure \ref{fig:Data Model}. These model names and relations will be referenced throughout this chapter. When a price calculation request is made, it is to be handled by a Loopback model endpoint, which processes the request parameters, aggregates all the data required for the calculation from the database, passes it to the calculation logic and returns the results.
+A deterministic algorithm always produces the exact same output when given a certain input. This concept is paramount in respect of a price calculation, or any financial calculation for that matter. Not only is it strange when two passengers, under the same conditions, booking the same trip, have to pay a different price. It is also impossible to guarentee the correctness of the calculation when certain parts of the computation introduce variation through side effects. This does not mean that the criteria that dictate whether rules match are not allowed to change. It does mean that given a input and a set of criteria, the resulting matched rule and associated price definitions, the output should be the same every time. It may not be possible to make the entire system deterministic. Parts of the system may execute operations asynchronously, which can be contained. But there are factors that can not be controlled, such as computations of external services. These factors are side effects that are out of the scope of containment. The result of such services will be seen as the input to a deterministic function, that in contrast, should be contained. In order to reach a level of determinism, the calculation logic should manage state flawlessly. In the object-oriented programming (OOP) paradigm, state is managed through encapsulation. Object instances manage their internal state, and expose public methods to allow certain changes to be made on those instances. The functional programming (FP) paradigm treats computations as evaluations of mathematical functions. This aspect seems tailored toward the goal of reaching determinism. Still, higher order structure may be managed through classes and encapsulation for more flexibility. The second proof of concept in the previous chapter separates the calculation logic from the Loopback framework as shown in Figure \ref{fig:Class Diagram}. The isolation of the calculation and direction classes result in a more robust system, assuming that the framework is just a user of the calculation logic. The Price object is composed of a Directions and a Calculator Class, both of which expose only one method, directions and calculate respectively. The behaviour of the gathering of directions information and calculation of prices is encapsulated in different subclasses using the strategy pattern as described in \cite{gof}. The entities stored in the database are comceptualized in Figure \ref{fig:Data Model}, illustrating the abstractions of timeframes and locations so that they can be used for different models in the design.
+
 
 \begin{figure}[H]
 	\centering
@@ -36,26 +36,6 @@ Framework related code is separated from the calculation logic, previously descr
 	\caption[Data Model]{Conceptual data model showing database entity relations.}
 	\label{fig:Data Model}
 \end{figure}
-
-\subsection{Rules}
-\mynote{Changes a lot, needs final version}
-Rules and discounts are queried for each requested product as shown in step three and five of Figure \ref{fig:Calculation}. MongoDB’s aggregation framework allows documents to be aggregated in a multi-staged pipeline.
-
-\subsubsection{Identification}
-The first step in the pipeline matches all DaAppInstall entities with the identifiers sent along in the JWT payload: companyId and daAppInstallId.
-\subsubsection{Links}
-As shown in Figure \ref{fig:DataModel}, the DaAppInstall entities have multiple Links; ruleLinks and discountLinks. These links store data in a polymorphic hasManyThrough relation.
-\subsubsection{Country}
-Each company has a country, used to determine the default VAT and currency.
-\subsubsection{Rules}
-All documents are filtered based on geolocation and timeframes.
-\subsubsection{Prices}
-Prices are retrieved for each product that is associated with the matched rule. DynamicPrices and related thresholds, and FixedPrices and related thresholds.
-\subsubsection{Sorting and Formatting}
-The final step in the aggregate sorts and formats the results so that the Price class can calculate a price breakdown for each result.
-
-\subsection{Discounts}
-The price calculation matches rules and discounts separately. Discounts were associated with rules in the legacy system, eliminating the amount of combinations of prices with or without discounts. A discount was either always active, or it was not. Having separation between the two enables users to define other locations and timeframes to both of them separately.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
