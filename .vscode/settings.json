@@ -1,26 +1,66 @@
 {
-  "files.exclude": {
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/CVS": true,
-    "**/.DS_Store": true,
-    "**/*.fls": true,
-    "**/*.aux": true,
-    "**/*.idx": true,
-    "**/*.ilg": true,
-    "**/*.ind": true,
-    "**/*.lof": true,
-    "**/*.log": true,
-    "**/*.synctex.gz": true,
-    "**/*.toc": true,
-    "**/*.ini": true,
-    "**/*.nlo": true,
-    "**/*.bbl": true,
-    "**/*.out": true,
-    "**/*.fdb_latexmk": true,
-    "**/*.lot": true,
-    "**/*.ps": true,
-    "**/*.blg": true,
-  }
+	"cSpell.words": [
+		"Schenk",
+		"timeframes"
+	],
+	"latex-workshop.view.pdf.viewer": "browser",
+	"latex-workshop.message.update.show": false,
+	"latex-workshop.latex.autoBuild.onSave.enabled": false,
+	"latex-workshop.message.error.show": false,
+	"latex-workshop.latex.tools": [
+		{
+			"name": "latexmk",
+			"command": "latexmk",
+			"args": [
+				"-halt-on-error",
+				"-synctex=1",
+				"-interaction=nonstopmode",
+				"-file-line-error",
+				"-pdf",
+				"%DOC%"
+			]
+		},
+		{
+			"name": "pdflatex",
+			"command": "pdflatex",
+			"args": [
+				"-halt-on-error",
+				"-synctex=1",
+				"-interaction=nonstopmode",
+				"-file-line-error",
+				"%DOC%"
+			]
+		},
+		{
+			"name": "bibtex",
+			"command": "bibtex",
+			"args": [
+				"%DOCFILE%"
+			]
+		}
+	],
+	"files.exclude": {
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/CVS": true,
+		"**/.DS_Store": true,
+		"**/*.fls": true,
+		"**/*.aux": true,
+		"**/*.idx": true,
+		"**/*.ilg": true,
+		"**/*.ind": true,
+		"**/*.lof": true,
+		"**/*.log": true,
+		"**/*.synctex.gz": true,
+		"**/*.toc": true,
+		"**/*.ini": true,
+		"**/*.nlo": true,
+		"**/*.bbl": true,
+		"**/*.out": true,
+		"**/*.fdb_latexmk": true,
+		"**/*.lot": true,
+		"**/*.ps": true,
+		"**/*.blg": true,
+	}
 }
