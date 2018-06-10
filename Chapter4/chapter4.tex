@@ -424,7 +424,7 @@ The Typescript type definitions reveal that calculation is of type Function, and
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Determinism}
-This recursiveThreshold static method is called for every price related calculation. It is honest about its parameters, and does not depend on external state. It is worth noting that even though this function is static and does not modify instance data, it is impure, leaving the passed thresholds array empty at the end. The function is deterministic because when given a valid input, it produces the same output every single time. The method merely executes the passed function with different arguments. The base case will therefore always yield the default result. The elegant nature of recursion counts as an inductive proof that the procedure will work for each successive step, which works in harmony with the uncertain amount of thresholds that need to be processed. Because the method does not rely on external state, it can easily be tested. Unit tests have been written using the Mocha framework \cite{mocha} and the Chai assertion library \cite{chai}, to cover the most important aspects of the system, making sure that the price calculation logic keeps producing the same outputs. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. The current setup of calculation and directions subclasses allow for extensibility with respect to the open-closed principle. Metrics, calculators, threshold types, price definitions, and other aspects of the calculation may be added as long as the same interfaces are used. State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. Typescript plays an important role in mixing OOP and FP together.
+This recursiveThreshold static method is called for every price related calculation. It is honest about its parameters, and does not depend on external state. It is worth noting that even though this function is static and does not modify instance data, it is impure, leaving the passed thresholds array empty at the end. The function is deterministic because when given a valid input, it produces the same output every single time. The method merely executes the passed function with different arguments. The base case will therefore always yield the default result. The elegant nature of recursion counts as an inductive proof that the procedure will work for each successive step, which works in harmony with the uncertain amount of thresholds that need to be processed. Because the method does not rely on external state, it can easily be tested. Unit tests have been written using the Mocha framework \cite{mocha} and the Chai assertion library \cite{chai}, to cover the most important aspects of the system, making sure that the price calculation logic keeps producing the same outputs. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. The current setup of calculation and directions subclasses allow for extensibility with respect to the open-closed principle. Metrics, calculators, threshold types, price definitions, and other aspects of the calculation may be added as long as the same interfaces are used. State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. Typescript plays an important role in mixing OOP and FP together through type definitions.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -440,8 +440,6 @@ The final result of the trip price calculation is a breakdown for every requeste
 \begin{lstlisting}[caption={Legacy price breakdown}, label={lst:legacy-breakdown}]
 [
 	{
-		"vehicleType": "saloon",
-		"maxPassengers": "4",
 		"price": {
 			"currency": "EUR",
 			"total": 850,
@@ -453,9 +451,9 @@ The final result of the trip price calculation is a breakdown for every requeste
 				"waiting": 0,
 				"discount": 0
 			}
-		},
-		"fixedPrice": "true"
-	}
+		}
+	},
+	...
 ]
 \end{lstlisting}
 
@@ -464,9 +462,6 @@ Two possible solutions were proposed having VAT included in the price. The first
 \begin{lstlisting}[caption={Improved price breakdown}, label={lst:new-breakdown}]
 [
 	{
-		"vehicleType": "estate",
-		"maxPassengers": 4,
-		"isEstimated": false,
 		"price": {
 			"breakdown": {
 				"route": 8300,
@@ -495,7 +490,7 @@ Keep in mind that unlike the listings the prices in the proposal are not display
 	\item Rounding the individual components could result in a sum that is not equal to the total displayed in the breakdown.
 \end{enumerate}
 
-The first proposal is chosen to be implemented, where the flag 'fixedPrice' is replaced by the 'isEstimated' flag to clearly reflect its purpose.
+The first proposal has been implemented, resulting in an operational trip price calculation system.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
