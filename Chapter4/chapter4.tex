@@ -403,31 +403,39 @@ On top of each calculation type, prices can be defined after certain thresholds 
 \begin{center}
 \noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Recursive threshold calculation.}, label={lst:threshold-recursion}]
-public static recursiveThreshold(
-	thresholds: threshold[],
-	calculation: Function,
-	metric: number,
-	cascaded: boolean = true,
-): number {
+	/**
+	* Recursive function that calculates a price for each threshold
+	* in a way specified by a calculation function that is passed
+	* until the thresholds are empty.
+	*/
+ public static recursiveThreshold(
+	 thresholds: threshold[],
+	 calculation: Function,
+	 metric: number,
+	 cascaded: boolean = true,
+ ): number {
 
-	if (thresholds === undefined || thresholds.length < 1) {
-		return calculation(undefined, metric);
-	}
+	 if (thresholds === undefined || thresholds.length < 1) {
+		 log('\tno more thresholds at ' + metric + ', using default price');
+		 return calculation(undefined, metric);
+	 }
 
-	if (!cascaded) {
-		return calculation((<threshold>thresholds.shift()).value, metric);
-	}
+	 log('\tthreshold met at ' + metric);
 
-	const nextMetric = thresholds[0].threshold;
-	const newMetric = metric - nextMetric;
-	const price = calculation((<threshold>thresholds.shift()).value, newMetric);
+	 if (!cascaded) {
+		 return calculation(thresholds[0].value, metric);
+	 }
 
-	return price + Price.recursiveThreshold(
-		thresholds,
-		calculation,
-		nextMetric,
-	);
-}
+	 const nextMetric = thresholds[0].threshold;
+	 const newMetric = metric - nextMetric;
+	 const price = calculation(thresholds[0].value, newMetric);
+
+	 return price + Price.recursiveThreshold(
+		 thresholds.slice(1),
+		 calculation,
+		 nextMetric,
+	 );
+ }
 \end{lstlisting}
 \end{minipage}
 \end{center}
@@ -440,7 +448,7 @@ The Typescript type definitions reveal that calculation is of type Function, and
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Determinism}
-This recursiveThreshold static method is called for every price related calculation. It is honest about its parameters, and does not depend on external state. It is worth noting that even though this function is static and does not modify instance data, it is impure, leaving the passed thresholds array empty at the end. The function is deterministic because when given a valid input, it produces the same output every single time. The method merely executes the passed function with different arguments. The base case will therefore always yield the default result. The elegant nature of recursion counts as an inductive proof that the procedure will work for each successive step, which works in harmony with the uncertain amount of thresholds that need to be processed. Because the method does not rely on external state, it can easily be tested. Unit tests have been written using the Mocha framework \cite{mocha} and the Chai assertion library \cite{chai}, to cover the most important aspects of the system, making sure that the price calculation logic keeps producing the same outputs. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. The current setup of calculation and directions subclasses allow for extensibility with respect to the open-closed principle. Metrics, calculators, threshold types, price definitions, and other aspects of the calculation may be added as long as the same interfaces are used. State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. Typescript plays an important role in mixing OOP and FP together through type definitions.
+This recursiveThreshold static method is called for every price related calculation. It is honest about its parameters, and does not depend on external state. It is pure, because it does not depend on state outside of its scope, and does not mutate the data that is passed to it. The function is deterministic because when given a valid input, it produces the same output every single time. The method merely executes the passed function with different arguments. The base case will therefore always yield the default result. The elegant nature of recursion counts as an inductive proof that the procedure will work for each successive step, which works in harmony with the uncertain amount of thresholds that need to be processed. Because the method is pure, it can easily be tested. Unit tests have been written using the Mocha framework \cite{mocha} and the Chai assertion library \cite{chai}, to cover the most important aspects of the system, making sure that the price calculation logic keeps producing the same outputs. Everything that has been noted so far, should apply to all the functionalities in the calculation system to keep the process deterministic. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. The current setup of calculation and directions subclasses allow for extensibility with respect to the open-closed principle. Metrics, calculators, threshold types, price definitions, and other aspects of the calculation may be added as long as the same interfaces are used. State and mutations should be fully encapsulated using OOP patterns, leaving only static functions exposed. Functions should be written in a functional style so that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. Typescript plays an important role in mixing OOP and FP together through type definitions. This deterministic nature of TPS will mean that a list of breakdowns as result is always guaranteed.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
