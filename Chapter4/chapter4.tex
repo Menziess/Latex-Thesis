@@ -70,7 +70,7 @@ The legacy postal code and address based system maintains a type based matching 
 Multipolygons allow for multiple locations to be defined as one, opening up the possibility of defining all branches of a company in a single location, which could then be selected as departure and destination location. This would solve example seven from the examples list, using just one rule and one location. Because locations could be associated with all rule types, all location based examples are easy to define. Although care must be taken to distinguish between not having a location defined, and not providing a location when booking a ride. If no departure location is assigned to a rule, the rule should match with any location. And if the passenger orders an on-demand ride, where the destination is not provided, the destination should be ignored during the matching process.
 
 \begin{center}
-\noindent\begin{minipage}{.45\textwidth}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Matching departure.}, label={lst:matching-departure}]
 const query = [];
 
@@ -115,8 +115,8 @@ The legacy system takes a straight forward approach of storing time in a relatio
 For this reason, a proposal was made to implement timeframes in a way that let users choose to describe each hour of the week, being stored as a bit map. The windows could be decreased to half an hour, resulting in twice as many bits. Three implementations have been tested, where the bit string format offered the best outcome, as seen in \ref{appendix:slides_4}. A timeframe is stored having two ISODates (international standard: ISO 8601), and a bit string representing the schedule for which the insert statement is shown in Listing \ref{lst:new-timeframe}.
 
 \begin{center}
-	\noindent\begin{minipage}{.45\textwidth}
-		\begin{lstlisting}[caption={Improved timeframe.}, label={lst:new-timeframe}]
+\noindent\begin{minipage}{.85\textwidth}
+\begin{lstlisting}[caption={Improved timeframe.}, label={lst:new-timeframe}]
 db.Timeframe.insert({
 	startDate: new Date(2018, 4, 7),
 	endDate: new Date(2019, 4, 7),
@@ -130,11 +130,13 @@ db.Timeframe.insert({
 		010111101000000101001110"
 })
 \end{lstlisting}
-	\end{minipage}
+\end{minipage}
 \end{center}
 
 A string is a very flexible datatype. Using a regex in a query makes checking multiple bits in the string relatively easy, and enables different values next to 0 and 1. 3. A bit array would only allow for 0 and 1 to be used. A bit string also makes querying the data really stable, as the query will simply not match if the content of the data is not of expected length or value. Performance is not an issue if the regex column is indexed, and when prefix expressions $(/\string^/)$ are used, as per documentation in \cite{MongoDB-Regex}. As noted before, the system is easy to scale if existing data can be migrated to deal with a new amount of bits, or new character usage over bits.
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Opening timeframe.}, label={lst:open-timeframe}]
 /**
  * Date object days start at sunday, in order let monday be
@@ -158,6 +160,8 @@ export const regexFromDate = (date: Date) => {
 	return { skip, timeRegex: new RegExp(`^.{${skip}}1`) };
 };
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 The regexFromDate could be used to create a regex that could be used in a query to check whether a single hour within a week is set. Skip is an integer representing the number of bits that should be skipped to get to the moment represented by the date. So in order to get 11 AM - 12 AM in the presented schedule, 3 * 24 skips + 11 skip = 83 skips are to be made to find the digit 1 on thursday. Because the getDay method on JavaScript date objects return an integer resembling the day, starting at sunday, the startMonday function is used to pretend that it starts on monday.
 % #endregion
@@ -194,7 +198,8 @@ When the user is authenticated, the system immediately requests the distance and
 \subsection{Calculation}
 When both queries have finished, potential discounts are added to each pricing rule, which are then fed to the Price class asynchronously. A single rule has price information for each available product of that rule. If a company offers three products, it is possible to only offer two products in a given timeframe or area by associating them with a rule. For each product that is related to the price rule fetched from the database, a price breakdown is calculated. If the array of matched rules is empty, a map over the array will result in an empty array of price breakdowns. Pricing information is validated before the calculation is started using the method shown in Listing \ref{lst:check-pricing-props}. The system should throw an error, as a price calculation can not proceed without the required information.
 
-\begin{minipage}{\linewidth}
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Find missing properties.}, label={lst:check-pricing-props}]
 /**
  * Check if pricing contains valid properties and is not undefined.
@@ -217,6 +222,7 @@ public static validPricingOrError(pricing: pricing | undefined): void {
 }
 \end{lstlisting}
 \end{minipage}
+\end{center}
 
 A price breakdown follows a series of logical steps, in which functions are created that have a certain default behavior. The strategy pattern is once again applied to use the appropriate calculator for the type of calculation that is required. The different types of calculations are discussed in the next chapter.
 
@@ -246,7 +252,8 @@ The calculate method of each calculator subclass receives the pricing informatio
 	\item Return the total price
 \end{enumerate}
 
-\begin{minipage}{\linewidth}
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Calculator generator.}, label={lst:calculator-generator}]
 /**
  * Generate functions based on prices and units, incorporating
@@ -269,13 +276,15 @@ public static generateCalculators(
 }
 \end{lstlisting}
 \end{minipage}
+\end{center}
 
 The generateCalculators method generates a function for each metric with default parameters.
 
 \subsection{Dynamic}
 A dynamic calculation is performed on the metrics: distance and duration, having units: kilometer and minute. A straight forward lambda expresses that the units are multiplied by the price.
 
-\begin{minipage}{\linewidth}
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Dynamic calculation.}, label={lst:dynamic-calculation}]
 /**
  * Main calculation for a dynamic pricing rule.
@@ -314,13 +323,15 @@ public calculate(
 }
 \end{lstlisting}
 \end{minipage}
+\end{center}
 
 From this expression, calculators are generated. When a calculator is called without arguments, the default parameter values are used. When the calculator function is called with just the distance, the second default parameter will be the price for that distance. This property is needed for the threshold calculations that are discussed in the next section. The thresholds array contains pricing information for each successive threshold that has been surpassed.
 
 \subsection{Fixed}
 Opposed to a dynamic price, the fixed price can not be expressed as a quadratic function. However, thresholds may increase the price in steps.
 
-\begin{minipage}{\linewidth}
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Fixed calculation.}, label={lst:fixed-calculation}]
 /**
  * Calculate fixed price.
@@ -358,11 +369,13 @@ public calculate(
 }
 \end{lstlisting}
 \end{minipage}
+\end{center}
 
 \subsection{Meter}
 The meter calculator should return zero under every circumstance.
 
-\begin{minipage}{\linewidth}
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Meter calculation.}, label={lst:meter-calculation}]
 /**
  * Main calculation for a on meter calculation.
@@ -375,6 +388,7 @@ public calculate(
 }
 \end{lstlisting}
 \end{minipage}
+\end{center}
 
 The on-meter calculation simply returns a breakdown for which all values are zero. This is done by convention at taxiID, so that the mobile apps can still display the products that are available, and determine the price at a later stage.
 % #endregion
@@ -386,7 +400,8 @@ The on-meter calculation simply returns a breakdown for which all values are zer
 \section{Threshold Calculations}
 On top of each calculation type, prices can be defined after certain thresholds are surpassed. For example: if a taxi travels 25km, a threshold could be defined at 20km, after which the price will be 10 cents cheaper. In this case, the passenger pays a normal price for the 20 kilometers, and a cheaper price for the last 5 kilometers. This procedure is executed for each metric, but only if the cascading option is specified.  Only the name of the metric used to measure thresholds and the actual calculation functions may change. For this reason, it is possible to define a function that recursively walks through all surpassed thresholds, then calculates a price using different calculations after each threshold was surpassed, as shown in Listing \ref{lst:threshold-recursion}
 
-\begin{minipage}{\linewidth}
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Recursive threshold calculation.}, label={lst:threshold-recursion}]
 public static recursiveThreshold(
 	thresholds: threshold[],
@@ -415,6 +430,7 @@ public static recursiveThreshold(
 }
 \end{lstlisting}
 \end{minipage}
+\end{center}
 
 The Typescript type definitions reveal that calculation is of type Function, and thresholds is of type threshold[]. The base case returns the calculation with an undefined first argument. This forces the calculation method to use its default value, which is actually the normal kilometer or minute price. The base case will have the value of the first threshold that is met, assuring that the passenger pays the normal price up until that point. If the base case is not satisfied, the function checks whether the cascading boolean is true. This boolean determines whether each threshold should be evaluated, or only the last one. In case of the fixed price calculation, only the last threshold fixed price will be computed. But for the dynamic prices, each step has to be added to the total amount. Finally, the calculation is made using the next threshold,  and the recursive call is summed up with the calculated price.
 % #endregion
@@ -437,6 +453,8 @@ This recursiveThreshold static method is called for every price related calculat
 \section{Breakdown}
 The final result of the trip price calculation is a breakdown for every requested product. For example: if the mobile application requests prices for 'saloon' and 'limo' vehicle types, the response will at most contain an array with two breakdowns, for saloon and limo products. To ensure a seamless transition from the legacy price calculation system to TPS, the response formats should be identical. Still an improvement, if profitable enough, could be taken into consideration. One requirement of the price breakdown states that the tax should be included, but as shown in Listing \ref{lst:legacy-breakdown} the included tax is part of the breakdown. Is it by mistake or design?
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Legacy price breakdown}, label={lst:legacy-breakdown}]
 [
 	{
@@ -456,9 +474,13 @@ The final result of the trip price calculation is a breakdown for every requeste
 	...
 ]
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 Two possible solutions were proposed having VAT included in the price. The first solution extracts the tax element from the breakdown, so that the sum of the breakdown would add up to the total price where VAT is included in the price as shown in Listing \ref{lst:new-breakdown}. As demonstrated in Appendix \ref{appendix:slides_2_breakdown}, a breakdown is easily constructed in four steps when VAT is included.
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Improved price breakdown}, label={lst:new-breakdown}]
 [
 	{
@@ -481,6 +503,8 @@ Two possible solutions were proposed having VAT included in the price. The first
 	...
 ]
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 Keep in mind that unlike the listings the prices in the proposal are not displayed in cents. The second solution maintains the legacy format, but has to recalculate the prices without VAT. This could have downsides unlike the first approach:
 

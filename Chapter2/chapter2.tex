@@ -146,6 +146,8 @@ As contained in Appendix \ref{appendix:pregame}, this example provides a proof t
 \subsection{OpenGIS Compatible databases}
 MySQL's innate integrity is a good reason to opt for a full MYSQL database setup. MariaDB is a fork of MYSQL that performs better according to benchmarks, however they don’t always translate to real life situations. It’s easy to migrate from MYSQL to MariaDB, so choosing MYSQL at first could be preferable as an instance of MYSQL is already used at TaxiID. PostgreSQL offers a spatial database extender for that is OpenGIS compliant called PostGIS that adds support for geographic objects and location queries. All spatial data types inherit properties such as type and spatial reference identifier (SRID). For rigorous documentation, both PostGIS documentation \cite{PostGIS} and MYSQL documentation \cite{MySQL} could be consulted. When a generic geometry column, or point column is created, points can be inserted as shown in snippet \ref{lst:sql-insert-points}.
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Insert four points and one polygon in MySQL.}, label={lst:sql-insert-points}]
 	START TRANSACTION;
 	SET @a = ST_GeomFromText('POINT(1 1)');
@@ -165,9 +167,13 @@ MySQL's innate integrity is a good reason to opt for a full MYSQL database setup
 	INSERT INTO polygon (polygon) VALUES (@a);
 	COMMIT;
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 It is evident that c is contained in p. To determine which points are contained in p, the function as seen in Snippet \ref{lst:sql-pts-in-poly} can be used, which returns the point with coordinates $[5, 5]$ as expected.
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Select points contained in polygon, and all polygons containing a point in MySQL.}, label={lst:sql-pts-in-poly}]
 	// All points contained in polygon
 	SELECT ST_ASTEXT(POINT)
@@ -191,9 +197,13 @@ It is evident that c is contained in p. To determine which points are contained 
 			POINT.point
 		)
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 A multipolygon can be inserted using triple braces, indicating a collection of polygons to be inserted as seen in Figure \ref{lst:sql-multipolygon}. The MultiPolygon class is able to support multiple polygons to be stored as a single entity. The standard provides containment predicate, and methods to distinguish larger locations from smaller ones, which could be used in precedence checks.
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Insert one multipolygon in MySQL.}, label={lst:sql-multipolygon}]
 	START TRANSACTION;
 	# First and last point should be the same
@@ -201,10 +211,14 @@ A multipolygon can be inserted using triple braces, indicating a collection of p
 	INSERT INTO multipolygon (multipolygon) VALUES (@a);
 	COMMIT;
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 \subsection{OpenGIS Incompatible databases}
 MongoDB doesn’t offer OpenGIS implementations but has geospatial query operators that may provide enough functionalities for current requirements \cite{MongoDB}. The argument for choosing one over the other depends on the vast differences between SQL and NoSQL, next to performance and extensiveness of geospatial features. The setup displayed in image \ref{fig:square} is recreated in MongoDB using queries shown in snippets \ref{lst:nosql-insert-points} and \ref{lst:nosql-pts-in-poly}. Geometry datatypes can be inserted as objects having a type and coordinates property. A polygon can be inserted in the same manner, having multiple points as a list instead of a single point.
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Insert four points and one polygon in MongoDB.}, label={lst:nosql-insert-points}]
 	db.point.insertMany([
 		{ shape: { type: "Point", coordinates: [1, 1] } },
@@ -223,9 +237,13 @@ MongoDB doesn’t offer OpenGIS implementations but has geospatial query operato
 	db.point.createIndex({ 'shape': '2dsphere' })
 	db.polygon.createIndex({ 'shape': '2dsphere' })
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 A method named $\$geoWithin$ can be used to return points that are contained within the polygon. Conversely, all polygons that contain a certain point can be queried using the $\$geoIntersects$ method as seen in \ref{lst:nosql-pts-in-poly}.
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Select points contained in polygon, and all polygons containing a point in MongoDB.}, label={lst:nosql-pts-in-poly}]
 	// All points contained in polygon
 	var p = db.polygon.find({})
@@ -258,9 +276,13 @@ A method named $\$geoWithin$ can be used to return points that are contained wit
 		}
 	})
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 In MongoDB, a multipolygon can be inserted using extra pairs of braces, as shown in \ref{lst:nosql-multipolygon}. Any predicate will fail if the type is defined as 'Polygon', but a MultiPolygon is stored in the coordinates property or vice versa. Therefore, it is important to manage the type property as more polygons are to be stored at once.
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Insert one multipolygon in MongoDB.}, label={lst:nosql-multipolygon}]
 	db.polygon.insert({
 		shape: {
@@ -272,6 +294,8 @@ In MongoDB, a multipolygon can be inserted using extra pairs of braces, as shown
 		}
 	})
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 \section{Overlapping Locations}
 If the destination is contained in several polygons associated with multiple rules, which rule should then be used to calculate the final price? A database will just pick the first result when the results are limited to one. Several solutions have been proposed to solve this problem:

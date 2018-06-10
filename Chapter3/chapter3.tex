@@ -57,6 +57,8 @@ The final decision, based on a comparison seen in table 4.1.1 in Appendix \ref{a
 \section{Information Dependencies}
 The frontend separation or integration cases have little influence on the further design of the system. The backend separation case however, is only possible if information dependencies are satisfied. A conceptual model can be derived from the database schema design in Figure 4.7.1.1 of Appendix \ref{appendix:pregame}. This conceptual model can be found in the next chapter, where the data for a price calculation is discussed, see chapter 4, Figure \ref{fig:DataModel}. Important information that must be acquired are: products, companies, applications, users, settings and VAT amounts. In isolation, this model contains all the required information to calculate a price, if the parameters shown in Listing \ref{lst:request} are provided.
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Minimal external information required for a trip price calculation.}, label={lst:request}]
 	{
 		"companyId": string
@@ -68,6 +70,8 @@ The frontend separation or integration cases have little influence on the furthe
 		"destination": { "gps": { "lat": string, "lng": string } }
 	}
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 The concrete data from the conceptual model could in theory be stored in one database, separate from the existing core database. How would the company data be synchronized? And does the system know which pricing rules should be used for the calculation? Assuming that companyId and daAppInstallId are provided in the authentication headers, the user can be identified. But this identity is futile if no pricing data is associated with it. There are three options with regard to storing the data in a way that user identity can be used to associate pricing information:
 
@@ -111,6 +115,8 @@ This proposal is used in example four of Appendix \ref{appendix:slides_2_authent
 \subsection{JSON Web Token}
 This proposal entirely removes the database connection to any user data. This is possible when a JSON Web Token (JWT) is used. A JWT may be signed with a cryptographic algorithm or even a public/private key pair using RSA. After the user enters valid credentials, the core system validates the credentials by comparing them with user data in the database.
 
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Two user identifiers and registered claim names stored inside the payload of a JSON web token.}, label={lst:payload}]
 	{
 		"companyId": "59ea0846f1fea03858e16311",
@@ -122,6 +128,8 @@ This proposal entirely removes the database connection to any user data. This is
 		"sub": "getPrices"
 	}
 \end{lstlisting}
+\end{minipage}
+\end{center}
 
 The keys other than companyId and daAppInstallId describe expiration date of the token, and other meta information. The core system signs a token that with a secret that is known by the microservice. The token consists of three parts, separated by a full stop. The first part (header) of the token contains information about the hashing algorithm that is used to encrypt the payload. This part is Base64Url encoded. The payload itself contains information stored in JSON format as shown in Listing \ref{lst:payload}. The identity of the user is stored in the payload that can only be revealed by whoever holds the secret with which it is signed. Then the message can be verified using the third part of the token, which is the signature. The verification step prevents tampering with the payload. Claims can be added to the payload as shown in \ref{lst:payload} to provide information about the token, as explained in \cite{JWT}. Figure \ref{fig:Auth2} adds statelessness to the previous proposal, thereby removing the verification step with the authentication server.
 
