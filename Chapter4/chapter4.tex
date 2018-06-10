@@ -12,7 +12,7 @@
 % #region
 \chapter{Trip Price Calculation System}
 \section{Introduction}
-The term 'rule-based' in the title caters to the proposition that trip price calculations hinge on information defined as something called a rule. In this chapter, the important questions in regard to the implementation of the backend are answered, resulting in a system that deterministically calculates trip prices using rules that are restricted by user defined criteria.
+The term 'rule-based' in the title caters to the proposition that trip price calculations hinge on information defined as something called a rule. This chapter contains resolutions that are less based on empirical evidence and more on the input of the product owner or a balancing of arguments that support functionality, usability, transparency, and other important quality attributes. The important questions in regard to the implementation of the backend are answered, resulting in a system that deterministically calculates trip prices using rules that are restricted by user defined criteria.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,11 +59,16 @@ A rule is the rudimentary element of the trip pricing system that allows users t
 There are also some restrictions that are applied by default, as pre- or  postconditions. For example, passenger count should not exceed that of the products passenger capacity. There is also a on demand option in the booking app that allows passengers to book a ride without providing a destination. In these cases, a rule must still be matched with the departure location, and the user may want to disable some products for the on demand functionality. This is an example where the products are shown without prices, or filtered out if the user requires it. Compared to the legacy system, this design of allowing criteria to be applied to rules and discounts independently, would result in a more modular system. The implementation of the location and timeframe concepts should preferably offer enough freedom in the future, and should not be tailored toward one specific entity relation. Being able to reuse these entities improves maintainability of the system.
 
 \subsection{Locations}
+Chapter two concluded
+
+
+Resolving the location matching cases
+
 As found in chapter two, locations may overlap. The best option should be chosen from the proposed solutions. From all the interesting approaches, the most straight forward solution is simply assigning a priority number to the rule. This solution has the ultimate advantage of interpretability and modifiability. The user will be free to change the precedence of location matching on a rule-to-rule basis. If no departure location is assigned to a rule, the rule should match with any location. And if the passenger orders an on-demand ride, where the destination is not provided, the destination should be ignored during the matching process. This idea can be replicated by constructing the query in pieces, depending on whether a location was provided by the booking apps.
 
 \begin{center}
 \noindent\begin{minipage}{.45\textwidth}
-\begin{lstlisting}[caption={Matchin destination.}, label={lst:matching-destination}]
+\begin{lstlisting}[caption={Matching destination.}, label={lst:matching-destination}]
 const query = [];
 
 if (destination) {
@@ -383,7 +388,7 @@ The object-oriented programming (OOP) paradigm offers many ways to keep a system
 % Premise
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
-\section{Premise}
+\section{Conclusion on Trip Price Calculation System}
 \[\textit{Which logic and data is required in the backend to reliably calculate a trip price?}\]\hfill
 
 \mynote{Conclusion for chapter 4}
