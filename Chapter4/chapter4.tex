@@ -37,6 +37,8 @@ The Price object is composed of a Directions and a Calculator Class, both of whi
 	\caption[Data Model]{Conceptual data model showing database entity relations.}
 	\label{fig:Data Model}
 \end{figure}
+
+Chapter three concludes that MongoDB is the proper database for this system. MongoDB allows relations to be embedded in the parent's document, which is useful if the child entity is never shared.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -44,34 +46,35 @@ The Price object is composed of a Directions and a Calculator Class, both of whi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{Matching Criteria}
-A rule is the rudimentary element of the trip pricing system that allows users to interpret and define the way with which prices are assigned to trips. In the legacy system, discounts were a fundamental part of the price definitions. Meaning that whenever a price was found, the discount was directly associated with the price. This design led to some issues, mainly revolving around having to duplicate prices in order to have prices with or without discounts. In perspective, a user may want to apply the following restrictions:
+A rule is the rudimentary element of the trip pricing system that allows users to interpret and define the way with which prices are assigned to trips, restricted by the dimensions of space and time. In the legacy system, discounts were a fundamental part of the price definitions. Meaning that whenever a price was found, the discount was directly associated with the price. This design led to some issues, mainly revolving around having to duplicate prices in order to have the same prices without discounts. It is mutually beneficial for users and developers who are set to maintain this system, to create a system that offers a lot of freedom in applying criteria to prices. In perspective, a user may want to apply the following restrictions:
 
 \begin{enumerate}
 	\item Define certain prices for one app, but not for the other
 	\item Define lower dynamic prices in Rotterdam
-	\item Define a fixed price during New Year's Eve
-	\item Assign a discount for trips that leave from Schiphol
-	\item Define a higher price for trips that end in cities
+	\item Define a certain fixed price during New Year's Eve
+	\item Assign a discount for trips that depart from Schiphol
+	\item Define a higher price for trips that end in larger cities
 	\item Make the limousine available only in North Holland
-	\item Allow free trips between two company locations during the weekend
+	\item Allow for free trips between two companies during the weekend
 \end{enumerate}
 
-There are also some restrictions that are applied by default, as pre- or  postconditions. For example, passenger count should not exceed that of the products passenger capacity. There is also a on demand option in the booking app that allows passengers to book a ride without providing a destination. In these cases, a rule must still be matched with the departure location, and the user may want to disable some products for the on demand functionality. This is an example where the products are shown without prices, or filtered out if the user requires it. Compared to the legacy system, this design of allowing criteria to be applied to rules and discounts independently, would result in a more modular system. The implementation of the location and timeframe concepts should preferably offer enough freedom in the future, and should not be tailored toward one specific entity relation. Being able to reuse these entities improves maintainability of the system.
+There are also some restrictions that are applied by default, as pre- or  postconditions. For example, passenger count should not exceed that of the products passenger capacity. There is also a on demand option in the booking app that allows passengers to book a ride without providing a destination. In these cases, a rule must still be matched with the departure location, and the user may want to disable some products for the on-demand functionality. This is an example where the products are shown without prices, or filtered out if the user wishes it. Compared to the legacy system, this design of allowing criteria to be applied to rules and discounts independently, resulting in a more modular system with more freedom. The user is allowed to define discounts and rules separately, and when a new concept is added that makes use of locations or timeframes, the user is able to reason about it in the same fashion. For the maintainers of this system, it is beneficial to have less duplication, more separation of concern, and less overhead.
 
 \subsection{Locations}
-Chapter two concluded
+Chapter two concludes that MongoDB's geometry datatypes are sufficient location encodings. The location matching examples can directly be implemented as a basis for the location matching criterion. The listed restrictions that a user may apply, depend on two locations being matched or ignored simultaneously. On top of that, one best match must be selected from the matching results, which must be done by determining what the solution for location overlap should be.
 
+\subsubsection{The Conventional Approach}
+The legacy postal code and address based system maintains a type based matching order: fixed, tier, and dynamic rule types. A location conflict would not occur if the user was able to make distinct pricing records. If it were to occur, the system would simply pick the first match. But with the introduction of overlap, this will no longer be feasible. It would be possible to have a rule definition with two locations that are defined in Amsterdam. If a different rule has two locations defined within Amsterdam, both rules would match. The legacy system did not have location bound dynamic rules. So each dynamic rule had to be evaluated lastly, as they were activated on every location. These freedoms can easily be implemented by abstractions.
 
-Resolving the location matching cases
-
-As found in chapter two, locations may overlap. The best option should be chosen from the proposed solutions. From all the interesting approaches, the most straight forward solution is simply assigning a priority number to the rule. This solution has the ultimate advantage of interpretability and modifiability. The user will be free to change the precedence of location matching on a rule-to-rule basis. If no departure location is assigned to a rule, the rule should match with any location. And if the passenger orders an on-demand ride, where the destination is not provided, the destination should be ignored during the matching process. This idea can be replicated by constructing the query in pieces, depending on whether a location was provided by the booking apps.
+\subsubsection{The New Approach}
+Multipolygons allow for multiple locations to be defined as one, opening up the possibility of defining all branches of a company in a single location, which could then be selected as departure and destination location. This would solve example seven from the examples list, using just one rule and one location. Because locations could be associated with all rule types, all location based examples are easy to define. Although care must be taken to distinguish between not having a location defined, and not providing a location when booking a ride. If no departure location is assigned to a rule, the rule should match with any location. And if the passenger orders an on-demand ride, where the destination is not provided, the destination should be ignored during the matching process.
 
 \begin{center}
 \noindent\begin{minipage}{.45\textwidth}
-\begin{lstlisting}[caption={Matching destination.}, label={lst:matching-destination}]
+\begin{lstlisting}[caption={Matching departure.}, label={lst:matching-departure}]
 const query = [];
 
-if (destination) {
+if (departure) {
 	query.push({
 		$match: {
 			$or: [{
@@ -94,19 +97,21 @@ if (destination) {
 	})
 }
 
-db.collection('...')
+db.collection('Location')
 	.aggregate(query)
 \end{lstlisting}
 \end{minipage}
 \end{center}
 
+In Listing \ref{lst:matching-departure}, the query is built conditionally to the fact if locations have been provided in the booking request. Only the provided locations are matched if they intersect with a defined destination, or if the destination does not exists. This covers the cases for checking only one of the two locations. In chapter two, solutions have been proposed to the overlapping locations problem. From all the interesting approaches, the most straight forward solution is simply assigning a priority number to the rule. This solution has the advantage of interpretability and flexibility. The behavior of the matching system can easily be tinkered with by the user. The user can reason about the fact whether one rule has a precedence over the other by comparing the priorities.
+
 \subsection{Timeframes}
 The requirements state that the user must be able to define a start and end time, the days on which the times are active, and the start and end date of the timeframe. This either means that the timeframe one window of time, or that each given day has a single window of time. But if a discount should be active during night of New Years Eve, between 23h and 5h, this description would not be sufficient to cover this use case under any interpretation.
 
-\subsubsection{Conventional Approach}
-The legacy system takes a straight forward approach of storing time in a relational database. The begin and end of a window are stored in a record that is related to a parent timeframe entity. The timeframe has many windows that could contain a timestamp. It either finds one or many time windows that contain the timeframe. This approach covers all possibilities imaginable.
+\subsubsection{The Conventional Approach}
+The legacy system takes a straight forward approach of storing time in a relational database. The begin and end of a window are stored in a record that is related to a parent timeframe entity. The timeframe has many windows that could contain a timestamp. It either finds one or many time windows that contain the timeframe. This approach covers all possibilities imaginable. The downside of this approach is the complexity to interpret or mutate the value of the timeframe.
 
-\subsubsection{Bitmap}
+\subsubsection{The New Approach}
 For this reason, a proposal was made to implement timeframes in a way that let users choose to describe each hour of the week, being stored as a bit map. The windows could be decreased to half an hour, resulting in twice as many bits. Three implementations have been tested, where the bit string format offered the best outcome, as seen in \ref{appendix:slides_4}. A timeframe is stored having two ISODates (international standard: ISO 8601), and a bit string representing the schedule for which the insert statement is shown in Listing \ref{lst:new-timeframe}.
 
 \begin{center}
@@ -162,14 +167,14 @@ The regexFromDate could be used to create a regex that could be used in a query 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{The Trip Price Calculation}
-The process from start to end is has many edge- and corner cases. Three major stages of the process: handling the incoming request, finding the matching price rule, and calculating the prices, are explained concisely in the following subsections to provide a general overview. Important details will be expanded upon in later sections of this chapter.
+The process from start to end is has many edge- and corner cases. Three major stages of the process: handling the incoming request, finding the matching price rule, and calculating the prices, are explained concisely in the following subsections to provide a general overview. Important details of calculation types will be expanded upon in later sections of this chapter.
 
 \subsection{Incoming Request}
 The flowchart in Figure \ref{fig:Incoming Request} shows the point where the request is received, up until the point where enough information is known to fetch rules and discounts from the database. When the request is received (1), the user is authenticated. The JSON Web Token contains the user identity, the companyId and daAppInstallId (2). The request body contains information about the ride: vehicle types, passenger count, requested date, departure, and destination.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1\textwidth]{IncomingRequest}
+	\includegraphics[width=.8\textwidth]{IncomingRequest}
 	\caption[Incoming Request]{The condensed flow of a trip price calculation - incoming request.}
 	\label{fig:Incoming Request}
 \end{figure}
@@ -181,32 +186,15 @@ When the user is authenticated, the system immediately requests the distance and
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1\textwidth]{DataAggregation}
+	\includegraphics[width=.8\textwidth]{DataAggregation}
 	\caption[Data Aggregation]{The condensed flow of a trip price calculation - data aggregation.}
 	\label{fig:Data Aggregation}
 \end{figure}
 
 \subsection{Calculation}
-When both queries have finished, potential discounts are added to each pricing rule, which are then fed to the Price class asynchronously. A single rule has price information for each available product of that rule. If a company offers three products, it is possible to only offer two products in a given timeframe or area by associating them with a rule. For each product that is related to the price rule fetched from the database, a price breakdown is calculated. If the array of matched rules is empty, a map over the array will result in an empty array of price breakdowns. A price breakdown follows a series of logical steps, in which functions are created that have a certain default behavior. The strategy pattern is once again applied to use the appropriate calculator for the type of calculation that is required.
+When both queries have finished, potential discounts are added to each pricing rule, which are then fed to the Price class asynchronously. A single rule has price information for each available product of that rule. If a company offers three products, it is possible to only offer two products in a given timeframe or area by associating them with a rule. For each product that is related to the price rule fetched from the database, a price breakdown is calculated. If the array of matched rules is empty, a map over the array will result in an empty array of price breakdowns. Pricing information is validated before the calculation is started using the method shown in Listing \ref{lst:check-pricing-props}. The system should throw an error, as a price calculation can not proceed without the required information.
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\textwidth]{Calculation}
-	\caption[Calculation]{The condensed flow of a trip price calculation - calculation.}
-	\label{fig:Calculation}
-\end{figure}
-
-In this case, the best match is found, and price breakdowns are returned without a calculated price. This is handled by the mobile applications, as it is the case with the legacy system. But if the trip details have successfully been obtained, the sys
-% #endregion
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Price Calculation Types
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - What was proposed as a solution to store a week schedule in a database?
-% #region
-\section{Price Calculation Types}
-Pricing information is validated before the calculation is started using the method shown in Listing \ref{lst:check-pricing-props}. The system should throw an error, as a price calculation can not proceed without the required information.
-
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Find missing properties.}, label={lst:check-pricing-props}]
 /**
  * Check if pricing contains valid properties and is not undefined.
@@ -228,19 +216,167 @@ public static validPricingOrError(pricing: pricing | undefined): void {
 	}
 }
 \end{lstlisting}
+\end{minipage}
 
+A price breakdown follows a series of logical steps, in which functions are created that have a certain default behavior. The strategy pattern is once again applied to use the appropriate calculator for the type of calculation that is required. The different types of calculations are discussed in the next chapter.
 
-Metrics are checked (distance duration)
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.8\textwidth]{Calculation}
+	\caption[Calculation]{The condensed flow of a trip price calculation - calculation.}
+	\label{fig:Calculation}
+\end{figure}
 
-Price calculator is picked depending on the rule type or if metrics are empty
+In step (7) the system faces the issue of not being able to calculate a price, because the distance and duration are not known. In this case, the user is able to choose whether on-meter calculations are allowed to be made, meaning that a meter is used to capture these metrics at a different period of time. If the user agrees, the products are returned with a truthy isAllowedOnMeter flag. The system will still follow the calculation procedure, but will use the MeterCalculator instead of the other two. Step (8) and (9) will be expanded upon in the Threshold Calculations chapter.
+% #endregion
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Price Calculation Types
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - What was proposed as a solution to store a week schedule in a database?
+% #region
+\section{Price Calculation Types}
+The calculate method of each calculator subclass receives the pricing information of a product and directions information of a ride. This setup proves to encapsulate all possible calculations that depend on any metric type (distance, duration, ...) and any more complex operation. The calculator method will perform the calculation in a fixed number of steps:
+
+\begin{enumerate}
+	\item Define the metrics (and units) for the calculation
+	\item Define a lambda function expressed a blueprint to generate a collection of calculator functions
+	\item Generate calculator functions that can be used by a deterministic function
+	\item Call the deterministic function
+	\item Return the total price
+\end{enumerate}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Calculator generator.}, label={lst:calculator-generator}]
+/**
+ * Generate functions based on prices and units, incorporating
+ * default prices that are passed next to different metrics
+ * and stored in a indexed object which names are types.
+ */
+public static generateCalculators(
+	prices: indexed,
+	metrics: metrics & indexed,
+	func: Function,
+): object {
+	const calculators: indexed = {};
+	for (const type in metrics) {
+		calculators[type] = (
+			price: number = prices[type],
+			unit: number = metrics[type],
+		) => func(price, unit);
+	}
+	return calculators;
+}
+\end{lstlisting}
+\end{minipage}
+
+The generateCalculators method generates a function for each metric with default parameters.
 
 \subsection{Dynamic}
-The word dynamic in the dynamic price calculation means that the price can dynamically increase or decrease by a given values based on given parameters.
-\subsection{Fixed}
-The word fixed in the fixed price calculation means that a price is a given fixed amount under circumstances determined by the parameters.
-\subsection{Meter}
-The on-meter calculation simply returns a breakdown for which all values are zero. This is done by convention at taxiID, so that the mobile apps can calculate their own price based on a integrated meter inside the taxi.
+A dynamic calculation is performed on the metrics: distance and duration, having units: kilometer and minute. A straight forward lambda expresses that the units are multiplied by the price.
 
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Dynamic calculation.}, label={lst:dynamic-calculation}]
+/**
+ * Main calculation for a dynamic pricing rule.
+ */
+public calculate(
+	pricing: pricing,
+	metrics: metrics & indexed,
+): number {
+
+	const thresholds: threshold[] = pricing.prices.dynamicThresholds;
+	const startAmount = pricing.prices.dynamicStartPrice;
+	const minAmount = pricing.prices.dynamicMinimumPrice;
+	const cascaded = pricing.prices.cascadingThresholdCalculation;
+
+	const prices: indexed = {
+		distance: pricing.prices.dynamicDistancePrice,
+		duration: pricing.prices.dynamicMinutePrice,
+	};
+
+	// Generating calculators
+	const func = (price: number, unit: number) => price * unit;
+	const calculators = Calculator.generateCalculators(prices, metrics, func);
+
+	// Walk through the thresholds to calculate total price using calculators
+	const total = Price.total(
+		metrics,
+		thresholds,
+		calculators,
+		cascaded,
+	);
+
+	return Math.max(
+		total + startAmount,
+		minAmount,
+	);
+}
+\end{lstlisting}
+\end{minipage}
+
+From this expression, calculators are generated. When a calculator is called without arguments, the default parameter values are used. When the calculator function is called with just the distance, the second default parameter will be the price for that distance. This property is needed for the threshold calculations that are discussed in the next section. The thresholds array contains pricing information for each successive threshold that has been surpassed.
+
+\subsection{Fixed}
+Opposed to a dynamic price, the fixed price can not be expressed as a quadratic function. However, thresholds may increase the price in steps.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Fixed calculation.}, label={lst:fixed-calculation}]
+/**
+ * Calculate fixed price.
+ */
+public calculate(
+	pricing: pricing,
+	metrics: metrics & indexed,
+): number {
+
+	const thresholds: threshold[] = pricing.prices.fixedThresholds;
+	const cascaded = false;
+
+	// Price for distance metric only
+	const prices: indexed = {
+		distance: pricing.prices.fixedPrice,
+		duration: 0,
+	};
+
+	// Explain how the price should be calculated
+	const func = (price: number, unit?: number) => price;
+
+	// Calculator for each metric using prices as default params
+	const calculators = Calculator.generateCalculators(prices, metrics, func);
+
+	// Walk through the thresholds to calculate total price using calculators
+	const total = Price.total(
+		metrics,
+		thresholds,
+		calculators,
+		cascaded,
+	);
+
+	// Return biggest of the two
+	return Math.max(total, 0);
+}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Meter}
+The meter calculator should return zero under every circumstance.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Meter calculation.}, label={lst:meter-calculation}]
+/**
+ * Main calculation for a on meter calculation.
+ */
+public calculate(
+	pricing: pricing,
+	metrics: metrics & indexed,
+): number {
+	return 0;
+}
+\end{lstlisting}
+\end{minipage}
+
+The on-meter calculation simply returns a breakdown for which all values are zero. This is done by convention at taxiID, so that the mobile apps can still display the products that are available, and determine the price at a later stage.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -248,8 +384,9 @@ The on-meter calculation simply returns a breakdown for which all values are zer
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{Threshold Calculations}
-On top of each calculation type, prices can be defined after certain thresholds are surpassed. For example: if a taxi travels 25km, a threshold could be defined at 20km, after which the price will be 10 cents cheaper. In this case, the passenger pays a normal price for the 20 kilometers, and a cheaper price for the last 5 kilometers. The same holds for minute prices, but only for the dynamic price calculation. In the fixed price calculation, only kilometer thresholds can be defined. After a threshold is met, the fixed price will be replaced by a newly defined value. For any type of calculation, the algorithm works the same. Only the name of the metric used to measure thresholds and the actual calculation functions may change. For this reason, it is possible to define a function that recursively walks through all surpassed thresholds, then calculates a price using different calculations after each threshold was surpassed, as shown in Listing \ref{lst:threshold-recursion}
+On top of each calculation type, prices can be defined after certain thresholds are surpassed. For example: if a taxi travels 25km, a threshold could be defined at 20km, after which the price will be 10 cents cheaper. In this case, the passenger pays a normal price for the 20 kilometers, and a cheaper price for the last 5 kilometers. This procedure is executed for each metric, but only if the cascading option is specified.  Only the name of the metric used to measure thresholds and the actual calculation functions may change. For this reason, it is possible to define a function that recursively walks through all surpassed thresholds, then calculates a price using different calculations after each threshold was surpassed, as shown in Listing \ref{lst:threshold-recursion}
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Recursive threshold calculation.}, label={lst:threshold-recursion}]
 public static recursiveThreshold(
 	thresholds: threshold[],
@@ -277,9 +414,17 @@ public static recursiveThreshold(
 	);
 }
 \end{lstlisting}
+\end{minipage}
 
-The Typescript type definitions reveal that calculation is of type Function, and thresholds is of type threshold[]. The base case returns the calculation with an undefined first argument. This forces the calculation method to use its default value, which is actually the normal kilometer or minute price. The base case will have the value of the first threshold that is met, assuring that the passenger pays the normal price up until that point. If the base case is not satisfied, the function checks whether the cascading boolean is true. This boolean determines whether each threshold should be evaluated, or only the last one. In case of the fixed price calculation, only the last threshold fixed price will be computed. But for the dynamic prices, each step has to be added to the total amount. Finally, the calculation is made using the next threshold,  and the recursive call is summed up with the calculated price. It is worth noting that even though this function is static and does not modify instance data, it is impure, leaving the passed thresholds array empty at the end.
+The Typescript type definitions reveal that calculation is of type Function, and thresholds is of type threshold[]. The base case returns the calculation with an undefined first argument. This forces the calculation method to use its default value, which is actually the normal kilometer or minute price. The base case will have the value of the first threshold that is met, assuring that the passenger pays the normal price up until that point. If the base case is not satisfied, the function checks whether the cascading boolean is true. This boolean determines whether each threshold should be evaluated, or only the last one. In case of the fixed price calculation, only the last threshold fixed price will be computed. But for the dynamic prices, each step has to be added to the total amount. Finally, the calculation is made using the next threshold,  and the recursive call is summed up with the calculated price.
+% #endregion
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Determinism
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Determinism}
+This recursiveThreshold static method is called for every price related calculation. It is honest about its parameters, and does not depend on external state. It is worth noting that even though this function is static and does not modify instance data, it is impure, leaving the passed thresholds array empty at the end. The function is deterministic because when given a valid input, it produces the same output every single time. The method merely executes the passed function with different arguments. The base case will therefore always yield the default result. The elegant nature of recursion counts as an inductive proof that the procedure will work for each successive step, which works in harmony with the uncertain amount of thresholds that need to be processed. Because the method does not rely on external state, it can easily be tested. Unit tests have been written using the Mocha framework \cite{mocha} and the Chai assertion library \cite{chai}, to cover the most important aspects of the system, making sure that the price calculation logic keeps producing the same outputs. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. The current setup of calculation and directions subclasses allow for extensibility with respect to the open-closed principle. Metrics, calculators, threshold types, price definitions, and other aspects of the calculation may be added as long as the same interfaces are used. State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. Typescript plays an important role in mixing OOP and FP together.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -351,37 +496,6 @@ Keep in mind that unlike the listings the prices in the proposal are not display
 \end{enumerate}
 
 The first proposal is chosen to be implemented, where the flag 'fixedPrice' is replaced by the 'isEstimated' flag to clearly reflect its purpose.
-% #endregion
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Testing
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\section{Determinism}
-- Database query return same result
-- Classes and project structure operate in the same way each time
-- Side effects like google maps reduced by enlarging points locations
-- FP pure functions programming styles
-- tests
-- CI CD
-- interfaces
-- static strong types
-- type hinting
-- OOP en FP mixen
-- OOP voor grote structuur
-- FP voor solide operaties
-- SOLID
-- Gang of Four
-- Loose coupling high cohesion
-- Async
-- Strategy pattern
-
-Unit tests are to be written to cover the most important aspects of the system. New features often introduce bugs by adding functionalities that are broken, although the reliability of the existing functionalities may also be impacted because of changes in the existing code. To prevent units of code from malfunctioning, regression tests may be implemented to validate whether a unit still functions according to a set of conditions. Static and dynamic tests may be performed using the framework Mocha \cite{mocha} and the assertion library Chai \cite{chai}. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. A comparison was made in Appendix \ref{appendix:pregame}, chapter 4.9, between CI tools. Various CI tools were implemented in previously mentioned proofs of concept.
-
-State and mutations should be fully encapsulated, leaving only static functions exposed. These functions aim to mutate data in a pure way, meaning that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. As discussed in the previous chapter, Typescript plays an important role in mixing OOP and FP together. The database schema design as shown in the previous chapter gives an impression on the different pieces of information required to calculate a price. Such a schema provides a good insight in the relationships that different entities have, but may distract from the actual story that is happening within each calculation.
-
-The object-oriented programming (OOP) paradigm offers many ways to keep a system structured. Good software design has low coupling and high cohesion, meaning that software components should have a high degree of belongingness, and a low degree of dependence in respect of each other. As stated in the previous chapter, another paradigm that could potentially improve the price calculation system is called: functional programming (FP).
-
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

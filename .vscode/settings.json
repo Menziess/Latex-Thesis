@@ -11,6 +11,7 @@
 		"Brouwer",
 		"Cheldrick",
 		"Covalents",
+		"DB's",
 		"Geohashing",
 		"Hauer",
 		"Holmberg",
@@ -20,6 +21,7 @@
 		"Markus",
 		"Medemblik",
 		"Microservices",
+		"Multipolygons",
 		"Nominatim",
 		"Philipp",
 		"Postgre",
@@ -62,6 +64,7 @@
 		"replicable",
 		"timeframe",
 		"timeframes",
+		"truthy",
 		"wireframes"
 	],
 	"latex-workshop.view.pdf.viewer": "browser",
