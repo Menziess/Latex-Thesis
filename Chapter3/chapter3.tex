@@ -36,7 +36,15 @@ The bigger shapes in Figure \ref{fig:Architecture} may be classified as monolith
 
 \subsection{Microservices}
 % https://resources.sei.cmu.edu/asset_files/Presentation/2016_017_001_454683.pdf
-If the legacy price calculation system was implemented as a service, it could have been reused or redeployed as a second separate price calculation system for YDA instead. A consensual definition of microservices does not exist, but can be defined as a development technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in Figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}, mentioning; improvements in development speed through parallel development, isolated deployment and continuous delivery (CD), scalability and potential parallelism, and independence in case of failure. Fair points of criticism have been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, security, and message formats.
+
+% \begin{figure}[H]
+% 	\centering
+% 	\includegraphics[width=0.6\textwidth]{MicroserviceMonolith}
+% 	\caption[Monolith and Microservice]{Microservice and Monolith.}
+% 	\label{fig:Microservice Monolith}
+% \end{figure}
+
+If the legacy price calculation system was implemented as a service, it could have been reused or replicated as a second separate price calculation system for YDA instead. A consensual definition of microservices does not exist, but can be defined as a development technique that structures a system architecture as multiple loosely coupled services, exactly opposing the description of a monolith. The smaller shapes in Figure \ref{fig:Architecture} can be described as miniservices or microservices. Philipp Hauer describes the advantages of independent services accurately in \cite{microservices}, mentioning; improvements in development speed through parallel development, isolated deployment and continuous delivery (CD), scalability and potential parallelism, and independence in case of failure. Fair points of criticism have been made in regard to microservices. Jan Stenberg has pointed out that microservices are information barriers in \cite{JS-microservices}, meaning that the process of implementing a new system is degraded by the sense of ownership of specific services by developers. Technical downsides that have been discussed in general are: latency, testing, deployment, security, and message formats.
 
 \subsection{Frontend and Backend}
 A model-view-controller pattern is separating the business and presentation layers in various frontend projects. This would mean that separate views have to be developed for each portal, or the views should be provided to the portals via iframes. In the last case, it may be beneficial to combine the frontend and backend in the same project structure. However, this would be in conflict with this three-tier pattern, which is not desired in respect to the evolution of the system architecture. Integration of the backend would mean that the core system should contain the price calculation system as a component, and separation of the backend would mean that the backend would be set up as a separate service. If this pattern is to be respected, four possibilities remain with which the frontend and backend could be implemented:
@@ -55,7 +63,7 @@ The final decision, based on a comparison seen in table 4.1.1 in Appendix \ref{a
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Information Dependencies}
-The frontend separation or integration cases have little influence on the further design of the system. The backend separation case however, is only possible if information dependencies are satisfied. A conceptual model can be derived from the database schema design in Figure 4.7.1.1 of Appendix \ref{appendix:pregame}. This conceptual model can be found in the next chapter, where the data for a price calculation is discussed, see chapter 4, Figure \ref{fig:DataModel}. Important information that must be acquired are: products, companies, applications, users, settings and VAT amounts. In isolation, this model contains all the required information to calculate a price, if the parameters shown in Listing \ref{lst:request} are provided.
+The frontend separation or integration cases have little influence on the further design of the system. The backend separation case however, is only possible if information dependencies are satisfied. User identifying information must be retrieved from a system containing the source of truth. Company and product information must be retrieved from adjecent systems, or stored in the trip pricing system database. Important data that must be acquired are: products, companies, applications, users, settings and VAT amounts. In isolation, this model contains all the required information to calculate a price, if the parameters shown in Listing \ref{lst:request} are provided.
 
 \begin{center}
 \noindent\begin{minipage}{.85\textwidth}
@@ -81,16 +89,7 @@ The concrete data from the conceptual model could in theory be stored in one dat
 	\item Minimal state - Multiple independent databases with stateless references
 \end{enumerate}
 
-A single source of truth, central database, would avoid having duplicate data all together. No synchronization, thus no network communication is necessary, and all data is always readily available. This design desecrates the independence aspect of microservices. The multiple synchronized databases in option 2, raises the problem of having duplicate, out of sync data.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.6\textwidth]{DataSync}
-	\caption[DataSync]{Flow of data requests.}
-	\label{fig:DataSync}
-\end{figure}
-
-A one-way dataflow could reduce this problem, but it is not always entirely avoidable. This design does adhere to the concept of microservices by allowing independent deployments still. The minimal state option 3, would improve on the previous option 2, by only allowing data to be referenced back in a stateless manner. This means that a company in the core database could have related data stored in the TPS database, without being 'aware' of it. The entities that reference the company can be used in an autonomous fashion, where only the necessary information is sent to TPS whenever a request is made. Multiple proposal were made aiming to solve the combination of authentication, authorization and data consistency problems.
+A single source of truth, central database, would avoid having duplicate data all together. No synchronization, thus no network communication is necessary, and all data is always readily available. This design desecrates the independence aspect of microservices. The multiple synchronized databases in option 2, raises the problem of having duplicate, out of sync data. A one-way dataflow could reduce this problem, but it is not always entirely avoidable. This design does adhere to the concept of microservices by allowing independent deployments still. The minimal state option 3, would improve on the previous option 2, by only allowing data to be referenced back in a stateless manner. This means that a company in the core database could have related data stored in the TPS database, without being 'aware' of it. The entities that reference the company can be used in an autonomous fashion, where only the necessary information is sent to TPS whenever a request is made. Multiple proposal were made aiming to solve the combination of authentication, authorization and data consistency problems.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Authentication and Authorization
@@ -150,17 +149,7 @@ The final proposal allows services to be used by external agents via the API Gat
 	\label{fig:Auth3}
 \end{figure}
 
-The fourth example is proposed as the best possible solution, as shown in Figure \ref{fig:Authentication}. This solution closely resembles the single responsibility authentication service as shown in Figure \ref{fig:Auth1}, and the minimal state option as shown in Figure \ref{fig:Auth2}. The user data resembles a database that holds the single source of truth.
-
-\mynote{Add fourth option from authentication proposals}
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\textwidth]{Authentication}
-	\caption[Authentication]{Preferred authentication setup.}
-	\label{fig:Authentication}
-\end{figure}
-
-The only synchronization steps are executed when a new company or application is created, or when they are deleted. The proposal completely decouples the information requirements by keeping Core data and TPS data in their respective databases separated. But without the means of sharing the user identity, this solution wouldn't work. JSON Web Tokens are part of the solution that solves the problem of synchronizing user identity.
+The fourth example is proposed as the best possible solution as shown in Appendix \ref{appendix:slides_2_authentication}. This solution would use the single responsibility authentication service as shown in Figure \ref{fig:Auth1}, and the minimal state option as shown in Figure \ref{fig:Auth2}. A successful login would yield a JWT from a dedicated authentication service. A database with a single source of truth would allow the authentication service to provide truthful user identifying information. The JWT would allow every system to acquire user identifying information from the token payload, and keep from having token verification round-trips. The only synchronization steps are executed when a new company or application is created, or when they are deleted. The proposal completely decouples the information requirements by keeping Core data and TPS data in their respective databases separated.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Methods and Techniques
@@ -176,7 +165,7 @@ The first proof of concept allows consumers of the API to dictate the informatio
 The first non-functional requirement states that the solution should be seamlessly integrated in the portal. On top of that, a user shouldn’t have to log in again to make use of the pricing service from within that portal. For the portal, a proof of concept was made for the case of having the portal implemented as a separate project. The proof of concept is available at \url{github.com/Menziess/Typescript-Reiskosten}. This concept was used to illustrate the differences between Vue and Angular, embodying mostly application structure. Angular being more suitable for large corporate application, while Vue caters toward smaller, more flexible, less structured applications. Iframes, objects and embeds have been mentioned as potential solutions to integrate a frontend in several distinct portals. This problem affects more than just the pricing project, therefore a decision must be made on a higher level before the frontend will be integrated, but the decision is not required for the first sprint to start. The YourDriverApp portal has been constructed using Angular 5. If the frontend is to be integrated, Angular will be the framework that is used to construct the views.
 
 \subsection{Database}
-Agarwal and Rajan state that NoSQL takes advantage of cheap memory and processing power, thereby handling the four V’s of big data more effectively, but lacks robustness in comparison to SQL databases in \cite{AGS}. Performance of geoWithin and geoIntersect queries have been tested between PostGIS and MongoDB. The report dives deeper into spatial queries and concludes that their tests suggest that MongoDB performs better by an average factor of 10, which increases exponentially as the data size increases, but lacks spatial functions that OpenGIS supports. Indexing of spatial fields is said to have a big impact on performance. The conclusion states that the downside of using NoSQL compared to SQL is the limitation in respect to spatial functions. The previous chapter discussed the important features that were required for the location matching functionality to operate properly. Both OGC and GeoJSON standards offered these features. After the paper Schmid et al. 2015 \cite{SCS} was published. The team argues that clustering is much easier in MongoDB, which may be important in the future when a company grows. In respect to the CAP theorem, and ACID properties, SQL and MySQL have different strengths:
+Agarwal and Rajan state that NoSQL takes advantage of cheap memory and processing power, thereby handling the four V’s of big data more effectively, but lacks robustness in comparison to SQL databases in \cite{AGS}. Performance of geoWithin and geoIntersect queries have been tested between PostGIS and MongoDB. The report dives deeper into spatial queries and concludes that their tests suggest that MongoDB performs better by an average factor of 10, which increases exponentially as the data size increases, but lacks spatial functions that OpenGIS supports. Indexing of spatial fields is said to have a big impact on performance. The conclusion states that the downside of using NoSQL compared to SQL is the limitation in respect to spatial functions. The previous chapter discussed important features that were required for the location matching functionality to operate properly. Both OGC and GeoJSON standards offered sufficient support. In the paper of Schmid et al. 2015 \cite{SCS}, the team argues that clustering is much easier in MongoDB, which may be important in the future when a company grows. In respect to the CAP theorem, and ACID properties, SQL and MySQL have different strengths and weaknesses:
 
 \begin{table}[htbp!]
 	\centering
@@ -203,17 +192,7 @@ Agarwal and Rajan state that NoSQL takes advantage of cheap memory and processin
 	\label{tab:databases-comparison}
 \end{table}
 
-MySQL offers more robust data structures via integrity checks. MongoDB offers the possibility to embed one to many relationships in a single document, keeping the data locality
-Within the systems architecture, MongoDB is highly represented,
-
-
-
-
-Performance of spatial queries is very important,
-
-
-NoSQL document storage allows for great horizontal scaling and sharding, catering more towards use cases that do not require overall consistency of the data, but makes the data highly available.
-
+Performance and scalability are important properties for taxiID's systems. MongoDB has the ability to scale horizontally. Because MongoDB has good sharding capabilities, location related performance issues may be solved by setting up local database systems. NoSQL document storage allows for great horizontal scaling and sharding, catering more towards use cases that do not require overall consistency of the data, but makes the data highly available. Performance of spatial queries is very important, for which the conclusion of Agarwal and Rajan support the use of NoSQL. Because MongoDB is represented within the systems architecture by the grand majority of adjacent systems, code reuse and consistency is enhanced by opting for a MongoDB database system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Premise

@@ -71,16 +71,7 @@ All postal codes that start with a ten describe the city of Amsterdam, the entir
 	\label{fig:Amsterdam}
 \end{figure}
 
-In reverse, this procedure would not work. If a polygon was drawn cutting Amsterdam in half diagonally, a single postal code pattern would never be flexible or precise enough to be able to describe the boundaries of the polygon. One big taxi company making use of taxiID's legacy system is located in the United Arab Emirates. This company would not be able to convert anything at all, because the United Arab Emirates does not have a postal code system to begin with.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=.8\textwidth]{PostalCodes}
-	\caption[PostalCodes]{Postal codes by country with amount of digits ranging from three digits (light blue) to eight digits (dark green) and no postal code system (gray).}
-	\label{fig:postalcodes}
-\end{figure}
-
-Addresses and postal code systems do not provide universally interpretable and precise encodings of locations, especially for the locations that matter for this project: points and areas. They can be ambiguous, imprecise, nonuniform, or completely lacking. In the United Arab Emirates, addresses can be utilized, even though it is harder to ensure that two addresses match. Street numbers, punctuation, formats and special characters, can cause this matching process to fail. In contrast, polygons would provide unique and precise location definition that is uniform and universal. When moving to other encoding techniques, this usefulness must be preserved.
+In reverse, this procedure would not work. If a polygon was drawn cutting Amsterdam in half diagonally, a single postal code pattern would never be flexible or precise enough to be able to describe the boundaries of the polygon. One big taxi company making use of taxiID's legacy system is located in the United Arab Emirates. This company would not be able to convert anything at all, because the United Arab Emirates does not have a postal code system to begin with. Regardless, addresses and postal code systems do not provide universally interpretable and precise encodings of locations, especially for the locations that matter for this project: points and areas. They can be ambiguous, imprecise, and nonuniform. In the United Arab Emirates, addresses can still be utilized, even though it is harder to ensure that two addresses match. Street numbers, punctuation, formats and special characters, may cause the matching process to fail. In contrast, polygons would provide unique and precise location definition that is uniform and universal. When moving to other encoding techniques, this usefulness must be preserved.
 
 \subsection{Requirements for Location Matching}
 If the following statements are true for a given location encoding using the definitions of the Point and Area, the location encoding is useful and able to operate independently from the postal code and address systems.
@@ -316,4 +307,4 @@ All listed solutions will work in the databases listed in this chapter, as the c
 %
 \section{Conclusion on Encoding Locations}
 \[\textit{"Which location encoding is sufficient for this system to be operational?"}\] \hfill
-Addresses and postal codes can be translated to geometric datatypes such as Points, Polygons and MultiPolygons. Geometry based locations can be visualized, and thus interpreted regardless of the country in which a location resides. Matching is done through the OpenGIS or GeoJSON API, by writing geospatial queries depending on the selected candidate database system. The problem of overlapping locations, can be solved using complex and straight forward approaches. Selected candidate database systems are systems that adhere to the OpenGIS or GeoJSON standard, yielding many possibilities, of which MySQL and MongoDB have been proven to be workable.
+Addresses and postal codes can be translated to geometric datatypes such as Points, Polygons and MultiPolygons. Geometry based locations can be visualized, and thus interpreted regardless of the country in which a location resides. Matching is done through the OpenGIS or GeoJSON API, by writing geospatial queries depending on the selected candidate database system. Selected candidate database systems are systems that adhere to the OpenGIS or GeoJSON standard, yielding many possibilities, of which MySQL and MongoDB have been proven to be workable. The problem of overlapping locations, can be solved using complex and straight forward approaches, thus proving this location encoding to be sufficient for this system to be operational.
