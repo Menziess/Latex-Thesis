@@ -12,7 +12,7 @@
 %
 \chapter{System Architecture}
 \section{Introduction}
-The term 'system' denotes "a set of things working together as parts of a mechanism or an interconnecting network". The family of systems that has formed through preceding architectural design decisions forms a collection of constrained connectors ready for new systems to assimilate. Flows of information are to be aligned with adjacent system components so that dependencies are satisfied, while making use of the most fitting technologies for great adaptation. Existing conventions, methods and styles throughout the technical and conceptual spectrums are applied, enabling the system architecture to evolve consistently at one pace. Additionally, adjacent systems are improved by solutions introduced in this chapter.
+The term 'system' denotes "a set of things working together as parts of a mechanism or an interconnecting network". The family of systems that has formed through preceding architectural design decisions, must be able to integrate the new TPS system. Flows of information are to be aligned with adjacent system components so that dependencies are satisfied, while making use of the most fitting technologies for great adaptation. Existing conventions, methods and styles throughout the technical and conceptual spectrums are applied, enabling the system architecture to evolve consistently at one pace. Additionally, adjacent systems are improved by solutions introduced in this chapter.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Architectural Patterns
@@ -20,7 +20,7 @@ The term 'system' denotes "a set of things working together as parts of a mechan
 % - Which architectural patterns fit in with the existing architecture?
 %
 \section{Architectural Patterns}
-The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in Figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. A separation exists between user interface, business logic and data storage that is known as the three-tier or multi-tier architecture, as described in \cite{IBM-3-tier}.
+The current system architecture consists of three API's and nine services that connect to four databases, as can be seen in Figure \ref{fig:Architecture}. They provide functionalities to portals and mobile apps. Within the architecture, a separation exists between user interfaces, business logic and data storage, that is known as the three-tier or multi-tier architecture, as described in \cite{IBM-3-tier}.
 
 \begin{figure}[H]
 	\centering
@@ -56,7 +56,7 @@ A model-view-controller pattern is separating the business and presentation laye
 	\item Build separate service providing iframe views, integrate TPS as monolith component
 \end{enumerate}
 
-The final decision, based on a comparison seen in table 4.1.1 in Appendix \ref{appendix:pregame}, proposes to separate the backend and integrate the frontend. This leaves the requirement of implementing the frontend in multiple portals at once unresolved, but improves consistency of each individual portal implementation, and reduces dependencies of having to implement iframes.
+The final decision, based on a comparison seen in table 4.1.1 in Appendix \ref{appendix:pregame}, proposes to separate the backend and integrate the frontend. This leaves the requirement of implementing the frontend in multiple portals simultaneously unresolved, but improves consistency of each individual portal implementation, and reduces dependencies of having to implement iframes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Information Dependencies
@@ -156,10 +156,10 @@ The fourth example is proposed as the best possible solution as shown in Appendi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Methods and Techniques}
-All API projects in taxiID have been developed using PHP or JavaScript. Java and Swift are used for mobile applications. It is not beneficial to explore every single possible combination of technologies, as the range of possibilities is too big. It is important to look at some popular alternatives along the way. NodeJS offers more modern features and abilities to separate concerns in comparison with PHP. Speed and consistency of the codebase are important reasons to opt for a JavaScript NodeJS project, as advised in Appendix \ref{appendix:pregame}, chapter 4.6. Two proofs of concept were made, one showcasing an Express solution using GraphQL to expose resource, and the other exposing resources using Loopback in a hybrid JavaScript Typescript project.
+All API projects in taxiID have been developed using JavaScript, with the exception of one legacy PHP project. Java and Swift are used for mobile applications. It is not beneficial to explore every single possible combination of technologies, as the range of possibilities is too big. But it is important to look at some popular alternatives. NodeJS offers more modern features and abilities to separate concerns in comparison with PHP. Speed and consistency of the codebase are important reasons to opt for a JavaScript NodeJS project, as advised in Appendix \ref{appendix:pregame}, chapter 4.6. Two proofs of concept were made, one showcasing an Express solution using GraphQL to expose resource, and the other exposing resources using Loopback in a hybrid JavaScript Typescript project.
 
 \subsection{Backend Framework}
-The first proof of concept allows consumers of the API to dictate the information that they want to receive. Using this concept, an API Gateway could easily chain requests, mapping resources from multiple services to a single endpoint. The proof of concept is available at \url{github.com/Menziess/Typescript-GraphQL-API}. This proof of concept was not advised to be used for TPS, because the inconsistencies between services introduce unnecessary complexity for developers. The second proof of concept, next to being the advised solution, is selected through consensus of developers working at taxiID. The team has experience with LoopBack 3.0 \cite{lb}, enabling the team to reuse code, maintain their development velocity, and reason about this project more effectively. The project structure as shown in Appendix \ref{appendix:slides_2} is made up of of loopback configuration files, and Typescript files containing important logic. This separation is not ideal, but expresses the fact that some JavaScript files belong to a framework, and must adhere to a special framework format. The Typescript files offer more strict checks through static typing, interfaces and classes.
+The first proof of concept allows consumers of the API to dictate the information that they want to receive. Using this concept, an API Gateway could easily chain requests, mapping resources from multiple services to a single endpoint. The proof of concept is available at \url{github.com/Menziess/Typescript-GraphQL-API}. This proof of concept was not advised to be used for TPS, because the inconsistencies between services introduce unnecessary complexity for developers. The first solution is vastly different from existing projects, which will introduce inconsistencies once again. For example, one API could make network requests to separate loopback API's, but then has to implement a new inconsistent request format to deal with a GraphQL API. And this activity is repeated for all other depending API's and applications. For this reason, the second proof of concept has been chosen to start the project with. The team has experience with LoopBack 3.0 \cite{lb}, enabling the team to reuse code, maintain their development velocity, and reason about this project more effectively. The project structure as shown in Appendix \ref{appendix:slides_2} is made up of of loopback configuration files, and Typescript files containing important logic. This separation is not ideal, but expresses the fact that some JavaScript files belong to a framework, and must adhere to a special framework format. The Typescript files offer more strict checks through static typing, interfaces and classes.
 
 \subsection{Frontend Framework}
 The first non-functional requirement states that the solution should be seamlessly integrated in the portal. On top of that, a user shouldn’t have to log in again to make use of the pricing service from within that portal. For the portal, a proof of concept was made for the case of having the portal implemented as a separate project. The proof of concept is available at \url{github.com/Menziess/Typescript-Reiskosten}. This concept was used to illustrate the differences between Vue and Angular, embodying mostly application structure. Angular being more suitable for large corporate application, while Vue caters toward smaller, more flexible, less structured applications. Iframes, objects and embeds have been mentioned as potential solutions to integrate a frontend in several distinct portals. This problem affects more than just the pricing project, therefore a decision must be made on a higher level before the frontend will be integrated, but the decision is not required for the first sprint to start. The YourDriverApp portal has been constructed using Angular 5. If the frontend is to be integrated, Angular will be the framework that is used to construct the views.
@@ -192,7 +192,7 @@ Agarwal and Rajan state that NoSQL takes advantage of cheap memory and processin
 	\label{tab:databases-comparison}
 \end{table}
 
-Performance and scalability are important properties for taxiID's systems. MongoDB has the ability to scale horizontally. Because MongoDB has good sharding capabilities, location related performance issues may be solved by setting up local database systems. NoSQL document storage allows for great horizontal scaling and sharding, catering more towards use cases that do not require overall consistency of the data, but makes the data highly available. Performance of spatial queries is very important, for which the conclusion of Agarwal and Rajan support the use of NoSQL. Because MongoDB is represented within the systems architecture by the grand majority of adjacent systems, code reuse and consistency is enhanced by opting for a MongoDB database system.
+Performance and scalability are important properties for taxiID's systems. MongoDB has the ability to scale horizontally. Because MongoDB has good sharding capabilities, location related performance issues may be solved by setting up local database systems. NoSQL document storage allows for great horizontal scaling and sharding, catering more towards use cases that do not require overall consistency of the data, but makes the data highly available. Performance of spatial queries is very important, for which the conclusion of Agarwal and Rajan support the use of NoSQL.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Premise
@@ -203,4 +203,29 @@ Performance and scalability are important properties for taxiID's systems. Mongo
 
 \mynote{second poc is used}
 \mynote{how is state shared(jwt), why are all the choices made and why are they good? Talk about the patterns applied.}
-It is advised to integrated frontend views in each required portal using the associated available technologies to maintain consistency within each portal and reduce dependencies. A separate NodeJS microservice with its own MongoDB database using Loopback as a framework to quickly implement functionalities written in Typescript should make the system readily available to all adjacent system components. Authentication should be established using a JWT provided by a single responsibility authentication service.
+% It is advised to integrated frontend views in each required portal using the associated available technologies to maintain consistency within each portal and reduce dependencies. A separate NodeJS microservice with its own MongoDB database using Loopback as a framework to quickly implement functionalities written in Typescript should make the system readily available to all adjacent system components. Authentication should be established using a JWT provided by a single responsibility authentication service.
+
+
+% Separation
+three tier, separate the backend and integrate the frontend
+
+% Microservice
+monolith vs microservice (scalability, parallelism, independence in case of failure)
+
+% JWT
+This solution would use the single responsibility authentication service as shown in Figure \ref{fig:Auth1}, and the minimal state option as shown in Figure \ref{fig:Auth2}. A successful login would yield a JWT from a dedicated authentication service. A database with a single source of truth would allow the authentication service to provide truthful user identifying information. The JWT would allow every system to acquire user identifying information from the token payload, and keep from having token verification round-trips. The only synchronization steps are executed when a new company or application is created, or when they are deleted. The proposal completely decouples the information requirements by keeping Core data and TPS data in their respective databases separated.
+
+% Loopback TS NodeJS
+Loopback in a hybrid JavaScript Typescript project. (speed, consistency)
+The team has experience with LoopBack 3.0 \cite{lb}, enabling the team to reuse code, maintain their development velocity, and reason about this project more effectively. The project structure as shown in Appendix \ref{appendix:slides_2} is made up of of loopback configuration files, and Typescript files containing important logic. This separation is not ideal, but expresses the fact that some JavaScript files belong to a framework, and must adhere to a special framework format. The Typescript files offer more strict checks through static typing, interfaces and classes.
+
+% Mongodb
+Performance and scalability are important properties for taxiID's systems. MongoDB has the ability to scale horizontally. Because MongoDB has good sharding capabilities, location related performance issues may be solved by setting up local database systems. NoSQL document storage allows for great horizontal scaling and sharding, catering more towards use cases that do not require overall consistency of the data, but makes the data highly available. Performance of spatial queries is very important, for which the conclusion of Agarwal and Rajan support the use of NoSQL.
+
+
+\item What is most fitting solution to integrate the backend and frontend into the existing architecture?
+	\begin{enumerate}[label*=\arabic*.]
+		\item Which architectural patterns fit in with the existing system architecture?
+		\item How is state shared and synchronized between system components?
+		\item What is the most applicable authentication method?
+	\end{enumerate}
