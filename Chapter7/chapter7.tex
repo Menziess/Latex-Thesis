@@ -9,31 +9,41 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \chapter{Conclusion}
+\[\textit{How can a generic location-based price calculation system be implemented}\]
+\[\textit{that could be used in every country?}\] \hfill
 
-Onderzoek 1
-Onderzoek 2
-Onderzoek 3
-Onderzoek 4
-Calculatie systeem
-Portal
-Wat is af?
+The four challenges manifested in the research questions that constructed this assignment have been answered in order to successfully implement the trip price calculation system. The best possible way of mapping conveyable locations to pricing rules in a system that integrates in the existing system architecture of taxiID, keeping the original rule types while improving the interpretability of the matching logic through the user interface, has been researched. Information available in the public domain has been used to answer empirical questions, from which proposals based on good arguments have been made, and working proof of concepts have been created, out of which some have been implemented, resulting in a system design that could be used for many other purposes in the software industry.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Conclusion
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\chapter{Conclusion}
 
-% A generic location-based price calculation system be implemented by separating ...
+% Locations
+Which location encoding is sufficient for this system to be operational?
+How can legacy location definitions be improved to be universally interpretable?
+In what way can location matching be improved?
+Which Database Management Systems are candidate for handling this project's use cases?
 
-% Which location encoding is sufficient for this system to be operational?
 Addresses and postal codes can be translated to geometric datatypes such as Points, Polygons and MultiPolygons. Geometry based locations can be visualized, and thus interpreted regardless of the country in which a location resides. Matching is done through the OpenGIS or GeoJSON API, by writing geospatial queries depending on the selected candidate database system. Selected candidate database systems are systems that adhere to the OpenGIS or GeoJSON standard, yielding many possibilities, of which MySQL and MongoDB have been proven to be workable. The problem of overlapping locations, can be solved using complex and straight forward approaches, thus proving this location encoding to be sufficient for this system to be operational.
 
-% What is most fitting solution to integrate the backend and frontend into the existing architecture?
+% Architecture
+What is most fitting solution to integrate the backend and frontend into the existing architecture?
+Which architectural patterns fit in with the existing system architecture?
+How is state shared and synchronized between system components?
+What is the most applicable authentication method?
+
 A NodeJS loopback microservice should be implemented along with a MongoDB database, resulting in a scalable high performance solution that can be deployed independently. Introducing a stateless authentication service to implement identity management, allowing the microservice to be more decoupled, bringing the amount of verification requests down to zero. This solution is most fitting to the existing architecture, that only has to implement one future proof authentication method.
 
-% Which logic and data is required in the backend to reliably calculate a trip price?
+% TPS
+Which logic and data is required in the backend to reliably calculate a trip price?
+Which criteria should regulate whether rules match?
+How can determinism of price computations be guaranteed?
+In what way can the three original pricing rule types be implemented? (fixed, dynamic, and threshold prices)
+
 Locations should only be used as criteria if the relevant location coordinates are provided by the booking app. Timeframes, passenger count, vehicle types, on-meter and estimation options always apply as criteria by which a rule is matched. The original rules are implemented to each have their own classes, producing deterministic higher order functions that calculate the final trip price, using functional programming techniques.
 
-% Is it possible to communicate the inner workings of the system through the user interface?
+
+% Portal
+Is it possible to communicate the inner workings of the system through the user interface?
+Which backend concepts are essential to display in the frontend?
+Which design practices allow users to understand coherence of different elements that make up a rule?
+How should a user know what the outcome of his interactions with the system are?
+
 The sidebar reflects which major concepts exist within the portal: Products, Pricing, Locations, and Apps. Composite views reflect the coherence that exists between related entities, while separation of independent entities reduce the cognitive overhead while reasoning about pricing rules. Spatial grouping on the page hint which properties belong to which entity, for which all human beings have a natural intuition. Manual activation and sorting of rules force the user to actively decide whether a rule should match, which can be tested immediately using the companies' booking app.
