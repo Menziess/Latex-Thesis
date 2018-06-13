@@ -12,15 +12,15 @@
 % #region
 \chapter{The Portal}
 \section{Introduction}
-The term 'reasoning' in the title, meaning "the action of thinking about something in a logical, sensible way", may have been redundant if a system were to calculate trip prices autonomously --- this system is designed with the user in mind. That is why the inner workings of the system must be expressed in such a way that given some rule as input, the user will be able to logically derive the consequential output with confidence.
+The term 'reasoning' in the title, meaning "the action of thinking about something in a logical, sensible way", may have been redundant if a system were to calculate trip prices autonomously. But this system is designed with the user in mind. That is why the inner workings of the system must be expressed in such a way that allows the user to predict the outcome after changes have been made to pricing rules with confidence.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Visual Hierarchy
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
-\section{Design}
-A pricing rule is nothing more than a set of prices and collection of criteria by which a trip must abide in order for those prices to apply. These criteria and pricing information are stored in database entities, which could be expressed as components in a view. For example, "the pickup location of a trip must be located in Amsterdam" is a criterion that is stored in a location entity, that may be expressed as polygon on a world map component. Even if the possible combinations of criteria could be graphed, it would be highly dimensional.
+\section{Visual Hierarchy}
+A pricing rule is a set of criteria that covers pricing information. These criteria and pricing information are stored in database entities. These entities could be expressed as view components. For example, "the pickup location of a trip must be located in Amsterdam" is a criterion that is stored in a location entity, that may be expressed as polygon on a world map component.
 
 \subsection{Essential Components}
 The main entities that make up a the price calculation system are visualized in Figure \ref{fig:Treemap}. The plurality of the child entities describe whether more than one child are present within the parent entity. For example, rules have many products, with each product having one price, which has one priceFixed and one priceDynamic.
@@ -33,23 +33,22 @@ The main entities that make up a the price calculation system are visualized in 
 \end{figure}
 
 \subsection{Expressing Order}
-Figure \ref{fig:Treemap} taps into the ability of the reader to preattentively process the images structure. It is immediately evident that Discounts have a subset of the entities that Rules have, and that Debtors and DaAppInstalls have the same entity relationships. The brain has already ordered the differently sized boxes by enclosure, proximity, intensity, and spatial grouping. Stephen Few states that "Perception of these basic visual attributes is called 'preattentive' processing, in contrast to the conscious part of perception, which is called 'attentive' processing. Preattentive processing is extremely fast and broadband in that we can simultaneously perceive a large number of these basic visual attributes, called 'preattentive attributes'. Preattentive perception is done in parallel, but attentive processing is done serially and is, therefore, much slower." in \cite[p.~3]{few}. This fact can be utilized to construct a hierarchy through visual queues. A famous phrase often used in data visualizations called Shneiderman's mantra \cite{mantra}, lays the foundation of principles that enable a user to maintain an understanding of the context in which data is visualized. The sentences in the mantra dictate that there are three stages in data exploration.
+A human brain is capable of ordering the differently sized boxes by enclosure, proximity, intensity, and spatial grouping. Stephen Few states that "Perception of these basic visual attributes is called 'preattentive' processing, in contrast to the conscious part of perception, which is called 'attentive' processing. Preattentive processing is extremely fast and broadband in that we can simultaneously perceive a large number of these basic visual attributes, called 'preattentive attributes'. Preattentive perception is done in parallel, but attentive processing is done serially and is, therefore, much slower." in \cite[p.~3]{few}. This fact can be utilized to construct a hierarchy similar to that of Figure \ref{fig:Treemap} through visual queues. A famous phrase often used in data visualizations called Shneiderman's mantra \cite{mantra}, lays the foundation of principles that enable users to maintain an understanding of the context in which data is visualized. The sentences in the mantra dictate that there are three stages in data exploration. This mantra in combination with preattentive attributes could be put to good use in reducing the cognitive overhead while reasoning about pricing rules.
 
 \begin{enumerate}
 	\item Overview First
 	\item Zoom and Filter
 	\item Details on Demand
 \end{enumerate}
-
-Pricing rules cannot be plotted in a graph, yet this mantra in combination with preattentive attributes could be put to good use in reducing the cognitive overhead while reasoning about pricing rules.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Design
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
-\section{Visual Hierarchy}
-In order to communicate the criteria of one pricing rule, the system must guide the user from an overview down to the less important details of the rule. This is to be achieved by splitting up the various criteria into multiple views. What this means is that the user is limited to only reason about a subset of the criteria at once. For example, the user is obligated to first define a location, before it is assigned to a rule, splitting problems into smaller portions. The mantra could be translated into the design on multiple levels. Some components are easy to reason about, and could be combined with other components to make up one view. For example, one rule can have many product entities, and each product has a price entity. These components could compose a single view, having one rule and a list of products with their respective prices. The existing pages in the portal already follow a basic hierarchy:
+\section{Design}
+% Which backend concepts are essential to display in the frontend?
+Composing a pricing rule should require no level of cognitive effort. It should be linear process where few choices result in the desired outcome. This could be achieved by separating related reusable entity components from the pricing rule. For example, a location does not have to be defined in the pricing rule view. It could be defined in its own separate view, so that it can later be selected, allowing the user to only reason about a subset of criteria at once. This theory works for reusable entities such as locations, but would result in a negative outcome when used with information that belongs to a single pricing rule, such as dynamic or fixed prices. The contextual understanding is lost when the user has navigate to a different view, while keeping locations, time, rule type, and other properties in memory while filling in the different price properties for different products. The mantra could be applied to offer an overview of a particular entity. The user could then select an entity and modify the details. Displaying the properties on a single page, ordered using preattentive attributes. The portal follows a basic hierarchy:
 
 \begin{enumerate}
 	\item Overview: enumerates over a list of entities
@@ -65,16 +64,7 @@ Entities that are part of a many-to-many or one-to-many relation should have the
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{Products}
-Users are allowed to view the list of products that have been created. Products can be selected, upon which the user is taken to the detail page where the type, name and other properties can be set, and where the product may be deleted. When a property has changed, the save button becomes available. And when the user tries to leave the page after changing a property, a prompt is shown that allows the user to leave or continue editing a product.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.9\textwidth]{Products}
-	\caption[Products Component]{Products with a warning prompt.}
-	\label{fig:Products Component}
-\end{figure}
-
-These features have been implemented in every detail page for consistency, and have been shown in Figure \ref{fig:Products Component} because the product detail page itself is simple enough to allow a distraction.
+The sidebar contains links to the overview pages. The products overview page shows a searchable and sortable list of products. These products may be selected, upon which the user is brought to the detail page where the type, name and other properties can be set, and where the product may be deleted. When properties have changed, the save button becomes available. And when the user tries to leave the page after changing a property, a prompt is shown that allows the user to leave or continue editing a product. These features have been implemented for all components.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,55 +72,16 @@ These features have been implemented in every detail page for consistency, and h
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{Pricing}
-When the user navigates to the pricing view, a table with two tabs, 'rules' and 'special rates', is displayed. The special rates refer to discounts, but that word would imply that these records would only be able to make trips cheaper. Special rates can be negative or positive, and can be expressed in percentages and fixed amounts. For the sake of consistency, special rates will be referred to as discounts. Discounts and Rules have a lot in common, both allowing criteria to be applied through timeframes and locations. They can both be prioritized and they are the only entities that have an impact on trip prices.
+The pricing overview contains a table with two tabs: 'rules' and 'special rates'. The word 'discounts' may imply that it would only be able to lower the prices of trips. Special rates can be negative or positive, and can be expressed in percentages or fixed amounts. Discounts and rules have a lot in common. They both have locations and timeframes, they can both be prioritized, and they both have an impact on price calculations.
 
 \subsection{Discounts}
-On the discount detail page, the name, priority, type and value properties may be set. When the type is changed between 'fixed' and 'percentage', the symbol next to the value changes from a \euro to a \% symbol. The timeframes and locations can be found underneath the normal properties. For the timeframes a component has been created that can be integrated into any page that requires a timeframe selector. Timeframes consist of two dates between which a discount or rule is active. A date picker allows users specify the date, while a separate time input allows users to specify the time. When users want to define more complex timeframes, a specific week days option opens up an hour selection element. When this option is enabled, the time inputs are hidden. They are mutually exclusive to avoid confusion between the time aspect of the timeframes.
-
-%###############################################################################
-% TIMEFRAME PICKER SCREENSHOT
-%###############################################################################
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.9\textwidth]{Timeframes}
-	\caption[Timeframe Component]{Timeframe with specific week days selector unfolded.}
-	\label{fig:Timeframe Selector}
-\end{figure}
-
-When this toggle is set, the time aspect of the start and end date is hidden, as from that moment, time can only be defined as individual hours. Because this aspect of the timeframe is stored as a bit string, it is easily translated into an html input element, and can easily be modified in the future. Right above the timeframe selector component sits the location selector component. It has a 'from' and a 'to' input in which the user may enter a location by name or address. Autocompletion displays search results underneath the inputs allowing the user to quickly find a predefined location. When the user presses enter and the location does not exist, the user is prompted to create a new location. All locations that have been created by developers can be shared. This is added as a requirement in a later stage that allows users to create pricing rules right away, without having to bother with locations first.
-
-%###############################################################################
-% LOCATION PICKER SCREENSHOT
-%###############################################################################
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.9\textwidth]{Rules}
-	\caption[Rules Component]{Location picker.}
-	\label{fig:Location Selector}
-\end{figure}
-
-When the input is empty, the 'Everywhere' option is shown, which ensures that no location is associated with that input.
+On the discount detail page, the name, priority, type and value properties may be set. The discount type can be changed between 'fixed' and 'percentage', changing the symbol next to the value from a \euro to a \% symbol. The timeframes and locations can be found below the normal properties. For the timeframes a component has been created that can be integrated into any form. Timeframes consist of two dates between which a discount or rule is active. A date picker allows users specify the date, and a separate time input allows users to specify the time. When users want to define more complex timeframes, a specific week days option opens up an hour selection element. When this option is enabled, the time inputs are hidden. Only one option can be enabled so that no confusion between the time aspect of the timeframes can exist. When this toggle is set, the time aspect of the start and end date is hidden, as from that moment, time can only be defined as individual hours. Because this aspect of the timeframe is stored as a bit string, it is easily translated into an html input element, and can easily be modified in the future. The location selector component can be found right above the timeframe selector component. It has a 'from' and a 'to' input in which the user may enter a location by name or address. Autocompletion results allow the user to quickly find a one of the company defined locations. When the user presses enter and the location does not exist, the user is prompted to create a new location. All locations that have been created by developers may be shared, so that the user is able to clone them. This is added as a requirement in a later stage, allowing users to create pricing rules without having to bother with locations first. When the input is empty, the 'Everywhere' option is selected, which ensures that no location is associated with that input.
 
 \subsection{Rules}
-On top of the functionalities just covered, the rule detail page has more complex property inputs. A table of columns for each product is displayed in which the minimum price, waiting price, start price, kilometer price, and minute price inputs can be found on each row.
-
-%###############################################################################
-% DYNAMIC FORM SCREENSHOT
-%###############################################################################
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.9\textwidth]{Rules}
-	\caption[Dynamic Form]{Dynamic Form.}
-	\label{fig:Dynamic Form}
-\end{figure}
-
-The kilometer and minute price can be extended through thresholds. When a threshold is added, it copies the values from the row above, which may then be edited. A rule can be of type 'dynamic' and 'fixed', which transforms the form when changed. When the 'dynamic' type is selected, locations may be defined as 'Everywhere'. This is not the case for the 'fixed' type. This freedom would not make sense in most cases, therefore it is desired that a user defined a start and end location to avoid mistakes that have the potential of causing financial damage. The form only has the rows waiting price and fixed price, where the fixed price row holds the location inputs now. Because fixed prices can be extended with subrules like the kilometer and minute prices could be extended with thresholds, the locations have to be consistently associated with the fixed price.
-%###############################################################################
-% BEETJE OVER DESIGN
-%###############################################################################
+On top of the functionalities just covered, the rule detail page has more complex property inputs. A table of columns for each product is displayed with a minimum price, waiting price, start price, kilometer price, and minute price inputs on each row. The kilometer and minute price can be extended through thresholds. When a threshold is added, it copies the values from the row above, which may then be edited. The timeframes and location selectors look the same as those of the discounts, but only when the rule is of type 'dynamic'. When the user selects the 'fixed' type, the form is transformed. The columns in the table only contain a waiting price and fixed price input. The location input is moved next to the fixed price input. The locations can no longer be set to 'Everywhere' to avoid expensive mistakes. A button allows prices to be extended with subrules, just like the way kilometer and minute prices could be extended with thresholds. A visual hierarchy exists between the different components on the page through proximity and spacial grouping. The views can be seen in Appendix \ref{appendix:slides_7}.
 
 \subsection{Priority}
-The priority for discounts and rules can be defined in the priority input field. For convenience, a drag and drop feature was added.
+The priority for discounts and rules can be defined in the priority input field, although modifying this field would be inconvenient for large amounts of modifications. A drag and drop feature was added to sort more quickly.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -145,9 +96,9 @@ Locations have been defined as either points or areas. In technical terms, this 
 %###############################################################################
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{Locations}
-	\caption[Locations Overview]{Overview of points and areas.}
-	\label{fig:Locations Overview}
+	\includegraphics[width=0.9\textwidth]{Amsterdam}
+	\caption[Amsterdam Drawn Polygon]{Amsterdam - A single location comprised of multiple locations.}
+	\label{fig:Amsterdam Drawn Polygon}
 \end{figure}
 
 \subsection{Point}
@@ -231,6 +182,15 @@ When a new rule or discount is saved, it is not activated by default. The app de
 
 \section{Conclusion on The Portal}
 \[\textit{Is it possible to communicate the inner workings of the system through the user interface?}\]\hfill
+
+% reasoning
+Pricing rules cannot be plotted in a graph, yet this mantra in combination with preattentive attributes could be put to good use in reducing the cognitive overhead while reasoning about pricing rules.
+
+% essential concepts
+
+
+% predicting outcome
+
 
 % Which backend concepts are essential to display in the frontend?
 % Which design practices allow users to understand coherence of different elements that make up a rule?
