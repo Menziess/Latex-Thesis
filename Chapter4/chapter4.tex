@@ -20,7 +20,7 @@ The term 'rule-based' in the title caters to the proposition that trip price cal
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{The System Structure}
-A deterministic algorithm always produces the exact same output when given a certain input. This concept is paramount in respect of a price calculation, or any financial calculation for that matter. Not only is it strange when two passengers, booking the same trip under the same conditions, have to pay different prices. It is also impossible to guarantee the correctness of the calculation when certain parts of the computation introduce variation through side effects. This does not mean that the criteria are not allowed to change. It does mean that given an input and a set of criteria, the output should be the same every time. It may not be possible to create a completely deterministic system. Parts of the system may execute operations asynchronously and out of order, which can be contained. But there are factors that can not be controlled, such as computations of external services at different times. These factors are side effects that are out of the scope of containment. The result of such services will be seen as the input to a deterministic function, which in contrast should be contained. In order to reach any level of determinism, the calculation logic should manage state flawlessly. In the object-oriented programming (OOP) paradigm, state is managed through encapsulation. Object instances manage their internal state, and expose public methods to allow certain changes to be made on those instances. The functional programming (FP) paradigm treats computations as evaluations of mathematical functions. This aspect seems tailored toward the goal of reaching determinism. Using FP in conjunction with OOP, a higher order structure may be constructed using classes and encapsulation for more flexibility, while minimizing or eliminating state mutations through pure functions. In the previous chapter the second proof of concept was mentioned that separates the calculation logic from the Loopback framework as shown in Figure \ref{fig:Class Diagram}. The isolation of the calculation and direction classes result in a more robust system, assuming that the framework is just a user of the calculation logic. Reasons and more arguments covering determinism will be discussed in the last section of this chapter.
+A deterministic algorithm always produces the exact same output when given a certain input. This concept is paramount in respect of a trip price calculation. Not only is it strange when two passengers, booking the same trip under the same conditions, have to pay different prices. It is also impossible to guarantee the correctness of the calculation when certain parts of the computation introduce variation through side effects. This does not mean that the criteria are not allowed to change. It does mean that given an input and a set of criteria, the output should be the same every single time. Parts of the system may execute operations asynchronously and out of order, which is possible to contain. But there are factors that can not be controlled, such as computations of external services at different times. These factors are side effects that are out of the scope of containment. The result of such services will be seen as the input to a deterministic function, which in contrast should be deterministic. In order to achieve this, the calculation logic should manage state flawlessly. In the object-oriented programming (OOP) paradigm, state is managed through encapsulation. Object instances manage their internal state, and expose public methods to allow certain changes to be made on those instances. The functional programming (FP) paradigm treats computations as evaluations of mathematical functions. This aspect fits perfectly with the goal of reaching determinism. Using FP in conjunction with OOP, a higher order structure may be implemented using classes and encapsulation for more flexibility, while minimizing or eliminating state mutations through pure functions. In the previous chapter, the second proof of concept was mentioned that separates the calculation logic from the Loopback framework, as shown in Figure \ref{fig:Class Diagram}. The isolation of the calculation and direction classes result in a more robust system.
 
 \begin{figure}[H]
 	\centering
@@ -38,7 +38,7 @@ The Price object is composed of a Directions and a Calculator Class, both of whi
 	\label{fig:Data Model}
 \end{figure}
 
-Chapter three concludes that MongoDB is the proper database for this system. MongoDB allows relations to be embedded in the parent's document, which is useful if the child entity is never shared.
+Chapter three concludes that MongoDB is the proper database for this system. MongoDB allows relations to be embedded in the parent's document, which is useful for child entities, like timeframes, that are never shared.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,7 +46,7 @@ Chapter three concludes that MongoDB is the proper database for this system. Mon
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{Matching Criteria}
-A rule is the rudimentary element of the trip pricing system that allows users to interpret and define the way with which prices are assigned to trips, restricted by the dimensions of space and time. In the legacy system, discounts were a fundamental part of the price definitions. Meaning that whenever a price was found, the discount was directly associated with the price. This design led to some issues, mainly revolving around having to duplicate prices in order to have the same prices without discounts. It is mutually beneficial for users and developers who are set to maintain this system, to create a system that offers a lot of freedom in applying criteria to prices. In perspective, a user may want to apply the following restrictions:
+A rule is the rudimentary element of the trip pricing system that allows users to interpret and define the way with which prices are assigned to trips, restricted by the dimensions of space and time. In the legacy system, discounts were a fundamental part of the price definitions. Meaning that whenever a price was found, the discount was directly associated with the price. This design led to some issues, mainly revolving around having to duplicate prices in order to have the same prices without discounts. It is mutually beneficial for users and developers who are destined to maintain this system, to create a system that offers a lot of freedom in applying criteria to prices. In perspective, a user may want to apply the following restrictions:
 
 \begin{enumerate}
 	\item Define certain prices for one app, but not for the other
@@ -58,13 +58,13 @@ A rule is the rudimentary element of the trip pricing system that allows users t
 	\item Allow for free trips between two companies during the weekend
 \end{enumerate}
 
-There are also some restrictions that are applied by default, as pre- or  postconditions. For example, passenger count should not exceed that of the products passenger capacity. There is also a on demand option in the booking app that allows passengers to book a ride without providing a destination. In these cases, a rule must still be matched with the departure location, and the user may want to disable some products for the on-demand functionality. This is an example where the products are shown without prices, or filtered out if the user wishes it. Compared to the legacy system, this design of allowing criteria to be applied to rules and discounts independently, resulting in a more modular system with more freedom. The user is allowed to define discounts and rules separately, and when a new concept is added that makes use of locations or timeframes, the user is able to reason about it in the same fashion. For the maintainers of this system, it is beneficial to have less duplication, more separation of concern, and less overhead.
+There are also some restrictions that are applied by default as pre- or  postconditions. For example, the passenger count should not exceed that of the products' passenger capacity. An on demand option in the booking app allows passengers to book a ride without providing a destination. In these cases, a rule must still be matched with the departure location, and the user may want to disable some products for the on-demand functionality. This is an example where the products are shown without prices, or filtered out if the user wishes it. Compared to the legacy system, this design of allowing criteria to be applied to rules and discounts independently, resulting in a more modular system with more freedom. The user is allowed to define discounts and rules separately, and when a new concept is added that makes use of locations or timeframes, the user is able to reason about it in the same fashion. For the maintainers of this system, it is beneficial to have less duplication, more separation of concern, and less overhead.
 
 \subsection{Locations}
 Chapter two concludes that MongoDB's geometry datatypes are sufficient location encodings. The location matching examples can directly be implemented as a basis for the location matching criterion. The listed restrictions that a user may apply, depend on two locations being matched or ignored simultaneously. On top of that, one best match must be selected from the matching results, which must be done by determining what the solution for location overlap should be.
 
 \subsubsection{The Conventional Approach}
-The legacy postal code and address based system maintains a type based matching order: fixed, tier, and dynamic rule types. A location conflict would not occur if the user was able to make distinct pricing records. If it were to occur, the system would simply pick the first match. But with the introduction of overlap, this will no longer be feasible. It would be possible to have a rule definition with two locations that are defined in Amsterdam. If a different rule has two locations defined within Amsterdam, both rules would match. The legacy system did not have location bound dynamic rules. So each dynamic rule had to be evaluated lastly, as they were activated on every location. These freedoms can easily be implemented by abstractions.
+The legacy postal code and address based system maintains a type based matching order: fixed, tier, and dynamic rule types. A location conflict would not occur if the user was able to make distinct pricing records. If it were to occur, the system would simply pick the first match. But with the introduction of overlap, this will no longer be feasible. North Holland contains Amsterdam, which contains Amsterdam-Centrum, which contains the Dam Square, which may contain a pickup location defined by the user. There exists some difference in magnitude of locations in the new system, whereas the old system had locations of the same magnitude.
 
 \subsubsection{The New Approach}
 Multipolygons allow for multiple locations to be defined as one, opening up the possibility of defining all branches of a company in a single location, which could then be selected as departure and destination location. This would solve example seven from the examples list, using just one rule and one location. Because locations could be associated with all rule types, all location based examples are easy to define. Although care must be taken to distinguish between not having a location defined, and not providing a location when booking a ride. If no departure location is assigned to a rule, the rule should match with any location. And if the passenger orders an on-demand ride, where the destination is not provided, the destination should be ignored during the matching process.
@@ -103,7 +103,7 @@ db.collection('Location')
 \end{minipage}
 \end{center}
 
-In Listing \ref{lst:matching-departure}, the query is built conditionally to the fact if locations have been provided in the booking request. Only the provided locations are matched if they intersect with a defined destination, or if the destination does not exists. This covers the cases for checking only one of the two locations. In chapter two, solutions have been proposed to the overlapping locations problem. From all the interesting approaches, the most straight forward solution is simply assigning a priority number to the rule. This solution has the advantage of interpretability and flexibility. The behavior of the matching system can easily be tinkered with by the user. The user can reason about the fact whether one rule has a precedence over the other by comparing the priorities.
+In Listing \ref{lst:matching-departure}, the query is built conditionally. If a location is not provided by the booking app, it will not be evaluated. Only the provided locations are matched if they intersect with a defined destination, or if the destination does not exists in the database. This covers the cases for checking only one of the two locations. In chapter two, solutions have been proposed to the overlapping locations problem. From all the interesting approaches, the most straight forward solution is simply assigning a priority number to the rule. This solution has the advantage of interpretability and flexibility. The behavior of the matching system can easily be tinkered with by the user. The user can reason about the fact whether one rule has a precedence over the other by comparing the priorities.
 
 \subsection{Timeframes}
 The requirements state that the user must be able to define a start and end time, the days on which the times are active, and the start and end date of the timeframe. This either means that the timeframe one window of time, or that each given day has a single window of time. But if a discount should be active during night of New Years Eve, between 23h and 5h, this description would not be sufficient to cover this use case under any interpretation.
@@ -283,112 +283,112 @@ The generateCalculators method generates a function for each metric with default
 \subsection{Dynamic}
 A dynamic calculation is performed on the metrics: distance and duration, having units: kilometer and minute. A straight forward lambda expresses that the units are multiplied by the price.
 
-\begin{center}
-\noindent\begin{minipage}{.85\textwidth}
-\begin{lstlisting}[caption={Dynamic calculation.}, label={lst:dynamic-calculation}]
-/**
- * Main calculation for a dynamic pricing rule.
- */
-public calculate(
-	pricing: pricing,
-	metrics: metrics & indexed,
-): number {
+% \begin{center}
+% \noindent\begin{minipage}{.85\textwidth}
+% \begin{lstlisting}[caption={Dynamic calculation.}, label={lst:dynamic-calculation}]
+% /**
+%  * Main calculation for a dynamic pricing rule.
+%  */
+% public calculate(
+% 	pricing: pricing,
+% 	metrics: metrics & indexed,
+% ): number {
 
-	const thresholds: threshold[] = pricing.prices.dynamicThresholds;
-	const startAmount = pricing.prices.dynamicStartPrice;
-	const minAmount = pricing.prices.dynamicMinimumPrice;
-	const cascaded = pricing.prices.cascadingThresholdCalculation;
+% 	const thresholds: threshold[] = pricing.prices.dynamicThresholds;
+% 	const startAmount = pricing.prices.dynamicStartPrice;
+% 	const minAmount = pricing.prices.dynamicMinimumPrice;
+% 	const cascaded = pricing.prices.cascadingThresholdCalculation;
 
-	const prices: indexed = {
-		distance: pricing.prices.dynamicDistancePrice,
-		duration: pricing.prices.dynamicMinutePrice,
-	};
+% 	const prices: indexed = {
+% 		distance: pricing.prices.dynamicDistancePrice,
+% 		duration: pricing.prices.dynamicMinutePrice,
+% 	};
 
-	// Generating calculators
-	const func = (price: number, unit: number) => price * unit;
-	const calculators = Calculator.generateCalculators(prices, metrics, func);
+% 	// Generating calculators
+% 	const func = (price: number, unit: number) => price * unit;
+% 	const calculators = Calculator.generateCalculators(prices, metrics, func);
 
-	// Walk through the thresholds to calculate total price using calculators
-	const total = Price.total(
-		metrics,
-		thresholds,
-		calculators,
-		cascaded,
-	);
+% 	// Walk through the thresholds to calculate total price using calculators
+% 	const total = Price.total(
+% 		metrics,
+% 		thresholds,
+% 		calculators,
+% 		cascaded,
+% 	);
 
-	return Math.max(
-		total + startAmount,
-		minAmount,
-	);
-}
-\end{lstlisting}
-\end{minipage}
-\end{center}
+% 	return Math.max(
+% 		total + startAmount,
+% 		minAmount,
+% 	);
+% }
+% \end{lstlisting}
+% \end{minipage}
+% \end{center}
 
 From this expression, calculators are generated. When a calculator is called without arguments, the default parameter values are used. When the calculator function is called with just the distance, the second default parameter will be the price for that distance. This property is needed for the threshold calculations that are discussed in the next section. The thresholds array contains pricing information for each successive threshold that has been surpassed.
 
 \subsection{Fixed}
 Opposed to a dynamic price, the fixed price can not be expressed as a quadratic function. However, thresholds may increase the price in steps.
 
-\begin{center}
-\noindent\begin{minipage}{.85\textwidth}
-\begin{lstlisting}[caption={Fixed calculation.}, label={lst:fixed-calculation}]
-/**
- * Calculate fixed price.
- */
-public calculate(
-	pricing: pricing,
-	metrics: metrics & indexed,
-): number {
+% \begin{center}
+% \noindent\begin{minipage}{.85\textwidth}
+% \begin{lstlisting}[caption={Fixed calculation.}, label={lst:fixed-calculation}]
+% /**
+%  * Calculate fixed price.
+%  */
+% public calculate(
+% 	pricing: pricing,
+% 	metrics: metrics & indexed,
+% ): number {
 
-	const thresholds: threshold[] = pricing.prices.fixedThresholds;
-	const cascaded = false;
+% 	const thresholds: threshold[] = pricing.prices.fixedThresholds;
+% 	const cascaded = false;
 
-	// Price for distance metric only
-	const prices: indexed = {
-		distance: pricing.prices.fixedPrice,
-		duration: 0,
-	};
+% 	// Price for distance metric only
+% 	const prices: indexed = {
+% 		distance: pricing.prices.fixedPrice,
+% 		duration: 0,
+% 	};
 
-	// Explain how the price should be calculated
-	const func = (price: number, unit?: number) => price;
+% 	// Explain how the price should be calculated
+% 	const func = (price: number, unit?: number) => price;
 
-	// Calculator for each metric using prices as default params
-	const calculators = Calculator.generateCalculators(prices, metrics, func);
+% 	// Calculator for each metric using prices as default params
+% 	const calculators = Calculator.generateCalculators(prices, metrics, func);
 
-	// Walk through the thresholds to calculate total price using calculators
-	const total = Price.total(
-		metrics,
-		thresholds,
-		calculators,
-		cascaded,
-	);
+% 	// Walk through the thresholds to calculate total price using calculators
+% 	const total = Price.total(
+% 		metrics,
+% 		thresholds,
+% 		calculators,
+% 		cascaded,
+% 	);
 
-	// Return biggest of the two
-	return Math.max(total, 0);
-}
-\end{lstlisting}
-\end{minipage}
-\end{center}
+% 	// Return biggest of the two
+% 	return Math.max(total, 0);
+% }
+% \end{lstlisting}
+% \end{minipage}
+% \end{center}
 
 \subsection{Meter}
 The meter calculator should return zero under every circumstance.
 
-\begin{center}
-\noindent\begin{minipage}{.85\textwidth}
-\begin{lstlisting}[caption={Meter calculation.}, label={lst:meter-calculation}]
-/**
- * Main calculation for a on meter calculation.
- */
-public calculate(
-	pricing: pricing,
-	metrics: metrics & indexed,
-): number {
-	return 0;
-}
-\end{lstlisting}
-\end{minipage}
-\end{center}
+% \begin{center}
+% \noindent\begin{minipage}{.85\textwidth}
+% \begin{lstlisting}[caption={Meter calculation.}, label={lst:meter-calculation}]
+% /**
+%  * Main calculation for a on meter calculation.
+%  */
+% public calculate(
+% 	pricing: pricing,
+% 	metrics: metrics & indexed,
+% ): number {
+% 	return 0;
+% }
+% \end{lstlisting}
+% \end{minipage}
+% \end{center}
 
 The on-meter calculation simply returns a breakdown for which all values are zero. This is done by convention at taxiID, so that the mobile apps can still display the products that are available, and determine the price at a later stage.
 % #endregion

@@ -13,13 +13,6 @@
 During the second phase, issues from the backlog were implemented in an iterative SCRUM process. In this chapter, the final realization of the project is evaluated. Findings and observations by considering the assumptions and limitations are discussed. During development, two main applications were written. The price calculation system, and the portal that enables users to manage pricing rules in the price calculation system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Methods and Techniques
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\section{Methods and Techniques}
-In the first sprint, a project was set up in NodeJS using Typescript. The existing projects were built using Javascript, but Typescript is a much safer language due to type checks warning programmers early on. Types also document code, expressing the intention of the programmer.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 1 - Dynamic Price Calculations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -52,13 +45,18 @@ Feedback is given by the product owner after each sprint, resulting in new requi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 5 - Thresholds}
-Thresholds, just like prioritized rules and discounts, had to be ordered, as they were independently embedded in multiple price entities that had to be synchronized consistently. A rule has pricing information for every product, and every product has many thresholds. Whenever a threshold property is mutated, every other threshold must be updated as well. Also no duplicates were allowed, and no empty price values were allowed inside the thresholds. Thresholds can independently be removed and added, where in the last case values will be copied from the last to the newly added threshold so that the user will not need to manually insert all values. The timeframes were expanded so that either hours per week were used to determine whether a rule should be triggered, or a time can be set to further restrict the begin and end date of the timeframes. Price estimations were added as a setting on all relations between all entities and rules, or discounts. Authentication is implemented in the portal so that a JWT is requested at the core system, the token stored in localstorage and used to communicate with TPS. The automatic call to generate synchronized company data is enabled for the core system, such that every time a company is created in the core system, it is also created in TPS.
+Thresholds, just like prioritized rules and discounts, should be ordered, as they are independently embedded in multiple price entities that had to be synchronized consistently. A rule has pricing information for every product, and every product has many thresholds. Whenever a threshold property is mutated, every other threshold must be updated as well. Also no duplicates were allowed, and no empty price values were allowed inside the thresholds. Thresholds can independently be removed and added, where in the last case values will be copied from the last to the newly added threshold so that the user will not need to manually insert all values. The timeframes are expanded so that either hours per week are used to determine whether a rule should be triggered, or a time should be set to further restrict the begin and end date of the timeframes. Price estimations are added as a setting on all relations between all entities and rules, or discounts. Authentication is implemented in the portal so that a JWT is requested at the core system. The token is stored in localstorage and used to communicate with TPS. The automatic call to generate synchronized company data is enabled for the core system, such that every time a company is created in the core system, it is also created in TPS.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 6 - Locations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 6 - Locations}
+An overview for locations has been added, showing points and areas. A point could be created by searching for a place in Google Places.
+
+The implementation of the Google Places
+
+
 A locations overview is added, displaying a list of areas and points.
 
 The detail page for each location is showing a map with the shape or point displayed.
@@ -106,11 +104,23 @@ Rule subrules had to be added in the rule detail page, for the user to be able t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 7 - Subrules}
-Sub rules were initially estimated to take up two days of development. Each time a sub rule was added, it had to be activated for the same apps as the parent rule. Whenever the parent rule changed its type from 'fixed' to 'dynamic', all sub rules had to be deactivated somehow. Whenever a parent rule ws deleted, all relations had to be deleted in a cascading fashion. And whenever a parent rule's priority changed, the ordering that had to be maintained had to keep the child rules separately updated. This task of micromanaging small properties, keeping data consistent, caused this task to take twice the estimated story points. The dropdown in the app detail page was
+
+
+Sub rules were initially estimated to take up two days of development. Each time a sub rule was added, it had to be activated for the same apps as the parent rule. Whenever the parent rule changed its type from 'fixed' to 'dynamic', all sub rules had to be deactivated somehow. Whenever a parent rule ws deleted, all relations had to be deleted in a cascading fashion. And whenever a parent rule's priority changed, the ordering that had to be maintained had to keep the child rules separately updated. This task of micromanaging small properties, keeping data consistent, caused this task to take twice the estimated story points.
+
+The dropdown in the app detail page was
 - on meter results removed
 - sub rules choice between frontend or backend responsibility
 - sorting trouble
--
+- Authorization
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Sprint 8 - Polishing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Sprint 8 - Polishing}
+The final sprint is dedicated to fixing bugs and making the system perform as desired.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
