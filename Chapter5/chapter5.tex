@@ -27,7 +27,7 @@ The main entities that make up a the price calculation system are visualized in 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{Treemap}
+	\includegraphics[width=0.7\textwidth]{Treemap}
 	\caption[Treemap of Components]{Treemap of entities.}
 	\label{fig:Treemap}
 \end{figure}
@@ -89,15 +89,12 @@ The priority for discounts and rules can be defined in the priority input field,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{Locations}
-Locations have been defined as either points or areas. In technical terms, this is sound. For an average user, this does not sound intuitive. That is why locations are named as two groups: locations and areas. The technical solution in matching points was initially based on points being distinct coordinate pairs, which could only be precisely matched if the user selected a location from the location service that was used, like Google Places. The locations found in searches would exactly match the coordinate pairs, as that is where the points are originated from. For practical purposes, a passenger may drop the pin on a map, which would have very little to no chance of matching the exact coordinate pair. That is why all locations are stored as polygons initially, with a coordinate pair denoting the centroid of the location. The polygons may be imported, drawn and edited by the user, depending on the location type.
+Locations have been defined as either points or areas. In technical terms, this is sound. For an average user, this does not sound intuitive. That is why locations are named as two groups: locations and areas. The technical solution in matching points was initially based on points being distinct coordinate pairs, which could only be precisely matched if the user selected a location from the location service that was never changed, like Google Places. The locations found in searches would exactly match the coordinate pairs, as that is where the points are originated from. But when a passenger drops a pin on the map, it would have very little to no chance of matching the exact coordinate pair. That is why all locations are stored as polygons initially, with a coordinate pair denoting the centroid of the location. The polygons may be imported, drawn and edited by the user in a later stage.
 
-%###############################################################################
-% LOCATION SCREENSHOT
-%###############################################################################
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{Amsterdam}
-	\caption[Amsterdam Drawn Polygon]{Amsterdam - A single location comprised of multiple locations.}
+	\includegraphics[width=0.9\textwidth]{AmsterdamShadow}
+	\caption[Amsterdam Drawn Polygon]{Amsterdam - A single area comprised of multiple locations.}
 	\label{fig:Amsterdam Drawn Polygon}
 \end{figure}
 
@@ -138,27 +135,10 @@ private static fromPoint(
 \end{minipage}
 \end{center}
 
-
-
-- import
-
-The distinction between points and areas is made in the sense that points are small locations a person could point at, like a house, hotel or a shop. Area's are bigger and more complex locations, like Schiphol or The Hague.
-
-When a point is created, a user searches for a place in Google Places, gives it a name and a descriptor, and saves it as if it were a string of characters that would be matched within the system.
-
-When an existing point is selected, the actual polygon is showing on the map.
+When a point is created, a user searches for a place in Google Places, gives it a name and a descriptor, and saves it as if it were a string of characters that would be matched within the system. After a point has been created, it may be modified by dragging the indices of the polygon. New polygons can be added by double clicking on the map, and edit mode can be stopped by right clicking on the map.
 
 \subsection{Area}
-The area detail page contains
-The map allows users to have more freedom in describing the location.
-
-- import
-- edit
--
-
-When an area is created, the user has the freedom to start drawing on
-
-
+The area detail page contains a map right at the creation screen. A search bar allows users to find a location, and add it to the map. The user may draw and modify polygons before the location is saved. The biggest difference between locations and areas is the search service that powers the autocomplete search. When a location is selected in the area search, a polygon is imported from OpenStreetMap as seen in Appendix \ref{appendix:slides_6}. Although this feature is great because it gives users the choice to avoid drawing polygons all together. The browser will have a hard time rendering all the indices of such complex shapes.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -166,32 +146,10 @@ When an area is created, the user has the freedom to start drawing on
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{Apps}
-When a new rule or discount is saved, it is not activated by default. The app detail page allows rules and discounts to be associated with an application, upon which they become active. For pricing rules, the isFixed and isAllowedOnMeter settings may be set.
-
-%###############################################################################
-% APPS SCREENSHOT
-%###############################################################################
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.9\textwidth]{Apps}
-	\caption[Apps Detail Page]{Apps Detail Page.}
-	\label{fig:Apps Detail Page}
-\end{figure}
-
+After the user has created locations, products, special rates and rules, nothing will happen. When a new rule or discount is saved, it is not activated by default. The app detail page allows rules and discounts to be associated with an application, upon which they become active. For pricing rules, extra settings may be set that allow applications to show price estimations, or calculate the trip price using a taxi meter. From that point, the user is able to order a ride using the companies' booking app to test whether the expected outcome is the consequence of the changes.
 % #endregion
 
 \section{Conclusion on The Portal}
 \[\textit{Is it possible to communicate the inner workings of the system through the user interface?}\]\hfill
-
-% reasoning
-Pricing rules cannot be plotted in a graph, yet this mantra in combination with preattentive attributes could be put to good use in reducing the cognitive overhead while reasoning about pricing rules.
-
+The sidebar reflects which major concepts exist within the portal: Products, Pricing, Locations, and Apps. Composite views reflect the coherence that exists between related entities, while separation of independent entities reduce the cognitive overhead while reasoning about pricing rules. Spatial grouping on the page hint which properties belong to which entity, for which all human beings have a natural intuition. Manual activation and sorting of rules force the user to actively decide whether a rule should match, which can be tested immediately using the companies' booking app.
 % essential concepts
-
-
-% predicting outcome
-
-
-% Which backend concepts are essential to display in the frontend?
-% Which design practices allow users to understand coherence of different elements that make up a rule?
-% How should a user know what the outcome of his interactions with the system are?
