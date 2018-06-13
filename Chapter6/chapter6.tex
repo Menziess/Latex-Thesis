@@ -17,115 +17,53 @@ During the second phase, issues from the backlog were implemented in an iterativ
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 1 - Dynamic Price Calculations}
-A basic dynamic price calculation system was implemented in the first sprint, aiming to deliver a first version of the price calculation system, including fake data generators, validation of models, a single service to determine the distance and duration of a ride, rules that contain pricing information, a calculation that produces the total price of a ride using a companies rules, a formatter that produces an expected response, and tests for all of the functionalities. Before the beginning of the sprint, different techniques and project structures have been tried, providing a head start.
+A basic dynamic price calculation system was implemented in the first sprint, aiming to deliver a first version of the price calculation system, including fake data generators, validation of models, a single service to determine the distance and duration of a ride, rules that contain pricing information, a calculation that produces the total price of a ride using a companies rules, a formatter that produces an expected response, and tests for all of the functionalities. See Appendix \ref{appendix:slides_1} for the sprint review. Before the beginning of the sprint, different techniques and project structures have been tried, providing a head start.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 2 - Authentication and Authorization
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 2 - Authentication and Authorization}
-Company pricing rules can be used by applications so that each application uses a subset of the pricing rules. For this reason, TPS requires two identifiers to make a price calculation using rules for a particular company application: a companyId and a daAppInstallId. Authentication has been implemented in this sprint using JSON Web Tokens that are signed by the core system. This implementation saves a lot of maintenance in relation to the TPS project, and other projects that adopt this token format. The token stores two important identifiers that are structurally used in taxiId projects: companyId and daAppInstallId. Companies have one country assigned by default, which determines the currency and VAT percentage. In the breakdown, the VAT percentage is calculated from the actual price, as VAT is included. Discounts are part of the breakdown, being a percentage of the route price, or a fixed price. On top of that, it is possible that a company application uses rules that are related to a debtor, instead of its own subset of rules. These basic steps have been implemented during this sprint. Finally, the project is deployed to a staging environment so that the system could be used by the applications in the staging environment for testing.
+Company pricing rules can be used by applications so that each application uses a subset of the pricing rules. For this reason, TPS requires two identifiers to make a price calculation using rules for a particular company application: a companyId and a daAppInstallId. In Appendix \ref{appendix:appendix:slides_2_authentication} a proposal has been made to solve authentication for TPS. Authentication has been implemented in this sprint using JSON Web Tokens that are signed by the core system. This implementation saves a lot of maintenance for TPS and other projects that adopt this token format in the future. The token stores two important identifiers that are structurally used in taxiId projects: companyId and daAppInstallId. Companies have one country assigned by default, which determines the currency and VAT percentage. In the breakdown, the VAT percentage is calculated from the actual price, as VAT is included. Discounts are part of the breakdown, being a percentage of the route price, or a fixed price. Another proposal was made to format the breakdown correctly, as shown in Appendix \ref{appendix:appendix:slides_2_breakdown}. On top of that, it is possible that a company application uses rules that are related to a debtor, instead of its own subset of rules. These basic steps have been implemented during this sprint, as shown in the sprint review Appendix \ref{appendix:slides_2}. Finally, the project is deployed to a staging environment so that the system could be used by the applications in the staging environment for testing.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 3 - Products and Pricing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 3 - Products and Pricing}
-At this point the system is fully operational, but company and daAppInstall information has to be inserted in the database manually. An endpoint is made that inserts a full company setup into the database so that prices can be calculated with five products by default. No wireframes were made beforehand, adding to the preliminary tasks of setting up the portal project. Angular in conjunction with Covalents UI platform is used to make the user interface, consisting of an overview and detail page for products and pricing rules. The pricing rules overview shows pricing information for each product that a company has. Whenever a product is added, the pricing information for that new project is automatically added to each rule. Conversely, whenever a new rule is added, all the existing products get their pricing information added to the new rule. On top of that, threshold rules can be added or deleted for distances and durations, making this particular view very complex. This final task is only operational in the backend, so the task of displaying thresholds in the frontend is moved to the next sprint.
+At this point the system is fully operational, but company and daAppInstall information has to be inserted in the database manually. An endpoint is made that inserts a full company setup into the database so that prices can be calculated with five products by default. No wireframes were made beforehand, adding to the preliminary tasks of setting up the portal project. Angular in conjunction with Covalents UI platform is used to make the user interface, consisting of an overview and detail page for products and pricing rules. The pricing rules overview shows pricing information for each product that a company has. Whenever a product is added, the pricing information for that new project is automatically added to each rule. Conversely, whenever a new rule is added, all the existing products get their pricing information added to the new rule. On top of that, threshold rules can be added or deleted for distances and durations, making this particular view very complex. This final task is only operational in the backend, so the task of displaying thresholds in the frontend is moved to the next sprint. Appendix \ref{appendix:slides_3} shows some screenshots of the earlier implementations.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 4 - Apps and Timeframes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 4 - Apps and Timeframes}
-Feedback is given by the product owner after each sprint, resulting in new requirements and modifications to requirements. A functionality is desired that enables users to sort pricing rules and special rates (discounts), by dragging the rows in a table to the correct positions. Whenever a priority changes, all subsequent rows need to be updated in order to maintain a consistent prioritized list without duplicate priorities. Another requirement will enable products to be returned in the breakdown as 'on-meter' results. This means that, whenever a destination or departure location is undefined, the system will return products without a price, so that the apps can assign a price later, but will still be aware of the available products. A view is added that displays all apps of a company, and a detail page is added in which rules and discounts can be associated with those apps. This detail page is created in three short iterations. All titles, labels and other texts are replaced by references to a localization api for internationalization purposes as seen in Figure \ref{fig:Architecture}. Timeframe components are added to multiple views, in which hours per week can be specified between two dates.
+Feedback is given by the product owner after each sprint, resulting in new requirements and modifications to requirements. A functionality is desired that enables users to sort pricing rules and special rates, by dragging the rows in a table to the correct positions. Whenever a priority changes, all subsequent rows need to be updated in order to maintain a consistent prioritized list without duplicate priorities. Another requirement will enable products to be returned in the breakdown as 'on-meter' results. This means that, whenever a destination or departure location is undefined, the system will return products without a price, so that the apps can assign a price later, but will still be aware of the available products. A view is added that displays all apps of a company, and a detail page is added in which rules and discounts can be associated with those apps. This detail page is created in three short iterations. All titles, labels and other texts are replaced by references to a localization api for internationalization purposes. Timeframe components are added to multiple views, in which hours per week can be specified between two dates. For this feature, a proposal was made that is shown in Appendix \ref{appendix:slides_4}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 5 - Thresholds
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 5 - Thresholds}
-Thresholds, just like prioritized rules and discounts, should be ordered, as they are independently embedded in multiple price entities that had to be synchronized consistently. A rule has pricing information for every product, and every product has many thresholds. Whenever a threshold property is mutated, every other threshold must be updated as well. Also no duplicates were allowed, and no empty price values were allowed inside the thresholds. Thresholds can independently be removed and added, where in the last case values will be copied from the last to the newly added threshold so that the user will not need to manually insert all values. The timeframes are expanded so that either hours per week are used to determine whether a rule should be triggered, or a time should be set to further restrict the begin and end date of the timeframes. Price estimations are added as a setting on all relations between all entities and rules, or discounts. Authentication is implemented in the portal so that a JWT is requested at the core system. The token is stored in localstorage and used to communicate with TPS. The automatic call to generate synchronized company data is enabled for the core system, such that every time a company is created in the core system, it is also created in TPS.
+Thresholds, just like prioritized rules and discounts, should be ordered, as they are independently embedded in multiple price entities that are to be synchronized consistently. A rule has pricing information for every product, and every product has many thresholds. Whenever a threshold property is mutated, every other threshold must be updated as well. Also no duplicates are allowed, and no empty price values are allowed inside the thresholds. Thresholds can independently be removed and added, where in the last case values will be copied from the last to the newly added threshold so that the user will not need to manually insert all values. The timeframes are expanded so that either hours per week are used to determine whether a rule should trigger, or a time should be set to further restrict the begin and end date of the timeframes. Price estimations are added as a setting on all relations between all entities and rules, or discounts. Authentication is implemented in the portal so that a JWT is requested at the core system. The token is stored in localstorage and used to communicate with TPS. The automatic call to generate synchronized company data is enabled for the core system, such that every time a company is created in the core system, it is also created in TPS.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 6 - Locations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 6 - Locations}
-An overview for locations has been added, showing points and areas. A point could be created by searching for a place in Google Places.
-
-The implementation of the Google Places
-
-
-A locations overview is added, displaying a list of areas and points.
-
-The detail page for each location is showing a map with the shape or point displayed.
-
-These views were split up in two subcategories to resemble smaller and bigger locations.
-
-A search bar allows users to find addresses, provinces, cities, and allows a polygon to be drawn around them. This polygon can be edited on the map.
-
-- query
-	- destination
-	- departure
-- overview
-	- locations
-	- areas
-- new
-	- locations
-		- search (google places)
-		- addresses
-		- name
-		- locations types
-	- areas
-		- search (osm)
-		- map
-			- drawing polygons
-		- name
-		- locations types
-- edit
-	- locations
-		- map
-		  - editing polygons
-		- name
-		- locations types
-	- areas
-		- search (osm)
-		- map
-			- drawing polygons
-			- editing polygons
-		- name
-		- locations types
-
-Rule subrules had to be added in the rule detail page, for the user to be able to edit multiple rules at once. This issue was not resolved during this sprint, and was moved to the next sprint.
+An overview for locations has been added, showing points and areas. A point could be created by searching for a place in Google Places. An area is a larger, more complex area, that should be imported as a more rich polygon. An implementation using OpenStreetMap was able to import complex locations and plot them on a Google Map. Appendix \ref{appendix:slides_6} shows the distinction between the two import functions. After locations have been imported, the user is able to edit the shapes and properties of the location. Because the OpenStreetMap polygons contain far too many indices, the user is confronted with a shape that would take far too long to modify. For this reason, the OpenStreetMap feature was removed from the project. In exchange, the Google Places service point is used as a basis to draw a polygon around. The size of the polygon that is drawn depends on the viewport that Google Places provides, so that larger areas will import larger polygons. Rule subrules had to be added in the rule detail page, for the user to be able to edit multiple rules at once. This issue was not resolved during this sprint, and was moved to the next sprint.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 7 - Subrules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 7 - Subrules}
-
-
-Sub rules were initially estimated to take up two days of development. Each time a sub rule was added, it had to be activated for the same apps as the parent rule. Whenever the parent rule changed its type from 'fixed' to 'dynamic', all sub rules had to be deactivated somehow. Whenever a parent rule ws deleted, all relations had to be deleted in a cascading fashion. And whenever a parent rule's priority changed, the ordering that had to be maintained had to keep the child rules separately updated. This task of micromanaging small properties, keeping data consistent, caused this task to take twice the estimated story points.
-
-The dropdown in the app detail page was
-- on meter results removed
-- sub rules choice between frontend or backend responsibility
-- sorting trouble
-- Authorization
+Sub rules were initially estimated to take up two days of development. Each time a sub rule was added, it had to be activated for the same apps as the parent rule. Whenever the parent rule changed its type from 'fixed' to 'dynamic', all sub rules had to be deactivated somehow. Whenever a parent rule ws deleted, all relations had to be deleted in a cascading fashion. And whenever a parent rule's priority changed, the ordering that had to be maintained had to keep the child rules separately updated. This task of micromanaging small properties, keeping data consistent, caused this task to take twice the estimated story points. Appendix \ref{appendix:slides_7} shows the first implementation of subrules. An authorization mixin was added so resources no longer have to be restricted to certain owners manually.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sprint 8 - Polishing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Sprint 8 - Polishing}
-The final sprint is dedicated to fixing bugs and making the system perform as desired.
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Result
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\section{Result}
-\mynote{Final Result (realization)}
+The final major feature changed the way users were able to access predefined locations. An extra tab shows relevant locations defined by taxiID that can be copied and modified in a preview screen. This allows users to set up their locations more quickly. The remaining time is dedicated to fixing bugs and processing feedback.
