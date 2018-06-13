@@ -12,7 +12,7 @@
 % #region
 \chapter{Trip Price Calculation System}
 \section{Introduction}
-The term 'rule-based' in the title caters to the proposition that trip price calculations hinge on information defined as something called a rule. This chapter contains resolutions that are less based on empirical evidence and more on the input of the product owner or a balancing of arguments that support functionality, usability, transparency, and other important quality attributes. The important questions in regard to the implementation of the backend are answered, resulting in a system that deterministically calculates trip prices using rules that are restricted by user defined criteria.
+The term 'rule-based' in the title caters to the proposition that trip price calculations hinge on information defined as something called a rule. This chapter contains resolutions that are less based on empirical evidence and more on the input of the product owner and a balancing of arguments that support important quality attributes. The questions in regard to the implementation of the backend are answered, resulting in a system that deterministically calculates trip prices using rules that are restricted by user defined criteria.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20,7 +20,7 @@ The term 'rule-based' in the title caters to the proposition that trip price cal
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % #region
 \section{The System Structure}
-A deterministic algorithm always produces the exact same output when given a certain input. This concept is paramount in respect of a trip price calculation. Not only is it strange when two passengers, booking the same trip under the same conditions, have to pay different prices. It is also impossible to guarantee the correctness of the calculation when certain parts of the computation introduce variation through side effects. This does not mean that the criteria are not allowed to change. It does mean that given an input and a set of criteria, the output should be the same every single time. Parts of the system may execute operations asynchronously and out of order, which is possible to contain. But there are factors that can not be controlled, such as computations of external services at different times. These factors are side effects that are out of the scope of containment. The result of such services will be seen as the input to a deterministic function, which in contrast should be deterministic. In order to achieve this, the calculation logic should manage state flawlessly. In the object-oriented programming (OOP) paradigm, state is managed through encapsulation. Object instances manage their internal state, and expose public methods to allow certain changes to be made on those instances. The functional programming (FP) paradigm treats computations as evaluations of mathematical functions. This aspect fits perfectly with the goal of reaching determinism. Using FP in conjunction with OOP, a higher order structure may be implemented using classes and encapsulation for more flexibility, while minimizing or eliminating state mutations through pure functions. In the previous chapter, the second proof of concept was mentioned that separates the calculation logic from the Loopback framework, as shown in Figure \ref{fig:Class Diagram}. The isolation of the calculation and direction classes result in a more robust system.
+In the previous chapter, the second proof of concept was mentioned that separates the calculation logic from the Loopback framework, as shown in Figure \ref{fig:Class Diagram}. The isolation of the calculation and direction classes result in a more robust system. The Price object is composed of a Directions and a Calculator Class, both of which expose only one method, directions and calculate respectively. The behavior of the gathering of directions information and calculation of prices is encapsulated in different subclasses using the strategy pattern as described in \cite{gof}. Allowing behavior to change on demand. The entities stored in the database are conceptualized in Figure \ref{fig:Data Model}, and will be referenced throughout this chapter. Chapter three concludes that MongoDB is the proper database for this system. MongoDB allows relations to be embedded in the parent's document, which is useful for child entities, like timeframes, that are never shared.
 
 \begin{figure}[H]
 	\centering
@@ -29,16 +29,12 @@ A deterministic algorithm always produces the exact same output when given a cer
 	\label{fig:Class Diagram}
 \end{figure}
 
-The Price object is composed of a Directions and a Calculator Class, both of which expose only one method, directions and calculate respectively. The behavior of the gathering of directions information and calculation of prices is encapsulated in different subclasses using the strategy pattern as described in \cite{gof}. Allowing behavior to change on demand. The entities stored in the database are conceptualized in Figure \ref{fig:Data Model}, and will be referenced throughout this chapter.
-
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\textwidth]{DataModel}
 	\caption[Data Model]{Conceptual data model showing database entity relations.}
 	\label{fig:Data Model}
 \end{figure}
-
-Chapter three concludes that MongoDB is the proper database for this system. MongoDB allows relations to be embedded in the parent's document, which is useful for child entities, like timeframes, that are never shared.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -112,7 +108,7 @@ The requirements state that the user must be able to define a start and end time
 The legacy system takes a straight forward approach of storing time in a relational database. The begin and end of a window are stored in a record that is related to a parent timeframe entity. The timeframe has many windows that could contain a timestamp. It either finds one or many time windows that contain the timeframe. This approach covers all possibilities imaginable. The downside of this approach is the complexity to interpret or mutate the value of the timeframe.
 
 \subsubsection{The New Approach}
-For this reason, a proposal was made to implement timeframes in a way that let users choose to describe each hour of the week, being stored as a bit map. The windows could be decreased to half an hour, resulting in twice as many bits. Three implementations have been tested, where the bit string format offered the best outcome, as seen in \ref{appendix:slides_4}. A timeframe is stored having two ISODates (international standard: ISO 8601), and a bit string representing the schedule for which the insert statement is shown in Listing \ref{lst:new-timeframe}.
+For this reason, a proposal was made to implement timef	rames in a way that let users choose to describe each hour of the week, being stored as a bit map. The windows could be decreased to half an hour, resulting in twice as many bits. Three implementations have been tested, where the bit string format offered the best outcome, as seen in \ref{appendix:slides_4}. A timeframe is stored having two ISODates (international standard: ISO 8601), and a bit string representing the schedule for which the insert statement is shown in Listing \ref{lst:new-timeframe}.
 
 \begin{center}
 \noindent\begin{minipage}{.85\textwidth}
@@ -283,112 +279,112 @@ The generateCalculators method generates a function for each metric with default
 \subsection{Dynamic}
 A dynamic calculation is performed on the metrics: distance and duration, having units: kilometer and minute. A straight forward lambda expresses that the units are multiplied by the price.
 
-% \begin{center}
-% \noindent\begin{minipage}{.85\textwidth}
-% \begin{lstlisting}[caption={Dynamic calculation.}, label={lst:dynamic-calculation}]
-% /**
-%  * Main calculation for a dynamic pricing rule.
-%  */
-% public calculate(
-% 	pricing: pricing,
-% 	metrics: metrics & indexed,
-% ): number {
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
+\begin{lstlisting}[caption={Dynamic calculation.}, label={lst:dynamic-calculation}]
+/**
+ * Main calculation for a dynamic pricing rule.
+ */
+public calculate(
+	pricing: pricing,
+	metrics: metrics & indexed,
+): number {
 
-% 	const thresholds: threshold[] = pricing.prices.dynamicThresholds;
-% 	const startAmount = pricing.prices.dynamicStartPrice;
-% 	const minAmount = pricing.prices.dynamicMinimumPrice;
-% 	const cascaded = pricing.prices.cascadingThresholdCalculation;
+	const thresholds: threshold[] = pricing.prices.dynamicThresholds;
+	const startAmount = pricing.prices.dynamicStartPrice;
+	const minAmount = pricing.prices.dynamicMinimumPrice;
+	const cascaded = pricing.prices.cascadingThresholdCalculation;
 
-% 	const prices: indexed = {
-% 		distance: pricing.prices.dynamicDistancePrice,
-% 		duration: pricing.prices.dynamicMinutePrice,
-% 	};
+	const prices: indexed = {
+		distance: pricing.prices.dynamicDistancePrice,
+		duration: pricing.prices.dynamicMinutePrice,
+	};
 
-% 	// Generating calculators
-% 	const func = (price: number, unit: number) => price * unit;
-% 	const calculators = Calculator.generateCalculators(prices, metrics, func);
+	// Generating calculators
+	const func = (price: number, unit: number) => price * unit;
+	const calculators = Calculator.generateCalculators(prices, metrics, func);
 
-% 	// Walk through the thresholds to calculate total price using calculators
-% 	const total = Price.total(
-% 		metrics,
-% 		thresholds,
-% 		calculators,
-% 		cascaded,
-% 	);
+	// Walk through the thresholds to calculate total price using calculators
+	const total = Price.total(
+		metrics,
+		thresholds,
+		calculators,
+		cascaded,
+	);
 
-% 	return Math.max(
-% 		total + startAmount,
-% 		minAmount,
-% 	);
-% }
-% \end{lstlisting}
-% \end{minipage}
-% \end{center}
+	return Math.max(
+		total + startAmount,
+		minAmount,
+	);
+}
+\end{lstlisting}
+\end{minipage}
+\end{center}
 
 From this expression, calculators are generated. When a calculator is called without arguments, the default parameter values are used. When the calculator function is called with just the distance, the second default parameter will be the price for that distance. This property is needed for the threshold calculations that are discussed in the next section. The thresholds array contains pricing information for each successive threshold that has been surpassed.
 
 \subsection{Fixed}
 Opposed to a dynamic price, the fixed price can not be expressed as a quadratic function. However, thresholds may increase the price in steps.
 
-% \begin{center}
-% \noindent\begin{minipage}{.85\textwidth}
-% \begin{lstlisting}[caption={Fixed calculation.}, label={lst:fixed-calculation}]
-% /**
-%  * Calculate fixed price.
-%  */
-% public calculate(
-% 	pricing: pricing,
-% 	metrics: metrics & indexed,
-% ): number {
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
+\begin{lstlisting}[caption={Fixed calculation.}, label={lst:fixed-calculation}]
+/**
+ * Calculate fixed price.
+ */
+public calculate(
+	pricing: pricing,
+	metrics: metrics & indexed,
+): number {
 
-% 	const thresholds: threshold[] = pricing.prices.fixedThresholds;
-% 	const cascaded = false;
+	const thresholds: threshold[] = pricing.prices.fixedThresholds;
+	const cascaded = false;
 
-% 	// Price for distance metric only
-% 	const prices: indexed = {
-% 		distance: pricing.prices.fixedPrice,
-% 		duration: 0,
-% 	};
+	// Price for distance metric only
+	const prices: indexed = {
+		distance: pricing.prices.fixedPrice,
+		duration: 0,
+	};
 
-% 	// Explain how the price should be calculated
-% 	const func = (price: number, unit?: number) => price;
+	// Explain how the price should be calculated
+	const func = (price: number, unit?: number) => price;
 
-% 	// Calculator for each metric using prices as default params
-% 	const calculators = Calculator.generateCalculators(prices, metrics, func);
+	// Calculator for each metric using prices as default params
+	const calculators = Calculator.generateCalculators(prices, metrics, func);
 
-% 	// Walk through the thresholds to calculate total price using calculators
-% 	const total = Price.total(
-% 		metrics,
-% 		thresholds,
-% 		calculators,
-% 		cascaded,
-% 	);
+	// Walk through the thresholds to calculate total price using calculators
+	const total = Price.total(
+		metrics,
+		thresholds,
+		calculators,
+		cascaded,
+	);
 
-% 	// Return biggest of the two
-% 	return Math.max(total, 0);
-% }
-% \end{lstlisting}
-% \end{minipage}
-% \end{center}
+	// Return biggest of the two
+	return Math.max(total, 0);
+}
+\end{lstlisting}
+\end{minipage}
+\end{center}
 
 \subsection{Meter}
 The meter calculator should return zero under every circumstance.
 
-% \begin{center}
-% \noindent\begin{minipage}{.85\textwidth}
-% \begin{lstlisting}[caption={Meter calculation.}, label={lst:meter-calculation}]
-% /**
-%  * Main calculation for a on meter calculation.
-%  */
-% public calculate(
-% 	pricing: pricing,
-% 	metrics: metrics & indexed,
-% ): number {
-% 	return 0;
-% }
-% \end{lstlisting}
-% \end{minipage}
-% \end{center}
+\begin{center}
+\noindent\begin{minipage}{.85\textwidth}
+\begin{lstlisting}[caption={Meter calculation.}, label={lst:meter-calculation}]
+/**
+ * Main calculation for a on meter calculation.
+ */
+public calculate(
+	pricing: pricing,
+	metrics: metrics & indexed,
+): number {
+	return 0;
+}
+\end{lstlisting}
+\end{minipage}
+\end{center}
 
 The on-meter calculation simply returns a breakdown for which all values are zero. This is done by convention at taxiID, so that the mobile apps can still display the products that are available, and determine the price at a later stage.
 % #endregion
@@ -448,7 +444,7 @@ The Typescript type definitions reveal that calculation is of type Function, and
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Determinism}
-This recursiveThreshold static method is called for every price related calculation. It is honest about its parameters, and does not depend on external state. It is pure, because it does not depend on state outside of its scope, and does not mutate the data that is passed to it. The function is deterministic because when given a valid input, it produces the same output every single time. The method merely executes the passed function with different arguments. The base case will therefore always yield the default result. The elegant nature of recursion counts as an inductive proof that the procedure will work for each successive step, which works in harmony with the uncertain amount of thresholds that need to be processed. Because the method is pure, it can easily be tested. Unit tests have been written using the Mocha framework \cite{mocha} and the Chai assertion library \cite{chai}, to cover the most important aspects of the system, making sure that the price calculation logic keeps producing the same outputs. Everything that has been noted so far, should apply to all the functionalities in the calculation system to keep the process deterministic. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. The current setup of calculation and directions subclasses allow for extensibility with respect to the open-closed principle. Metrics, calculators, threshold types, price definitions, and other aspects of the calculation may be added as long as the same interfaces are used. State and mutations should be fully encapsulated using OOP patterns, leaving only static functions exposed. Functions should be written in a functional style so that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. Typescript plays an important role in mixing OOP and FP together through type definitions. This deterministic nature of TPS will mean that a list of breakdowns as result is always guaranteed.
+An algorithm is deterministic if it always produces the same output given a certain input. This concept is paramount when calculating prices. This does not imply that a criterion is not allowed to change. It does mean that given a certain input and a certain set of criteria, the output should be the same every single time. External state or time are crucial factors that determine whether a function can be deterministic. The concept of determinism is further explained in a later chapter. In the object-oriented programming (OOP) paradigm, state is managed through encapsulation. Object instances manage their internal state, and expose public methods to allow certain changes to be made on those instances. The functional programming (FP) paradigm treats computations as evaluations of mathematical functions. This aspect fits perfectly with the goal of reaching determinism. Using FP in conjunction with OOP, a higher order structure may be implemented using classes and encapsulation for more flexibility, while minimizing or eliminating state mutations through pure functions. Parts of the system may execute operations asynchronously, emphasizing the importance of managing state flawlessly. There are factors that can not be controlled also, such as computations of external services at different times. For example, if a passenger books a ride, and Google's algorithm gives a different estimated distance and duration, the price may go up or down. These factors are side effects that are out of the scope of containment. Side effects that can be contained should be eliminated as much as possible. Professor Frisby demonstrates side effects in \cite[Chapter~3]{Frisby}. The functions slice and splice both being pure and impure respectively, have equal results in the first operation on an array. But the second time the method is called, splice returns different results because of side effects. The recursiveThreshold static method is called for every price related calculation. It is honest about its parameters, and does not depend on external state. It is pure, because it does not depend on state outside of its scope, and does not mutate the data that is passed to it. The function is deterministic because when given a valid input, it produces the same output every single time. The method merely executes the passed function with different arguments. The base case will therefore always yield the default result. The elegant nature of recursion counts as an inductive proof that the procedure will work for each successive step, which works in harmony with the uncertain amount of thresholds that need to be processed. Because the method is pure, it can easily be tested. Unit tests have been written using the Mocha framework \cite{mocha} and the Chai assertion library \cite{chai}, to cover the most important aspects of the system, making sure that the price calculation logic keeps producing the same outputs. Everything that has been noted so far, should apply to all the functionalities in the calculation system to keep the process deterministic. To further reduce the chances of introducing bugs, some additional techniques could be used, including Software Validation techniques. Linting is the process of running a program that will analyse code for potential errors. Static analysis tools may be used to find code smells. Continuous Integration may be implemented to ensure that valid builds are deployed. The current setup of calculation and directions subclasses allow for extensibility with respect to the open-closed principle. Metrics, calculators, threshold types, price definitions, and other aspects of the calculation may be added as long as the same interfaces are used. State and mutations should be fully encapsulated using OOP patterns, leaving only static functions exposed. Functions should be written in a functional style so that no state is changed outside of the function scope, and that the function is absolutely honest about its parameters and return values. Typescript plays an important role in mixing OOP and FP together through type definitions. This deterministic nature of TPS will mean that a list of breakdowns as result is always guaranteed.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -531,8 +527,4 @@ The first proposal has been implemented, resulting in an operational trip price 
 % #region
 \section{Conclusion on Trip Price Calculation System}
 \[\textit{Which logic and data is required in the backend to reliably calculate a trip price?}\]\hfill
-
-\mynote{Conclusion for chapter 4}
-% How can determinism of price computations be guaranteed?
-% Which criteria determine whether rules match?
-% In what way can the three original pricing rule types be implemented? (fixed, dynamic, and threshold prices)
+Locations should only be used as criteria if the relevant location coordinates are provided by the booking app. Timeframes, passenger count, vehicle types, on-meter and estimation options always apply as criteria by which a rule is matched. The original rules are implemented to each have their own classes, producing deterministic higher order functions that calculate the final trip price, using functional programming techniques.
