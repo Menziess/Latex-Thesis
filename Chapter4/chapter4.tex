@@ -274,7 +274,7 @@ public static generateCalculators(
 \end{minipage}
 \end{center}
 
-The generateCalculators method generates a function for each metric with default parameters. This method is called in every calculator class to create consistent first-class functions. For the implementation and differences between calculators see Appendix \ref{appendix:slides_3}, slides 8-10.
+The generateCalculators method generates a function for each metric with default parameters. This method is called in every calculator class to create consistent first-class functions. For the implementation of the different calculators described in the subsections below, see Appendix \ref{appendix:slides_3}, slides 8-10.
 
 \subsection{Dynamic}
 A dynamic calculation is performed on the metrics: distance and duration, having units: kilometer and minute. A straight forward lambda expresses that the units are multiplied by the price. From this expression, calculators are generated. When a calculator is called without arguments, the default parameter values are used. When the calculator function is called with just the distance, the second default parameter will be the price for that distance. This property is needed for the threshold calculations that are discussed in the next section. The thresholds array contains pricing information for each successive threshold that has been surpassed.
