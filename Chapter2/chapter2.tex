@@ -236,9 +236,8 @@ A method named $\$geoWithin$ can be used to return points that are contained wit
 \begin{center}
 \noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Select points contained in polygon, and all polygons containing a point in MongoDB.}, label={lst:nosql-pts-in-poly}]
-	// All points contained in polygon
-	var p = db.polygon.find({})
 
+	// All points contained in a polygon
 	db.point.find({
 		shape: {
 			$geoWithin: {
@@ -253,9 +252,7 @@ A method named $\$geoWithin$ can be used to return points that are contained wit
 		}
 	})
 
-	// All polygons containing point
-	var p = db.point.findOne({ coordinates: [5, 5] })
-
+	// All polygons containing a point
 	db.polygon.find({
 		shape: {
 			$geoIntersects: {

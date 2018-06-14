@@ -1,53 +1,10 @@
 % ************************** Thesis Abstract *****************************
 % *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes, or Math in Paper Title or Abstract.
-%
-% Use buzzwords
-% Don't use jargon
-% Generic to specific
-% Pose questions
-%
-% In de samenvatting komt te staan:
-% - Onderwerp-informatie;
-% - probleemomschrijving/-analyse;
-% - probleemvraag; - onderzoeksmethode;
-% - de belangrijkste resultaten kort samengevat;
-% - de (belangrijkste) conclusies.
-%
+
 \begin{abstract}
-Taxi companies have been delivering booking apps as a result of passengers' raising expectations of being presented a list of available cabs with corresponding prices on demand. YourDriverApp is a new white label application developed by taxiID that is set to provide this solution to taxi companies worldwide. Despite the fact that YourDriverApp is new, it still depends on the price calculation functionality of a legacy system, which was not designed with internationalization in mind.
+Taxi companies have been delivering booking apps in response to passengers' raising expectations of being presented a list of available cabs with corresponding prices, on demand. YourDriverApp is a new white label application developed by taxiID that is set to provide this solution to taxi companies worldwide. Despite the fact that YourDriverApp is new, it still depends on the price calculation functionality of a legacy system, which was not designed with internationalization in mind. Besides that fact that business information has to be stored in a platform that has no relation with YourDriverApp, the lack of internationalization capabilities poses a problem. Company administrators are obligated to define trip prices for particular postal codes and address combinations. But how would these prices be defined in a country that has no postal code system? The aim of this study is to determine how a generic trip price calculation system can be implemented in a way that is usable by companies located anywhere in the world. Research questions are answered by gathering information available in the public domain, after which the acquired knowledge is translated to proposals and proof of concepts.
 
-
-
-The resulting problem
-
-It was created to process postal codes and addresses to determine the price of a trip, which is impossible for countries without a postal code system.
-
-The price calculation system depends on addresses and postal codes. Some clients live in countries that do not have such a system to begin with.
-
-
-
-The problem is that YDA depends on a legacy systems price calculation functionality
-
-
-
-on the screen and a potential passenger is presented a list of available vehicle types that may take the passenger to the desired destination.
-and prices that correspond with the distance and
-needs its own price calculation system
-
-The aim of this study is to determine how such a system can be implemented in a way that is usable by companies all over the world
-
-The research questions are answered by gathering information available in the public domain.
-
-Applying proposals derived from this research
-
-has been researched. Information available in the public domain has been used to answer empirical questions, from which proposals based on good arguments have been made, and
-
-
-A purely geometrical interpretation of user-defined locations would allow taxi-companies around the world to set up rules so that trip prices could be calculated without depending on distinct postal code systems. Geolocation datatypes provide part of the solution, but the benifits of geometrical definitions are lost when areas intersect. A hierarchy of precedence based rules tied to reusable locations would eliminate these competing rule matches.
-
-A solution is proposed to implement a microservice with a single responsibility of calculating trip prices that is accessible to existing systems and portals in which users can define the pricing rules. The company for which this system is realized requires customers to be able to migrate to the new system without downtime, while keeping the existing rules that determine the prices of taxi trips.
-
-The portals providing users access to company information must integrate a separate user interface allowing pricing rules to be managed. The microservice must be able to authenticate direct requests. The core system manages user and company data, complicating identity management in the microservice. A JSON Web Token would allow user identity to be stored in the payload of the token, thereby delegating authentication to the core system, safeguarding the single responsibility of the microservice.
+A purely geometrical interpretation of user-defined locations allows taxi-companies around the world to set up pricing information in corresponding views that are added to the YourDriverApp portal. Geometry datatypes provide part of the solution of matching pricing rules, but the benefits of geometrical definitions are lost when areas overlap. A hierarchy of priority based rules tied to reusable locations eliminates these competing rule matches. A microservice is created with a single responsibility of calculating trip prices. A JSON Web Token allows user identity to be transferred in the payload of the token, thereby delegating authentication to the core system, safeguarding the single responsibility of the microservice. Functional programming techniques allow deterministic functors to be generated for consistent price calculations, while visual representations of pricing rule criteria allow users to reason about the inner workings of the system, regardless of their nationality.
 
 
 % In de samenvatting komt te staan:
