@@ -274,119 +274,16 @@ public static generateCalculators(
 \end{minipage}
 \end{center}
 
-The generateCalculators method generates a function for each metric with default parameters.
+The generateCalculators method generates a function for each metric with default parameters. This method is called in every calculator class to create consistent first-class functions. For the implementation and differences between calculators see Appendix \ref{appendix:slides_3}, slides 8-10.
 
 \subsection{Dynamic}
-A dynamic calculation is performed on the metrics: distance and duration, having units: kilometer and minute. A straight forward lambda expresses that the units are multiplied by the price.
-
-\begin{center}
-\noindent\begin{minipage}{.85\textwidth}
-\begin{lstlisting}[caption={Dynamic calculation.}, label={lst:dynamic-calculation}]
-/**
- * Main calculation for a dynamic pricing rule.
- */
-public calculate(
-	pricing: pricing,
-	metrics: metrics & indexed,
-): number {
-
-	const thresholds: threshold[] = pricing.prices.dynamicThresholds;
-	const startAmount = pricing.prices.dynamicStartPrice;
-	const minAmount = pricing.prices.dynamicMinimumPrice;
-	const cascaded = pricing.prices.cascadingThresholdCalculation;
-
-	const prices: indexed = {
-		distance: pricing.prices.dynamicDistancePrice,
-		duration: pricing.prices.dynamicMinutePrice,
-	};
-
-	// Generating calculators
-	const func = (price: number, unit: number) => price * unit;
-	const calculators = Calculator.generateCalculators(prices, metrics, func);
-
-	// Walk through the thresholds to calculate total price using calculators
-	const total = Price.total(
-		metrics,
-		thresholds,
-		calculators,
-		cascaded,
-	);
-
-	return Math.max(
-		total + startAmount,
-		minAmount,
-	);
-}
-\end{lstlisting}
-\end{minipage}
-\end{center}
-
-From this expression, calculators are generated. When a calculator is called without arguments, the default parameter values are used. When the calculator function is called with just the distance, the second default parameter will be the price for that distance. This property is needed for the threshold calculations that are discussed in the next section. The thresholds array contains pricing information for each successive threshold that has been surpassed.
+A dynamic calculation is performed on the metrics: distance and duration, having units: kilometer and minute. A straight forward lambda expresses that the units are multiplied by the price. From this expression, calculators are generated. When a calculator is called without arguments, the default parameter values are used. When the calculator function is called with just the distance, the second default parameter will be the price for that distance. This property is needed for the threshold calculations that are discussed in the next section. The thresholds array contains pricing information for each successive threshold that has been surpassed.
 
 \subsection{Fixed}
 Opposed to a dynamic price, the fixed price can not be expressed as a quadratic formula. However, thresholds may increase the price in steps.
 
-\begin{center}
-\noindent\begin{minipage}{.85\textwidth}
-\begin{lstlisting}[caption={Fixed calculation.}, label={lst:fixed-calculation}]
-/**
- * Calculate fixed price.
- */
-public calculate(
-	pricing: pricing,
-	metrics: metrics & indexed,
-): number {
-
-	const thresholds: threshold[] = pricing.prices.fixedThresholds;
-	const cascaded = false;
-
-	// Price for distance metric only
-	const prices: indexed = {
-		distance: pricing.prices.fixedPrice,
-		duration: 0,
-	};
-
-	// Explain how the price should be calculated
-	const func = (price: number, unit?: number) => price;
-
-	// Calculator for each metric using prices as default params
-	const calculators = Calculator.generateCalculators(prices, metrics, func);
-
-	// Walk through the thresholds to calculate total price using calculators
-	const total = Price.total(
-		metrics,
-		thresholds,
-		calculators,
-		cascaded,
-	);
-
-	// Return biggest of the two
-	return Math.max(total, 0);
-}
-\end{lstlisting}
-\end{minipage}
-\end{center}
-
 \subsection{Meter}
-The meter calculator should return zero under every circumstance.
-
-\begin{center}
-\noindent\begin{minipage}{.85\textwidth}
-\begin{lstlisting}[caption={Meter calculation.}, label={lst:meter-calculation}]
-/**
- * Main calculation for a on meter calculation.
- */
-public calculate(
-	pricing: pricing,
-	metrics: metrics & indexed,
-): number {
-	return 0;
-}
-\end{lstlisting}
-\end{minipage}
-\end{center}
-
-The on-meter calculation simply returns a breakdown for which all values are zero. This is done by convention at taxiID, so that the mobile apps can still display the products that are available, and determine the price at a later stage.
+The meter calculator should return zero under every circumstance. The on-meter calculation simply returns a breakdown for which all values are zero. This is done by convention at taxiID, so that the mobile apps can still display the products that are available, and determine the price at a later stage.
 % #endregion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -399,17 +296,17 @@ On top of each calculation type, prices can be defined after certain thresholds 
 \begin{center}
 \noindent\begin{minipage}{.85\textwidth}
 \begin{lstlisting}[caption={Recursive threshold calculation.}, label={lst:threshold-recursion}]
-	/**
-	* Recursive function that calculates a price for each threshold
-	* in a way specified by a calculation function that is passed
-	* until the thresholds are empty.
-	*/
- public static recursiveThreshold(
-	 thresholds: threshold[],
-	 calculation: Function,
-	 metric: number,
-	 cascaded: boolean = true,
- ): number {
+/**
+ * Recursive function that calculates a price for each threshold
+ * in a way specified by a calculation function that is passed
+ * until the thresholds are empty.
+ */
+public static recursiveThreshold(
+	thresholds: threshold[],
+	calculation: Function,
+	metric: number,
+	cascaded: boolean = true,
+): number {
 
 	 if (thresholds === undefined || thresholds.length < 1) {
 		 log('\tno more thresholds at ' + metric + ', using default price');
@@ -431,7 +328,7 @@ On top of each calculation type, prices can be defined after certain thresholds 
 		 calculation,
 		 nextMetric,
 	 );
- }
+}
 \end{lstlisting}
 \end{minipage}
 \end{center}
@@ -527,4 +424,5 @@ The first proposal has been implemented, resulting in an operational trip price 
 % #region
 \section{Conclusion on Trip Price Calculation System}
 \[\textit{Which logic and data is required in the backend to reliably calculate a trip price?}\]\hfill
+
 Locations should only be used as criteria if the relevant location coordinates are provided by the booking app. Timeframes, passenger count, vehicle types, on-meter and estimation options always apply as criteria by which a rule is matched. The original rules are implemented to each have their own classes, producing deterministic higher order functions that calculate the final trip price, using functional programming techniques.

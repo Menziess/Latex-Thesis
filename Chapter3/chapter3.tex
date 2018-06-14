@@ -200,4 +200,5 @@ Performance and scalability are important properties for taxiID's systems. Mongo
 %
 \section{Conclusion on System Architecture}
 \[\textit{What is most fitting solution to integrate the backend and frontend into the existing architecture?}\] \hfill
+
 A NodeJS loopback microservice should be implemented along with a MongoDB database, resulting in a scalable high performance solution that can be deployed independently. Introducing a stateless authentication service to implement identity management, allowing the microservice to be more decoupled, bringing the amount of verification requests down to zero. This solution is most fitting to the existing architecture, that only has to implement one future proof authentication method.

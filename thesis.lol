@@ -11,10 +11,7 @@
 \contentsline {lstlisting}{\numberline {4.3}Opening timeframe.}{37}{lstlisting.4.3}
 \contentsline {lstlisting}{\numberline {4.4}Find missing properties.}{41}{lstlisting.4.4}
 \contentsline {lstlisting}{\numberline {4.5}Calculator generator.}{43}{lstlisting.4.5}
-\contentsline {lstlisting}{\numberline {4.6}Dynamic calculation.}{44}{lstlisting.4.6}
-\contentsline {lstlisting}{\numberline {4.7}Fixed calculation.}{45}{lstlisting.4.7}
-\contentsline {lstlisting}{\numberline {4.8}Meter calculation.}{46}{lstlisting.4.8}
-\contentsline {lstlisting}{\numberline {4.9}Recursive threshold calculation.}{47}{lstlisting.4.9}
-\contentsline {lstlisting}{\numberline {4.10}Legacy price breakdown}{50}{lstlisting.4.10}
-\contentsline {lstlisting}{\numberline {4.11}Improved price breakdown}{50}{lstlisting.4.11}
-\contentsline {lstlisting}{\numberline {5.1}Generating Polygon From Point.}{59}{lstlisting.5.1}
+\contentsline {lstlisting}{\numberline {4.6}Recursive threshold calculation.}{45}{lstlisting.4.6}
+\contentsline {lstlisting}{\numberline {4.7}Legacy price breakdown}{48}{lstlisting.4.7}
+\contentsline {lstlisting}{\numberline {4.8}Improved price breakdown}{48}{lstlisting.4.8}
+\contentsline {lstlisting}{\numberline {5.1}Generating Polygon From Point.}{57}{lstlisting.5.1}
