@@ -25,7 +25,7 @@ What was once an ordinary startup known as Uber, is now the most famous taxi dis
 % - Cooperation
 %
 \section{Context}
-taxiID was founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, offering a wide variety of IT solutions to serve the taxi market, including a passenger app, a driver app, and administrative panels. More specifically: an app for passengers to order a taxi, an app for drivers to receive their job assignments, and services for all size businesses, offering convenient planning and dispatching without requiring local installations. Businesses that make use of taxiID's services can be found anywhere in the world. This introduces complicated challenges when developing applications that depend on countries' infrastructure and postal code systems. The development team responsible for solving these problems is located in Medemblik. Consisting of two mobile app developers (iOS and Android), two backend developers, two designers and a project managers.
+taxiID was founded as a startup that successfully introduced smartphone taxi booking in The Netherlands, offering a wide variety of IT solutions to serve the taxi market, including a passenger app, a driver app, and administrative panels. More specifically: an app for passengers to order a taxi, an app for drivers to receive their job assignments, and services for all size businesses, offering convenient planning and dispatching without requiring local installations. Businesses that make use of taxiID's services can be found anywhere in the world. This introduces complicated challenges when developing applications that depend on countries' infrastructure and postal code systems. The development team responsible for solving these problems is located in Medemblik. Consisting of two mobile app developers (iOS and Android), two backend developers, two designers and a project manager.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Problem Definition
@@ -58,7 +58,7 @@ The new YDA apps depend on the price calculation module that is part of the lega
 	\label{tab:fixedprices}
 \end{table}
 
-Matching postal codes has been no problem in the Netherlands, but internationalizing would pose problems with wide range of postal code and address formats. Some countries do not have a postal code, which would prevent some companies from being able to use YDA. When a passenger books a ride, the price calculation module will first compare the postal codes and/or addresses, amount of passengers, and desired vehicle types that are sent by the booking app with the fixed pricing rules. A fixed price is returned as soon as a match is found. If no match is found in any of the fixed pricing rules, the system proceeds to calculate a price using a kilometer threshold rule, given that at least one exists. This type of calculation decreases or increases the price per kilometer for every successive amount of kilometers that have surpassed a predetermined threshold. This concept will be discussed in chapter 4. If this rule does not exist, a dynamic rule is used to calculate the price based on distance and duration of the ride. Finally, on top of the prices that have been calculated, a discount may be applied as a fixed amount, as a percentage of the price, or as a so called alternative fixed pricing table. When this last option is selected, the price will be calculated all over again, using a newly referenced fixed pricing rule. This process is not just hard to understand for a user, who has to reason about the companies' prices. But it is also hard to understand for programmers, who have to maintain the code that supports this functionality. A small mistake in the csv file could lead to major issues if the error passes through deployment undetected.
+Matching postal codes has been no problem in the Netherlands, but internationalizing would pose problems with wide range of postal code and address formats. Some countries do not have a postal code, which would prevent some companies from being able to use YDA. When a passenger books a ride, the price calculation module will first compare the fixed pricing rules and the postal codes and/or addresses, amount of passengers, and desired vehicle types that are sent by the booking app. A fixed price is returned as soon as a match is found. If no match is found in any of the fixed pricing rules, the system proceeds to calculate a price using a kilometer threshold rule, given that at least one exists. This type of calculation decreases or increases the price per kilometer for every successive amount of kilometers that have surpassed a predetermined threshold. This concept will be further discussed in chapter 4. If this rule does not exist, a dynamic rule is used to calculate the price based on distance and duration of the ride. Finally, on top of the prices that have been calculated, a discount may be applied as a fixed amount, as a percentage of the price, or as a so called alternative fixed pricing table. When this last option is selected, the price will be calculated all over again, using a newly referenced fixed pricing rule. This process is not just hard to understand for a user, who has to reason about the companies' prices. But it is also hard to understand for programmers, who have to maintain the code that supports this functionality. A small mistake in the csv file could lead to major issues if the error passes through deployment undetected.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Assignment
@@ -69,7 +69,7 @@ The title of this thesis reads:
 
 \[\textit{"A rule-based geospatial reasoning system for trip price calculations"}.\] \hfill
 
-A Trip Pricing System (TPS) must be designed and implemented to calculate trip prices based on user defined pricing rules. Concisely, YourDriverApp requires its own pricing calculation functionality that is similar to the existing taxiID implementation but must not be incorporated into a non-related monolithic, highly coupled system, as it is today. Clients must be able to set up pricing rules and discounts through the YDA portal. It is important that the feature that allows clients to define locations for the pricing rules, are usable in countries that have no workable postal code system.
+A Trip Pricing System (TPS) must be designed and implemented to calculate trip prices based on user defined pricing rules. Concisely, YourDriverApp requires its own pricing calculation functionality that is similar to the existing taxiID implementation but must not be incorporated into a non-related monolithic, highly coupled system, as it is today. Clients must be able to set up pricing rules and discounts through the YDA portal. It is important that the feature that allows clients to define locations for the pricing rules, is usable in countries that have no workable postal code system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Research
@@ -95,7 +95,7 @@ This question encapsulates the four important challenges that have to be dealt w
 		\item Which Database Management Systems are candidate for handling this project's use cases?
 	\end{enumerate}
 
-	\item What is most fitting solution to integrate the backend and frontend into the existing architecture?
+	\item What is the most fitting solution to integrate the backend and frontend into the existing architecture?
 	\begin{enumerate}[label*=\arabic*.]
 		\item Which architectural patterns fit in with the existing system architecture?
 		\item How is state shared and synchronized between system components?
@@ -127,7 +127,7 @@ Answering these questions will lead to the implementation of a solid, straightfo
 % - Steps taken before implementation phase
 %
 \section{Process}
-A desire from within taxiID to use the SCRUM methodology to potentially improve their development process is an important factor to set up this project in a way that would introduce the team to SCRUM without forcing developers and CEO's to adopt it right away. All team members are familiarized with tools, roles, workflows, and the project artifacts somewhat indirectly. Because of the novelty of SCRUM in regard to the product owner, a pregame phase is introduced for preparation purposes, see Table \ref{tab:planning}. A written working method is provided to the product owner, see Appendix \ref{appendix:pregame}, Phase I - Pregame. The interpretation of the product owners product vision and the reflection from a developer viewpoint is documented, so that miscommunications and misinterpretations can be resolved before the project is started. It contains an architectural vision and a proposed solution, which is agreed upon by the product owner before the backlog is created. Reading the document is recommended if more knowledge about the process and context of the assignment is desired.
+A desire from within taxiID to use the SCRUM methodology to potentially improve their development process is an important factor to set up this project in a way that would introduce the team to SCRUM without forcing developers and CEO's to adopt it right away. All team members are familiarized with tools, roles, workflows, and the project artifacts somewhat indirectly. Because of the novelty of SCRUM in regard to the product owner, a pregame phase is introduced for preparation purposes, see Table \ref{tab:planning}. A written working method is provided to the product owner, see Appendix \ref{appendix:pregame}, Phase I - Pregame. The interpretation of the product owners product vision and the reflection from a developer viewpoint is documented, so that miscommunications and misinterpretations can be resolved before the project is started. It contains an architectural vision and a proposed solution, which is agreed upon by the product owner before the backlog is created. Reading the document is recommended if more knowledge about the process, jargon, or context of the assignment is desired.
 
 \begin{table}[htbp!]
 	\centering
@@ -164,10 +164,3 @@ A desire from within taxiID to use the SCRUM methodology to potentially improve 
 	\caption[Project Roadmap]{Project roadmap.}
 	\label{tab:planning}
 \end{table}
-
-\begin{figure}[htbp!]
-	\centering
-	\includegraphics[width=.9\textwidth]{Organogram}
-	\caption[Organogram]{Organizational chart of taxiID.}
-	\label{fig:latlngsphere}
-\end{figure}
